@@ -1,0 +1,1321 @@
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Toggle</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+
+        :root {
+
+            --flint-100: #5a5e68;
+
+            --flint-200: #44474f;
+
+            --flint-300: #353840;
+
+            --flint-400: #282b32;
+
+            --flint-500: #1e2028;
+
+            --flint-600: #15171d;
+
+            --flint-700: #0e1014;
+
+            --flint-800: #08090c;
+
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+
+        body {
+
+            background: var(--flint-700);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            overflow: hidden;
+
+        }
+
+
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+
+                radial-gradient(ellipse at 55% 40%, rgba(25, 28, 35, 0.8) 0%, rgba(8, 9, 12, 1) 70%),
+
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+
+            z-index: -1;
+
+        }
+
+
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background: radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,0.55) 100%);
+
+            pointer-events: none;
+
+            z-index: 200;
+
+        }
+
+
+
+        /* ============================================
+
+           PLAQUE ACIER
+
+           ============================================ */
+
+        .plate {
+
+            position: relative;
+
+            background:
+
+                repeating-linear-gradient(90deg, transparent 0px, rgba(255,255,255,0.003) 1px, transparent 2px, transparent 3px),
+
+                linear-gradient(160deg, var(--flint-300) 0%, var(--flint-600) 100%);
+
+            border-radius: 22px;
+
+            padding: 50px 60px;
+
+            box-shadow:
+
+                0 55px 100px -20px rgba(0,0,0,0.95),
+
+                0 25px 45px rgba(0,0,0,0.75),
+
+                0 10px 15px rgba(0,0,0,0.5),
+
+                inset 1px 1px 2px rgba(255,255,255,0.07),
+
+                inset -1px -1px 2px rgba(0,0,0,0.7),
+
+                0 0 0 1px rgba(255,255,255,0.04),
+
+                0 0 0 2.5px var(--flint-800),
+
+                0 0 0 3.5px rgba(255,255,255,0.015);
+
+        }
+
+
+
+        /* ===== VIS TORX ===== */
+
+        .torx {
+
+            position: absolute;
+
+            width: 12px; height: 12px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(circle at 35% 35%, var(--flint-200), var(--flint-700));
+
+            box-shadow:
+
+                inset 0 1px 1px rgba(255,255,255,0.14),
+
+                inset 0 -1px 1px rgba(0,0,0,0.8),
+
+                0 2px 4px rgba(0,0,0,0.5);
+
+            z-index: 30;
+
+        }
+
+        .torx::before, .torx::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            background: rgba(0,0,0,0.65);
+
+            border-radius: 0.5px;
+
+        }
+
+        .torx::before { width: 5.5px; height: 1.2px; transform: translate(-50%, -50%); }
+
+        .torx::after { width: 1.2px; height: 5.5px; transform: translate(-50%, -50%); }
+
+
+
+        .silk {
+
+            font-family: system-ui;
+
+            font-size: 7.5px;
+
+            font-weight: 600;
+
+            letter-spacing: 2.5px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.055);
+
+            position: absolute;
+
+            pointer-events: none;
+
+            z-index: 30;
+
+        }
+
+
+
+        /* ============================================
+
+           SWITCH HOUSING — Conic usiné
+
+           ============================================ */
+
+        .switch-housing {
+
+            background: conic-gradient(
+
+                from 0deg,
+
+                var(--flint-400), var(--flint-200), var(--flint-500),
+
+                var(--flint-300), var(--flint-500), var(--flint-200), var(--flint-400)
+
+            );
+
+            border-radius: 78px;
+
+            padding: 4px;
+
+            box-shadow:
+
+                0 12px 24px rgba(0,0,0,0.6),
+
+                0 4px 8px rgba(0,0,0,0.4),
+
+                inset 0 1px 1px rgba(255,255,255,0.1),
+
+                inset 0 -1px 1px rgba(0,0,0,0.8);
+
+        }
+
+
+
+        /* ============================================
+
+           RAIL
+
+           ============================================ */
+
+        .rail {
+
+            position: relative;
+
+            width: 390px;
+
+            height: 142px;
+
+            border-radius: 74px;
+
+            /* Gradient intérieur du rail — pas un noir plat */
+
+            background:
+
+                /* Micro-texture granuleuse (surface rugueuse du fond) */
+
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)' opacity='0.04'/%3E%3C/svg%3E"),
+
+                /* Gradient radial — centre plus clair, bords enfoncés */
+
+                radial-gradient(ellipse at 50% 60%, #0e1015 0%, #080a0d 40%, #030304 100%);
+
+            cursor: pointer;
+
+            user-select: none;
+
+            -webkit-tap-highlight-color: transparent;
+
+            display: flex;
+
+            align-items: center;
+
+            overflow: hidden;
+
+            /* Gorge profonde — 8 couches d'inset shadow */
+
+            box-shadow:
+
+                inset 0 14px 30px rgba(0,0,0,0.98),
+
+                inset 0 6px 12px rgba(0,0,0,0.85),
+
+                inset 0 2px 4px rgba(0,0,0,0.7),
+
+                inset 0 -5px 12px rgba(0,0,0,0.6),
+
+                inset 0 -2px 4px rgba(0,0,0,0.4),
+
+                inset 8px 0 16px rgba(0,0,0,0.6),
+
+                inset -8px 0 16px rgba(0,0,0,0.6),
+
+                inset 0 -1px 1px rgba(255,255,255,0.015);
+
+        }
+
+
+
+        /* Texture de surface striée dans le rail (fines rainures horizontales) */
+
+        .rail::after {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 74px;
+
+            background: repeating-linear-gradient(
+
+                0deg,
+
+                transparent 0px,
+
+                rgba(255,255,255,0.006) 1px,
+
+                transparent 2px,
+
+                transparent 5px
+
+            );
+
+            pointer-events: none;
+
+            z-index: 0;
+
+        }
+
+
+
+        /* ===== TRAÎNÉE — 7 couches avec texture et gradient ===== */
+
+
+
+        /* Couche 0 : Ombre portée au sol du rail (la lumière projette une ombre) */
+
+        .trail-floor-shadow {
+
+            position: absolute;
+
+            left: 0; bottom: 0;
+
+            height: 40%;
+
+            width: 0%;
+
+            background: linear-gradient(90deg,
+
+                transparent 10%,
+
+                rgba(0, 0, 0, 0.4) 50%,
+
+                rgba(0, 0, 0, 0.7) 100%
+
+            );
+
+            filter: blur(8px);
+
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 0;
+
+        }
+
+
+
+        /* Couche 1 : Fond diffus large (bloom) */
+
+        .trail-bloom {
+
+            position: absolute;
+
+            left: 0; top: 0; bottom: 0;
+
+            width: 0%;
+
+            background: linear-gradient(90deg,
+
+                transparent 15%,
+
+                rgba(80, 20, 0, 0.06) 40%,
+
+                rgba(180, 50, 0, 0.12) 70%,
+
+                rgba(255, 70, 0, 0.22) 100%
+
+            );
+
+            filter: blur(25px);
+
+            transition: width 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 1;
+
+        }
+
+
+
+        /* Couche 2 : Mid glow avec gradient vertical (plus chaud en haut) */
+
+        .trail-mid {
+
+            position: absolute;
+
+            left: 0; top: 5%; bottom: 5%;
+
+            width: 0%;
+
+            background: linear-gradient(90deg,
+
+                transparent 8%,
+
+                rgba(200, 60, 0, 0.1) 35%,
+
+                rgba(255, 80, 0, 0.4) 70%,
+
+                rgba(255, 110, 10, 0.7) 100%
+
+            );
+
+            filter: blur(12px);
+
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 2;
+
+        }
+
+
+
+        /* Couche 3 : Bande de couleur visible (la trainée principale) */
+
+        .trail-band {
+
+            position: absolute;
+
+            left: 0; top: 12%; bottom: 12%;
+
+            width: 0%;
+
+            /* Gradient vertical DANS la bande : plus chaud au centre */
+
+            background:
+
+                linear-gradient(180deg,
+
+                    rgba(255, 100, 0, 0.3) 0%,
+
+                    rgba(255, 120, 10, 0.85) 35%,
+
+                    rgba(255, 140, 20, 1) 50%,
+
+                    rgba(255, 110, 10, 0.8) 65%,
+
+                    rgba(255, 80, 0, 0.25) 100%
+
+                );
+
+            /* Masque horizontal pour le fade-in */
+
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 40%, black 100%);
+
+            mask-image: linear-gradient(90deg, transparent 0%, black 40%, black 100%);
+
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 3;
+
+        }
+
+
+
+        /* Texture granuleuse sur la traînée */
+
+        .trail-texture {
+
+            position: absolute;
+
+            left: 0; top: 10%; bottom: 10%;
+
+            width: 0%;
+
+            background:
+
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)' opacity='0.12'/%3E%3C/svg%3E");
+
+            mix-blend-mode: overlay;
+
+            -webkit-mask-image: linear-gradient(90deg, transparent 20%, black 60%, black 100%);
+
+            mask-image: linear-gradient(90deg, transparent 20%, black 60%, black 100%);
+
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 4;
+
+            pointer-events: none;
+
+        }
+
+
+
+        /* Couche 4 : Core incandescent (centre étroit très lumineux) */
+
+        .trail-core {
+
+            position: absolute;
+
+            left: 0; top: 30%; bottom: 30%;
+
+            width: 0%;
+
+            background: linear-gradient(90deg,
+
+                transparent 25%,
+
+                rgba(255, 180, 60, 0.5) 65%,
+
+                rgba(255, 210, 110, 0.9) 85%,
+
+                rgba(255, 230, 150, 1) 100%
+
+            );
+
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 5;
+
+        }
+
+
+
+        /* Couche 5 : Reflet plafond (lumière renvoyée en haut du tube) */
+
+        .trail-ceiling {
+
+            position: absolute;
+
+            left: 0; top: 0;
+
+            height: 28%;
+
+            width: 0%;
+
+            background: linear-gradient(90deg,
+
+                transparent 35%,
+
+                rgba(255, 150, 50, 0.06) 60%,
+
+                rgba(255, 180, 80, 0.14) 80%,
+
+                rgba(255, 200, 100, 0.2) 100%
+
+            );
+
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 6;
+
+        }
+
+
+
+        /* Couche 6 : Ombre de contact (ombre projetée par le knob sur la traînée) */
+
+        .trail-knob-shadow {
+
+            position: absolute;
+
+            top: 10%; bottom: 10%;
+
+            width: 40px;
+
+            right: 50%;
+
+            background: linear-gradient(90deg,
+
+                rgba(0,0,0,0.6) 0%,
+
+                rgba(0,0,0,0.2) 60%,
+
+                transparent 100%
+
+            );
+
+            filter: blur(6px);
+
+            transition: right 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+            z-index: 7;
+
+            pointer-events: none;
+
+        }
+
+
+
+        .is-on .trail-floor-shadow { width: 65%; }
+
+        .is-on .trail-bloom { width: 74%; }
+
+        .is-on .trail-mid { width: 68%; }
+
+        .is-on .trail-band { width: 63%; }
+
+        .is-on .trail-texture { width: 63%; }
+
+        .is-on .trail-core { width: 60%; }
+
+        .is-on .trail-ceiling { width: 58%; }
+
+        .is-on .trail-knob-shadow { right: 4%; }
+
+
+
+        .rail-shadow {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 74px;
+
+            box-shadow:
+
+                /* Ombre haute massive (lumière vient du dessus) */
+
+                inset 0 18px 35px rgba(0,0,0,0.95),
+
+                inset 0 8px 15px rgba(0,0,0,0.8),
+
+                inset 0 3px 6px rgba(0,0,0,0.6),
+
+                /* Bords latéraux enfoncés */
+
+                inset 12px 0 22px rgba(0,0,0,0.65),
+
+                inset -12px 0 22px rgba(0,0,0,0.65),
+
+                inset 5px 0 8px rgba(0,0,0,0.4),
+
+                inset -5px 0 8px rgba(0,0,0,0.4),
+
+                /* Bas plus léger */
+
+                inset 0 -8px 16px rgba(0,0,0,0.5),
+
+                inset 0 -3px 5px rgba(0,0,0,0.3);
+
+            pointer-events: none;
+
+            z-index: 8;
+
+        }
+
+
+
+        .particle-layer {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 74px;
+
+            pointer-events: none;
+
+            z-index: 5;
+
+            overflow: hidden;
+
+        }
+
+
+
+        /* ============================================
+
+           KNOB — Aluminium brossé PLEIN (pas de creux)
+
+           ============================================ */
+
+        .knob {
+
+            position: relative;
+
+            width: 180px;
+
+            height: 130px;
+
+            border-radius: 65px;
+
+            margin-left: 6px;
+
+            z-index: 10;
+
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+
+
+            /* Aluminium massif multi-stops */
+
+            background: linear-gradient(165deg,
+
+                #b8bcc6 0%,
+
+                #a0a4ae 10%,
+
+                #868a96 22%,
+
+                #6e7380 38%,
+
+                #5c6170 52%,
+
+                #4e5362 66%,
+
+                #424754 78%,
+
+                #363b48 90%,
+
+                #2e3340 100%
+
+            );
+
+
+
+            box-shadow:
+
+                18px 0 35px rgba(0,0,0,0.85),
+
+                8px 0 15px rgba(0,0,0,0.65),
+
+                3px 0 5px rgba(0,0,0,0.5),
+
+                inset 0 2px 2px rgba(255,255,255,0.35),
+
+                inset 1px 0 1px rgba(255,255,255,0.1),
+
+                inset 0 -3px 6px rgba(0,0,0,0.4),
+
+                0 0 0 1px rgba(255,255,255,0.08);
+
+        }
+
+
+
+        .is-on .knob {
+
+            transform: translateX(192px);
+
+            box-shadow:
+
+                -18px 0 35px rgba(0,0,0,0.85),
+
+                -8px 0 15px rgba(0,0,0,0.65),
+
+                -3px 0 5px rgba(0,0,0,0.5),
+
+                inset 0 2px 2px rgba(255,255,255,0.35),
+
+                inset 1px 0 1px rgba(255,255,255,0.1),
+
+                inset 0 -3px 6px rgba(0,0,0,0.4),
+
+                0 0 0 1px rgba(255,255,255,0.08),
+
+                -12px 0 25px rgba(255, 100, 0, 0.12),
+
+                -5px 0 10px rgba(255, 120, 0, 0.08);
+
+        }
+
+
+
+        /* Texture brossée diagonale */
+
+        .knob::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 65px;
+
+            background: repeating-linear-gradient(
+
+                155deg,
+
+                transparent 0px,
+
+                rgba(255,255,255,0.012) 1px,
+
+                transparent 2px,
+
+                transparent 4px
+
+            );
+
+            pointer-events: none;
+
+            z-index: 2;
+
+        }
+
+
+
+        /* Highlight spéculaire vif haut-droit */
+
+        .knob::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 5px;
+
+            right: 16px;
+
+            width: 40px;
+
+            height: 22px;
+
+            background: radial-gradient(ellipse at 60% 30%,
+
+                rgba(255,255,255,0.5) 0%,
+
+                rgba(255,255,255,0.12) 45%,
+
+                transparent 70%
+
+            );
+
+            border-radius: 50%;
+
+            filter: blur(3px);
+
+            pointer-events: none;
+
+            z-index: 3;
+
+        }
+
+
+
+        /* Reflet secondaire bas-gauche */
+
+        .knob-sub-reflect {
+
+            position: absolute;
+
+            bottom: 8px;
+
+            left: 20px;
+
+            width: 30px;
+
+            height: 12px;
+
+            background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 70%);
+
+            border-radius: 50%;
+
+            filter: blur(3px);
+
+            pointer-events: none;
+
+            z-index: 3;
+
+        }
+
+
+
+        /* ============================================
+
+           LUMIÈRE PROJETÉE — Multi-layer
+
+           ============================================ */
+
+        .glow-1 {
+
+            position: absolute;
+
+            bottom: -18px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 200px; height: 15px;
+
+            border-radius: 50%;
+
+            filter: blur(8px);
+
+            pointer-events: none;
+
+            transition: all 0.6s ease;
+
+            opacity: 0;
+
+        }
+
+        .glow-2 {
+
+            position: absolute;
+
+            bottom: -35px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 350px; height: 30px;
+
+            border-radius: 50%;
+
+            filter: blur(18px);
+
+            pointer-events: none;
+
+            transition: all 0.6s ease;
+
+            opacity: 0;
+
+        }
+
+        .glow-3 {
+
+            position: absolute;
+
+            bottom: -60px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 500px; height: 50px;
+
+            border-radius: 50%;
+
+            filter: blur(35px);
+
+            pointer-events: none;
+
+            transition: all 0.6s ease;
+
+            opacity: 0;
+
+        }
+
+        .glow-reflect {
+
+            position: absolute;
+
+            top: -15px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 250px; height: 15px;
+
+            border-radius: 50%;
+
+            filter: blur(10px);
+
+            pointer-events: none;
+
+            transition: all 0.6s ease;
+
+            opacity: 0;
+
+        }
+
+
+
+        /* Ambient sur le body */
+
+        .env-glow {
+
+            position: fixed;
+
+            top: 55%; left: 55%;
+
+            width: 600px; height: 400px;
+
+            transform: translate(-50%, -50%);
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            filter: blur(80px);
+
+            transition: opacity 0.8s ease;
+
+            z-index: -1;
+
+            opacity: 0;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState, useEffect, useRef, useCallback } = React;
+
+
+
+        const useToggleSound = () => {
+
+            const ctx = useRef(null);
+
+            return useCallback((toOn) => {
+
+                try {
+
+                    if (!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
+
+                    const c = ctx.current;
+
+                    const click = c.createOscillator(), cg = c.createGain();
+
+                    click.connect(cg); cg.connect(c.destination);
+
+                    click.frequency.value = toOn ? 2200 : 1400;
+
+                    click.type = 'sine';
+
+                    cg.gain.setValueAtTime(0.06, c.currentTime);
+
+                    cg.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.025);
+
+                    click.start(c.currentTime); click.stop(c.currentTime + 0.025);
+
+                    const thud = c.createOscillator(), tg = c.createGain();
+
+                    thud.connect(tg); tg.connect(c.destination);
+
+                    thud.frequency.value = 80; thud.type = 'sine';
+
+                    tg.gain.setValueAtTime(0.08, c.currentTime + 0.01);
+
+                    tg.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.08);
+
+                    thud.start(c.currentTime + 0.01); thud.stop(c.currentTime + 0.08);
+
+                } catch(e){}
+
+            }, []);
+
+        };
+
+
+
+        const useParticles = (canvasRef, isOn) => {
+
+            const parts = useRef([]);
+
+            const raf = useRef(null);
+
+            useEffect(() => {
+
+                const canvas = canvasRef.current;
+
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+
+                const W = canvas.width = 390; const H = canvas.height = 142;
+
+                const spawn = () => {
+
+                    if (!isOn || parts.current.length > 35) return;
+
+                    parts.current.push({
+
+                        x: W * 0.48 + Math.random() * W * 0.12,
+
+                        y: H * 0.2 + Math.random() * H * 0.6,
+
+                        vx: -0.2 - Math.random() * 0.6,
+
+                        vy: -0.4 - Math.random() * 1.0,
+
+                        life: 1, decay: 0.01 + Math.random() * 0.018,
+
+                        size: 1 + Math.random() * 2.2,
+
+                        bright: 0.5 + Math.random() * 0.5
+
+                    });
+
+                };
+
+                const draw = () => {
+
+                    ctx.clearRect(0, 0, W, H);
+
+                    if (isOn) { spawn(); if (Math.random() > 0.4) spawn(); }
+
+                    parts.current = parts.current.filter(p => {
+
+                        p.x += p.vx; p.y += p.vy; p.vy -= 0.015; p.life -= p.decay;
+
+                        if (p.life <= 0) return false;
+
+                        const a = p.life * p.bright, r = p.size * p.life;
+
+                        ctx.beginPath(); ctx.arc(p.x, p.y, r * 0.35, 0, Math.PI * 2);
+
+                        ctx.fillStyle = `rgba(255,240,200,${a})`; ctx.fill();
+
+                        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+
+                        ctx.fillStyle = `rgba(255,130,30,${a * 0.6})`; ctx.fill();
+
+                        ctx.beginPath(); ctx.arc(p.x, p.y, r * 2.5, 0, Math.PI * 2);
+
+                        ctx.fillStyle = `rgba(255,60,0,${a * 0.12})`; ctx.fill();
+
+                        return true;
+
+                    });
+
+                    raf.current = requestAnimationFrame(draw);
+
+                };
+
+                raf.current = requestAnimationFrame(draw);
+
+                return () => cancelAnimationFrame(raf.current);
+
+            }, [isOn]);
+
+        };
+
+
+
+        const App = () => {
+
+            const [isOn, setIsOn] = useState(false);
+
+            const canvasRef = useRef(null);
+
+            const playSound = useToggleSound();
+
+            useParticles(canvasRef, isOn);
+
+
+
+            const toggle = useCallback(() => {
+
+                const next = !isOn; playSound(next); setIsOn(next);
+
+            }, [isOn, playSound]);
+
+
+
+            const on = isOn;
+
+
+
+            return (
+
+                <div style={{ position: 'relative' }}>
+
+                    <div className="env-glow" style={{
+
+                        background: 'radial-gradient(circle, rgba(255,90,0,0.06) 0%, transparent 60%)',
+
+                        opacity: on ? 1 : 0
+
+                    }} />
+
+
+
+                    <div className="plate">
+
+                        <div className="torx" style={{ top: 12, left: 12 }} />
+
+                        <div className="torx" style={{ top: 12, right: 12 }} />
+
+                        <div className="torx" style={{ bottom: 12, left: 12 }} />
+
+                        <div className="torx" style={{ bottom: 12, right: 12 }} />
+
+
+
+                        <div className="silk" style={{ top: 16, left: '50%', transform: 'translateX(-50%)' }}>
+
+                            MAIN PWR
+
+                        </div>
+
+                        <div className="silk" style={{ bottom: 16, right: 20, fontSize: '6px', letterSpacing: '1.5px' }}>
+
+                            20A / 250V
+
+                        </div>
+
+
+
+                        <div className="switch-housing">
+
+                            <div className={`rail ${on ? 'is-on' : ''}`} onClick={toggle}>
+
+                                <div className="trail-floor-shadow" />
+
+                                <div className="trail-bloom" />
+
+                                <div className="trail-mid" />
+
+                                <div className="trail-band" />
+
+                                <div className="trail-texture" />
+
+                                <div className="trail-core" />
+
+                                <div className="trail-ceiling" />
+
+                                <div className="trail-knob-shadow" />
+
+
+
+                                <div className="particle-layer">
+
+                                    <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
+
+                                </div>
+
+
+
+                                <div className="rail-shadow" />
+
+
+
+                                <div className="knob">
+
+                                    <div className="knob-sub-reflect" />
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        {/* Multi-layer light projection */}
+
+                        <div className="glow-1" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,100,0,0.2) 0%, transparent 70%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                        <div className="glow-2" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,80,0,0.08) 0%, transparent 70%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                        <div className="glow-3" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,70,0,0.035) 0%, transparent 65%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                        <div className="glow-reflect" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,120,20,0.06) 0%, transparent 70%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

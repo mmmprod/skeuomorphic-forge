@@ -1,0 +1,875 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Power Button — Forge Edition</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap');
+
+
+
+        :root {
+
+            /* Palette matérielle */
+
+            --bezel-hi: #2a2d32;
+
+            --bezel-lo: #0b0c0f;
+
+            --glass-hi: rgba(52, 56, 64, 0.92);
+
+            --glass-lo: rgba(16, 18, 22, 0.96);
+
+            --led-core: #ff2800;
+
+            --led-mid: rgba(255, 60, 10, 0.9);
+
+            --led-outer: rgba(255, 0, 0, 0.4);
+
+            --led-bleed: rgba(255, 20, 0, 0.15);
+
+            --metal-spec: rgba(255, 255, 255, 0.09);
+
+            --metal-shadow: rgba(0, 0, 0, 0.95);
+
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+
+        body {
+
+            background-color: #060608;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            font-family: 'Orbitron', monospace;
+
+            overflow: hidden;
+
+        }
+
+
+
+        /* ===== FOND INDUSTRIEL ===== */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background: 
+
+                radial-gradient(ellipse at 50% 40%, rgba(20, 22, 28, 1) 0%, rgba(6, 6, 8, 1) 70%),
+
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+
+            z-index: -1;
+
+        }
+
+
+
+        /* ===== PLAQUE DE MONTAGE (Mounting Plate) ===== */
+
+        .mounting-plate {
+
+            position: relative;
+
+            background: linear-gradient(165deg, #1a1c20 0%, #0e0f12 100%);
+
+            padding: 60px;
+
+            border-radius: 20px;
+
+            /* Plaque boulonnée : ombre massive + biseau */
+
+            box-shadow:
+
+                0 50px 80px -15px rgba(0,0,0,0.95),
+
+                0 25px 40px rgba(0,0,0,0.7),
+
+                inset 1px 1px 2px rgba(255,255,255,0.05),
+
+                inset -1px -1px 3px rgba(0,0,0,0.9),
+
+                0 0 0 1px rgba(255,255,255,0.03),
+
+                0 0 0 3px #050506,
+
+                0 0 0 4px rgba(255,255,255,0.02);
+
+        }
+
+
+
+        /* Texture brossée directionnelle (horizontale) sur la plaque */
+
+        .mounting-plate::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 20px;
+
+            background: 
+
+                repeating-linear-gradient(
+
+                    90deg,
+
+                    transparent 0px,
+
+                    rgba(255,255,255,0.008) 1px,
+
+                    transparent 2px,
+
+                    transparent 4px
+
+                );
+
+            pointer-events: none;
+
+            z-index: 1;
+
+        }
+
+
+
+        /* ===== VIS DE FIXATION ===== */
+
+        .screw {
+
+            position: absolute;
+
+            width: 14px;
+
+            height: 14px;
+
+            border-radius: 50%;
+
+            background: linear-gradient(145deg, #2a2c30, #141518);
+
+            box-shadow:
+
+                inset 0 1px 1px rgba(255,255,255,0.12),
+
+                inset 0 -1px 2px rgba(0,0,0,0.8),
+
+                0 2px 4px rgba(0,0,0,0.6);
+
+            z-index: 5;
+
+        }
+
+        .screw::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform: translate(-50%, -50%) rotate(35deg);
+
+            width: 8px;
+
+            height: 1.5px;
+
+            background: rgba(0,0,0,0.7);
+
+            border-radius: 1px;
+
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08);
+
+        }
+
+        .screw-tl { top: 14px; left: 14px; }
+
+        .screw-tr { top: 14px; right: 14px; }
+
+        .screw-bl { bottom: 14px; left: 14px; }
+
+        .screw-br { bottom: 14px; right: 14px; }
+
+
+
+        /* ===== BEZEL (anneau du bouton) ===== */
+
+        .bezel {
+
+            position: relative;
+
+            background: conic-gradient(
+
+                from 0deg,
+
+                #1e2024 0deg, #2a2d32 30deg, #18191d 60deg,
+
+                #2c2f34 120deg, #1b1c20 180deg,
+
+                #272a2f 240deg, #1d1e22 300deg, #1e2024 360deg
+
+            );
+
+            padding: 8px;
+
+            border-radius: 32px;
+
+            box-shadow:
+
+                0 15px 30px rgba(0,0,0,0.7),
+
+                0 5px 10px rgba(0,0,0,0.5),
+
+                inset 0 1px 1px rgba(255,255,255,0.08),
+
+                inset 0 -1px 2px rgba(0,0,0,0.9);
+
+        }
+
+
+
+        /* Chanfrein intérieur du bezel */
+
+        .bezel-inner {
+
+            background: linear-gradient(160deg, #111215 0%, #0a0a0d 100%);
+
+            padding: 6px;
+
+            border-radius: 26px;
+
+            box-shadow:
+
+                inset 0 2px 4px rgba(0,0,0,0.9),
+
+                inset 0 -1px 1px rgba(255,255,255,0.04);
+
+            position: relative;
+
+        }
+
+
+
+        /* ===== ANNEAU LED (sous le verre, dans le bezel) ===== */
+
+        .led-ring {
+
+            position: absolute;
+
+            inset: 2px;
+
+            border-radius: 24px;
+
+            border: 2px solid transparent;
+
+            opacity: 0;
+
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+            pointer-events: none;
+
+            z-index: 2;
+
+        }
+
+
+
+        .is-on .led-ring {
+
+            border-color: rgba(255, 40, 0, 0.5);
+
+            box-shadow:
+
+                0 0 8px rgba(255, 30, 0, 0.4),
+
+                0 0 20px rgba(255, 0, 0, 0.2),
+
+                inset 0 0 12px rgba(255, 20, 0, 0.15);
+
+            opacity: 1;
+
+        }
+
+
+
+        /* ===== LE BOUTON VERRE ===== */
+
+        .glass-btn {
+
+            position: relative;
+
+            width: 150px;
+
+            height: 150px;
+
+            border-radius: 22px;
+
+            background: linear-gradient(155deg, var(--glass-hi) 0%, var(--glass-lo) 100%);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            user-select: none;
+
+            -webkit-tap-highlight-color: transparent;
+
+            z-index: 3;
+
+
+
+            /* Course mécanique : ressort amorti */
+
+            transition:
+
+                transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+
+                box-shadow 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+
+
+            /* Épaisseur du verre par empilement d'ombres */
+
+            box-shadow:
+
+                0 12px 24px rgba(0,0,0,0.8),
+
+                0 6px 8px rgba(0,0,0,0.6),
+
+                inset 0 2px 3px rgba(255,255,255,0.18),
+
+                inset 0 -4px 12px rgba(0,0,0,0.85),
+
+                inset 0 0 0 1px rgba(255,255,255,0.04);
+
+        }
+
+
+
+        /* Reflet spéculaire principal (Fresnel) */
+
+        .glass-btn::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 22px;
+
+            background: linear-gradient(
+
+                128deg,
+
+                rgba(255,255,255,0.14) 0%,
+
+                rgba(255,255,255,0.04) 35%,
+
+                transparent 36%
+
+            );
+
+            pointer-events: none;
+
+            z-index: 10;
+
+        }
+
+
+
+        /* Reflet secondaire (caustic inférieur) */
+
+        .glass-btn::after {
+
+            content: "";
+
+            position: absolute;
+
+            bottom: 8px;
+
+            left: 20%;
+
+            right: 20%;
+
+            height: 1px;
+
+            background: linear-gradient(
+
+                90deg,
+
+                transparent 0%,
+
+                rgba(255,255,255,0.06) 30%,
+
+                rgba(255,255,255,0.08) 50%,
+
+                rgba(255,255,255,0.06) 70%,
+
+                transparent 100%
+
+            );
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            z-index: 10;
+
+        }
+
+
+
+        /* ENFONCEMENT MÉCANIQUE */
+
+        .glass-btn:active {
+
+            transform: translateY(6px) scale(0.985);
+
+            box-shadow:
+
+                0 3px 4px rgba(0,0,0,0.8),
+
+                0 1px 2px rgba(0,0,0,0.6),
+
+                inset 0 1px 1px rgba(255,255,255,0.06),
+
+                inset 0 8px 18px rgba(0,0,0,0.9),
+
+                inset 0 0 0 1px rgba(255,255,255,0.02);
+
+            transition: all 0.04s ease-out;
+
+        }
+
+
+
+        /* ===== ICÔNE POWER ===== */
+
+        .power-icon {
+
+            position: relative;
+
+            z-index: 20;
+
+            width: 52px;
+
+            height: 52px;
+
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+        }
+
+
+
+        /* État OFF : gravure sous verre */
+
+        .power-icon-off {
+
+            stroke: #1a1a1a;
+
+            filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08));
+
+        }
+
+
+
+        /* État ON : néon */
+
+        .power-icon-on {
+
+            stroke: #fff;
+
+            filter:
+
+                drop-shadow(0 0 4px rgba(255, 255, 255, 0.9))
+
+                drop-shadow(0 0 12px var(--led-mid))
+
+                drop-shadow(0 0 28px var(--led-outer))
+
+                drop-shadow(0 0 50px var(--led-bleed));
+
+            animation: led-breathe 2s ease-in-out infinite alternate;
+
+        }
+
+
+
+        @keyframes led-breathe {
+
+            0%   { opacity: 0.88; filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)) drop-shadow(0 0 10px var(--led-mid)) drop-shadow(0 0 24px var(--led-outer)); }
+
+            100% { opacity: 1;    filter: drop-shadow(0 0 6px rgba(255,255,255,1))   drop-shadow(0 0 16px var(--led-mid)) drop-shadow(0 0 35px var(--led-outer)); }
+
+        }
+
+
+
+        /* ===== HALO SOUS VERRE ===== */
+
+        .glow-layer {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 22px;
+
+            pointer-events: none;
+
+            z-index: 5;
+
+            overflow: hidden;
+
+            opacity: 0;
+
+            transition: opacity 0.4s ease;
+
+        }
+
+
+
+        .glow-radial {
+
+            background: radial-gradient(circle at 50% 50%, var(--led-core) 0%, rgba(255,30,0,0.3) 25%, transparent 55%);
+
+            mix-blend-mode: color-dodge;
+
+        }
+
+
+
+        .glow-ambient {
+
+            background: radial-gradient(ellipse at 50% 60%, rgba(255,20,0,0.08) 0%, transparent 70%);
+
+            mix-blend-mode: screen;
+
+        }
+
+
+
+        .is-on .glow-radial { opacity: 0.7; }
+
+        .is-on .glow-ambient { opacity: 1; }
+
+
+
+        /* ===== REFLET SUR LA PLAQUE (light spill) ===== */
+
+        .plate-reflection {
+
+            position: absolute;
+
+            bottom: -20px;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 120px;
+
+            height: 40px;
+
+            background: radial-gradient(ellipse, rgba(255, 20, 0, 0.12) 0%, transparent 70%);
+
+            opacity: 0;
+
+            transition: opacity 0.5s ease;
+
+            pointer-events: none;
+
+            filter: blur(8px);
+
+            z-index: 0;
+
+        }
+
+
+
+        .is-on .plate-reflection {
+
+            opacity: 1;
+
+        }
+
+
+
+        /* ===== LABEL STATUS ===== */
+
+        .status-label {
+
+            position: absolute;
+
+            bottom: 18px;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            font-family: 'Orbitron', monospace;
+
+            font-size: 9px;
+
+            font-weight: 700;
+
+            letter-spacing: 3px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.08);
+
+            transition: all 0.4s ease;
+
+            z-index: 5;
+
+        }
+
+
+
+        .is-on .status-label {
+
+            color: rgba(255, 40, 0, 0.6);
+
+            text-shadow: 0 0 8px rgba(255, 30, 0, 0.3);
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState, useCallback, useRef } = React;
+
+
+
+        /* ===== FEEDBACK AUDIO (Web Audio API) ===== */
+
+        const useClickSound = () => {
+
+            const ctxRef = useRef(null);
+
+            return useCallback((isOn) => {
+
+                try {
+
+                    if (!ctxRef.current) ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+
+                    const ctx = ctxRef.current;
+
+                    const osc = ctx.createOscillator();
+
+                    const gain = ctx.createGain();
+
+                    osc.connect(gain);
+
+                    gain.connect(ctx.destination);
+
+                    // Click ON : snap aigu. Click OFF : thud grave.
+
+                    osc.frequency.value = isOn ? 1200 : 600;
+
+                    osc.type = 'sine';
+
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+
+                    osc.start(ctx.currentTime);
+
+                    osc.stop(ctx.currentTime + 0.06);
+
+                } catch(e) { /* Silently fail if no audio context */ }
+
+            }, []);
+
+        };
+
+
+
+        /* ===== ICÔNE SVG POWER ===== */
+
+        const PowerIcon = ({ isOn }) => (
+
+            <svg
+
+                className={`power-icon ${isOn ? 'power-icon-on' : 'power-icon-off'}`}
+
+                viewBox="0 0 24 24"
+
+                fill="none"
+
+                strokeWidth="2.2"
+
+                strokeLinecap="round"
+
+                strokeLinejoin="round"
+
+            >
+
+                <line x1="12" y1="2" x2="12" y2="12" />
+
+                <path d="M16.24 7.76a6 6 0 1 1-8.49 0" />
+
+            </svg>
+
+        );
+
+
+
+        /* ===== COMPOSANT PRINCIPAL ===== */
+
+        const App = () => {
+
+            const [powerOn, setPowerOn] = useState(false);
+
+            const playClick = useClickSound();
+
+
+
+            const toggle = useCallback(() => {
+
+                const next = !powerOn;
+
+                playClick(next);
+
+                setPowerOn(next);
+
+            }, [powerOn, playClick]);
+
+
+
+            const stateClass = powerOn ? 'is-on' : '';
+
+
+
+            return (
+
+                <div className="mounting-plate">
+
+                    {/* Vis de fixation */}
+
+                    <div className="screw screw-tl"></div>
+
+                    <div className="screw screw-tr"></div>
+
+                    <div className="screw screw-bl"></div>
+
+                    <div className="screw screw-br"></div>
+
+
+
+                    {/* Label status */}
+
+                    <div className={`status-label ${stateClass}`}>
+
+                        {powerOn ? 'active' : 'standby'}
+
+                    </div>
+
+
+
+                    <div className={`bezel ${stateClass}`}>
+
+                        <div className={`bezel-inner ${stateClass}`}>
+
+                            {/* Ring LED périphérique */}
+
+                            <div className="led-ring"></div>
+
+
+
+                            <div
+
+                                className={`glass-btn ${stateClass}`}
+
+                                onClick={toggle}
+
+                            >
+
+                                {/* Couches de halo sous le verre */}
+
+                                <div className="glow-layer glow-radial"></div>
+
+                                <div className="glow-layer glow-ambient"></div>
+
+
+
+                                <PowerIcon isOn={powerOn} />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {/* Réflexion de lumière sur la plaque */}
+
+                    <div className={`plate-reflection ${stateClass}`}></div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

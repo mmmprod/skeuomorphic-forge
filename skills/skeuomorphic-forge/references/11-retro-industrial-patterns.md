@@ -757,6 +757,12 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Full circular gauge | 60 (Watt gauge forge) | Spring-damper needle physics + 5-layer glass + warn lamp + condensation droplets |
 | Minimal arc gauge | 61 (Watt gauge simple) | SVG `describeArc` + thick red track (strokeWidth 55) + diamond pointer + concentric rings |
 | Start/Stop toggle button | 62 (Start/Stop button) | Conic well + 4-layer orange rim glow + engraved→illuminated text + WebAudio click |
+| Trail toggle switch | 63 (Trail toggle) | 7-layer incandescent trail + canvas particles + knob shadow inversion + spring bezier |
+| Gunmetal slider switch | 64 (Gunmetal switch) | Plasma core inset glow + grip ridges + directional shadow flip + star Torx screws |
+| Synth LCD screen | 65 (Synth LCD) | 5-layer glass (depth/fresnel/spec/caustic/rim) + conic bezel + pixel grid + 3-tier spill |
+| Deep 3D LCD display | 66 (LCD Deep 3D) | Cyan radial backlight + inverted block + 3px pixel grid z-above text + glass overlay |
+| Glass power button | 67 (Power button forge) | Conic bezel + glass btn + LED ring + SVG power icon neon/engrave + color-dodge glow |
+| Hardware gauge dashboard | 68 (Gauge dashboard) | Asymmetric ballistic needle (attack/release) + VFD display + glass dome + red zone arc |
 
 ---
 
@@ -4341,3 +4347,813 @@ const useClickSound = () => {
 ```
 
 **Full working demo**: `assets/codepen-start-stop-button.html`
+
+---
+
+## 63. Trail Toggle Switch (Incandescent Trail)
+
+A horizontal rail toggle with a **7-layer incandescent trail** that fills behind the knob when ON, plus **canvas particle emitters** for spark/ember effects. The trail uses gradient stacking with mask-image fade-ins.
+
+### Rail (recessed channel with 8-layer inset)
+
+```css
+.rail {
+  width: 390px; height: 142px;
+  border-radius: 74px;
+  background:
+    url("data:image/svg+xml,...feTurbulence baseFrequency='2.5'...opacity='0.04'..."),
+    radial-gradient(ellipse at 50% 60%, #0e1015 0%, #080a0d 40%, #030304 100%);
+  box-shadow:
+    inset 0 14px 30px rgba(0,0,0,0.98),
+    inset 0 6px 12px rgba(0,0,0,0.85),
+    inset 0 2px 4px rgba(0,0,0,0.7),
+    inset 0 -5px 12px rgba(0,0,0,0.6),
+    inset 0 -2px 4px rgba(0,0,0,0.4),
+    inset 8px 0 16px rgba(0,0,0,0.6),
+    inset -8px 0 16px rgba(0,0,0,0.6),
+    inset 0 -1px 1px rgba(255,255,255,0.015);
+  overflow: hidden;
+}
+```
+
+### 7-layer incandescent trail system
+
+Each layer is positioned `left: 0` with `width: 0%` → transitions to target width when `.is-on`:
+
+```css
+/* Layer 0: Floor shadow (cast by heat glow) */
+.trail-floor-shadow { height: 40%; bottom: 0; filter: blur(8px); }
+.is-on .trail-floor-shadow { width: 65%; }
+
+/* Layer 1: Bloom (wide diffuse orange) */
+.trail-bloom {
+  background: linear-gradient(90deg,
+    transparent 15%, rgba(80,20,0,0.06) 40%,
+    rgba(180,50,0,0.12) 70%, rgba(255,70,0,0.22) 100%);
+  filter: blur(25px);
+}
+.is-on .trail-bloom { width: 74%; }
+
+/* Layer 2: Mid glow */
+.trail-mid {
+  background: linear-gradient(90deg,
+    transparent 8%, rgba(200,60,0,0.1) 35%,
+    rgba(255,80,0,0.4) 70%, rgba(255,110,10,0.7) 100%);
+  filter: blur(12px);
+}
+.is-on .trail-mid { width: 68%; }
+
+/* Layer 3: Visible band (main trail color) */
+.trail-band {
+  background: linear-gradient(180deg,
+    rgba(255,100,0,0.3) 0%, rgba(255,120,10,0.85) 35%,
+    rgba(255,140,20,1) 50%, rgba(255,110,10,0.8) 65%,
+    rgba(255,80,0,0.25) 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 40%, black 100%);
+}
+.is-on .trail-band { width: 63%; }
+
+/* Layer 4: Core incandescent (narrow hot center) */
+.trail-core {
+  top: 30%; bottom: 30%;
+  background: linear-gradient(90deg,
+    transparent 25%, rgba(255,180,60,0.5) 65%,
+    rgba(255,210,110,0.9) 85%, rgba(255,230,150,1) 100%);
+}
+.is-on .trail-core { width: 60%; }
+
+/* Layer 5: Ceiling reflection */
+.trail-ceiling {
+  top: 0; height: 28%;
+  background: linear-gradient(90deg,
+    transparent 35%, rgba(255,150,50,0.06) 60%,
+    rgba(255,180,80,0.14) 80%, rgba(255,200,100,0.2) 100%);
+}
+.is-on .trail-ceiling { width: 58%; }
+
+/* Layer 6: Knob contact shadow */
+.trail-knob-shadow {
+  width: 40px; top: 10%; bottom: 10%;
+  background: linear-gradient(90deg, rgba(0,0,0,0.6), transparent);
+  filter: blur(6px);
+}
+.is-on .trail-knob-shadow { right: 4%; }
+```
+
+All layers use `transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)` for spring-back motion.
+
+### Trail texture overlay
+
+```css
+.trail-texture {
+  background: url("data:image/svg+xml,...feTurbulence baseFrequency='3'...opacity='0.12'...");
+  mix-blend-mode: overlay;
+  -webkit-mask-image: linear-gradient(90deg, transparent 20%, black 60%, black 100%);
+}
+```
+
+### Aluminum knob with directional shadow flip
+
+```css
+.knob {
+  width: 180px; height: 130px;
+  border-radius: 65px;
+  background: linear-gradient(165deg,
+    #b8bcc6 0%, #a0a4ae 10%, #868a96 22%, #6e7380 38%,
+    #5c6170 52%, #4e5362 66%, #424754 78%,
+    #363b48 90%, #2e3340 100%);
+  box-shadow:
+    18px 0 35px rgba(0,0,0,0.85),
+    8px 0 15px rgba(0,0,0,0.65),
+    inset 0 2px 2px rgba(255,255,255,0.35);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ON: slide right + flip shadows + orange back-spill */
+.is-on .knob {
+  transform: translateX(192px);
+  box-shadow:
+    -18px 0 35px rgba(0,0,0,0.85),
+    -8px 0 15px rgba(0,0,0,0.65),
+    inset 0 2px 2px rgba(255,255,255,0.35),
+    -12px 0 25px rgba(255,100,0,0.12),
+    -5px 0 10px rgba(255,120,0,0.08);
+}
+```
+
+### Canvas particle system
+
+```js
+const spawn = () => {
+  parts.push({
+    x: W * 0.48 + Math.random() * W * 0.12,  // near knob
+    y: H * 0.2 + Math.random() * H * 0.6,
+    vx: -0.2 - Math.random() * 0.6,            // drift left
+    vy: -0.4 - Math.random() * 1.0,            // rise
+    life: 1, decay: 0.01 + Math.random() * 0.018,
+    size: 1 + Math.random() * 2.2,
+    bright: 0.5 + Math.random() * 0.5
+  });
+};
+// 3-layer particle rendering:
+// Core: rgba(255,240,200,a) at r*0.35
+// Mid:  rgba(255,130,30,a*0.6) at r
+// Halo: rgba(255,60,0,a*0.12) at r*2.5
+```
+
+**Full working demo**: `assets/codepen-trail-toggle-switch.html`
+
+---
+
+## 64. Gunmetal Slider Switch (Plasma Core)
+
+A heavy industrial slider switch with **plasma core** backlight, **grip ridges**, directional shadow flipping, and star (★) Torx screws. Minimal, brutalist design.
+
+### Gunmetal plate with feTurbulence grain
+
+```css
+.hardware-plate {
+  background: linear-gradient(135deg, #25282e 0%, #111316 100%);
+  padding: 50px 70px;
+  border-radius: 20px;
+  box-shadow:
+    0 40px 60px -10px rgba(0,0,0,0.9),
+    inset 1px 1px 2px rgba(255,255,255,0.1),
+    inset -2px -2px 5px rgba(0,0,0,0.8),
+    0 0 0 2px #000;
+}
+/* Grain overlay */
+.hardware-plate::before {
+  background-image: url("data:image/svg+xml,...baseFrequency='1.2'...opacity='0.08'...");
+  mix-blend-mode: overlay;
+}
+```
+
+### CNC switch track (recessed slot)
+
+```css
+.switch-track {
+  width: 320px; height: 120px;
+  background: #030405;
+  border-radius: 60px;
+  padding: 8px;
+  box-shadow:
+    inset 0 15px 25px rgba(0,0,0,1),
+    inset 0 5px 10px rgba(0,0,0,1),
+    inset 0 -2px 4px rgba(255,255,255,0.05),
+    0 1px 1px rgba(255,255,255,0.1);
+}
+```
+
+### Plasma core (inner glow behind knob)
+
+```css
+.plasma-core {
+  position: absolute;
+  left: 10px; top: 10px; bottom: 10px;
+  width: calc(100% - 20px);
+  border-radius: 50px;
+  background: #000;
+}
+.is-on .plasma-core {
+  background: #0a0100;
+  box-shadow:
+    inset 30px 0 60px #ff3300,
+    0 0 20px rgba(255,51,0,0.4);
+  transition: all 0.3s ease-out 0.1s;
+}
+```
+
+### Grip ridges (machined knurling)
+
+```css
+.grip-ridge {
+  width: 4px; height: 44px;
+  background: #111316;
+  border-radius: 2px;
+  box-shadow:
+    inset 1px 0 1px rgba(0,0,0,1),
+    inset -1px 0 1px rgba(255,255,255,0.1),
+    1px 0 1px rgba(255,255,255,0.1);
+}
+```
+
+### Directional shadow flip + heavy spring bezier
+
+```css
+.slider-knob {
+  background: linear-gradient(145deg, #4a4f59 0%, #202328 50%, #111316 100%);
+  border-radius: 52px;
+  transition: transform 0.5s cubic-bezier(0.8, -0.2, 0.2, 1.2);
+  /* Shadow casts RIGHT in OFF state */
+  box-shadow: 15px 0 20px rgba(0,0,0,0.8), 5px 0 10px rgba(0,0,0,0.6), ...;
+}
+.is-on .slider-knob {
+  transform: translateX(164px);
+  /* Shadow flips to LEFT */
+  box-shadow: -15px 0 20px rgba(0,0,0,0.9), -5px 0 10px rgba(0,0,0,0.7), ...;
+}
+```
+
+### Star Torx screws
+
+```css
+.screw::after {
+  content: '★';
+  color: #050505;
+  font-size: 8px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.1);
+}
+/* Each corner rotated differently */
+.screw-tl { transform: rotate(15deg); }
+.screw-tr { transform: rotate(-35deg); }
+.screw-bl { transform: rotate(85deg); }
+.screw-br { transform: rotate(120deg); }
+```
+
+### Engraved labels with neon ON state
+
+```css
+.label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  color: #2a2d33;
+  letter-spacing: 0.2em;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.1);
+}
+.is-on .label.on {
+  color: #ff3300;
+  text-shadow: 0 0 10px rgba(255,51,0,0.8), 0 0 20px rgba(255,51,0,0.4);
+}
+```
+
+**Full working demo**: `assets/codepen-gunmetal-switch.html`
+
+---
+
+## 65. Synth LCD Screen (5-Layer Glass + Conic Bezel)
+
+A **synthesizer memory display** with a backlit LCD screen, 5-layer glass reflection system, conic-gradient machined bezel, and 3-tier chassis light spill. The LCD uses a warm blue-gray palette (`--lcd-hi: #b8ccd8`, `--lcd-ink: #3a5a72`).
+
+### Conic-gradient bezel (CNC-milled ring)
+
+```css
+.screen-bezel {
+  background: conic-gradient(
+    from 20deg,
+    var(--flint-400) 0deg, var(--flint-200) 15deg, var(--flint-500) 40deg,
+    var(--flint-300) 80deg, var(--flint-500) 120deg,
+    var(--flint-200) 160deg, var(--flint-400) 200deg,
+    var(--flint-300) 250deg, var(--flint-500) 300deg,
+    var(--flint-200) 340deg, var(--flint-400) 360deg);
+  border-radius: 42px;
+  padding: 5px;
+  box-shadow:
+    0 15px 30px rgba(0,0,0,0.6),
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    inset 0 -1px 2px rgba(0,0,0,0.8);
+}
+```
+
+### LCD surface with deep inset shadows
+
+```css
+.screen-lcd {
+  background: linear-gradient(178deg, var(--lcd-hi) 0%, var(--lcd-lo) 100%);
+  border-radius: 28px;
+  box-shadow:
+    inset 0 12px 25px rgba(0,0,0,0.45),
+    inset 0 5px 12px rgba(0,0,0,0.35),
+    inset 6px 0 15px rgba(0,0,0,0.12),
+    inset -6px 0 15px rgba(0,0,0,0.12),
+    inset 0 -8px 16px rgba(255,255,255,0.6),
+    inset 0 -2px 4px rgba(255,255,255,0.7);
+}
+```
+
+### Pixel grid (LCD subpixel simulation)
+
+```css
+.screen-lcd::before {
+  background:
+    repeating-linear-gradient(0deg,
+      transparent 0px, transparent 2px,
+      rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
+    repeating-linear-gradient(90deg,
+      transparent 0px, transparent 2px,
+      rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px);
+  z-index: 5;
+}
+```
+
+### 5-layer glass reflection system
+
+```css
+/* 1. Depth — overall glass thickness gradient */
+.glass-depth {
+  background: linear-gradient(140deg,
+    rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 35%,
+    rgba(0,0,0,0.04) 60%, rgba(0,0,0,0.1) 100%);
+  z-index: 10;
+}
+
+/* 2. Fresnel — diagonal reflection band */
+.glass-fresnel {
+  top: -25%; left: -12%;
+  width: 130%; height: 65%;
+  background: linear-gradient(162deg,
+    rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.08) 38%, transparent 42%);
+  transform: rotate(-3deg);
+  filter: blur(1.5px);
+  z-index: 11;
+}
+
+/* 3. Specular highlight (top-left corner) */
+.glass-spec {
+  top: 4%; left: 4%; width: 25%; height: 15%;
+  background: radial-gradient(ellipse at 30% 40%,
+    rgba(255,255,255,0.18) 0%, transparent 70%);
+  filter: blur(3px);
+  z-index: 12;
+}
+
+/* 4. Caustic (bottom-right bounce light) */
+.glass-caustic {
+  bottom: 4%; right: 6%; width: 35%; height: 8%;
+  background: radial-gradient(ellipse,
+    rgba(255,255,255,0.12) 0%, transparent 70%);
+  filter: blur(10px);
+  z-index: 12;
+}
+
+/* 5. Rim light (top edge shine) */
+.glass-rim {
+  top: 0; left: 5%; right: 5%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(255,255,255,0.25) 30%,
+    rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.25) 70%, transparent);
+  z-index: 13;
+}
+```
+
+### 3-tier screen backlight spill
+
+```css
+/* Near halo (around screen) */
+.screen-glow-near {
+  width: 110%; height: 110%;
+  background: radial-gradient(ellipse, rgba(160,195,215,0.1) 0%, transparent 60%);
+}
+/* Mid diffusion (onto bezel) */
+.screen-glow-mid {
+  width: 130%; height: 140%; filter: blur(10px);
+  background: radial-gradient(ellipse, rgba(160,195,215,0.05) 0%, transparent 65%);
+}
+/* Far spill (onto chassis) */
+.screen-glow-far {
+  width: 160%; height: 180%; filter: blur(25px);
+  background: radial-gradient(ellipse, rgba(160,195,215,0.025) 0%, transparent 60%);
+}
+```
+
+### 3-tier chassis floor spill
+
+```css
+.chassis-spill-1 { bottom: -25px; width: 60%; height: 20px; filter: blur(8px); }
+.chassis-spill-2 { bottom: -45px; width: 80%; height: 35px; filter: blur(18px); }
+.chassis-spill-3 { bottom: -75px; width: 110%; height: 55px; filter: blur(35px); }
+/* All: radial-gradient(ellipse, rgba(160,195,215,N), transparent) */
+```
+
+### LCD text style
+
+```css
+.lcd-text {
+  color: var(--lcd-ink);  /* #3a5a72 */
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.12);
+  filter: brightness(0.88);
+}
+```
+
+**Full working demo**: `assets/codepen-synth-lcd-screen.html`
+
+---
+
+## 66. Deep 3D LCD Display (Cyan Radial Backlight)
+
+A **deeper, more vivid** LCD variant using cyan radial-gradient backlight, a heavy 3px pixel grid rendered **above** text (z-index: 15), and an **inverted block** pattern for active UI elements (dark bg, light text — simulating LCD segment inversion).
+
+### Cyan radial backlight
+
+```css
+.lcd-display {
+  background: radial-gradient(circle at 50% 50%, #8ae0ff 0%, #3a8ebd 50%, #102a3d 100%);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 10px 20px rgba(0,0,0,0.8),
+    inset 0 -5px 15px rgba(0,0,0,0.5);
+}
+```
+
+### 3px pixel grid (z-above text)
+
+```css
+.lcd-grid {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+  background-size: 3px 3px;
+  z-index: 15;  /* ABOVE text (z-index: 10) — simulates physical pixels */
+}
+```
+
+### Glass overlay (single brutal Fresnel)
+
+```css
+.glass-overlay {
+  background: linear-gradient(110deg,
+    rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 35%, transparent 36%);
+  box-shadow:
+    inset 0 2px 2px rgba(255,255,255,0.3),  /* top bevel */
+    inset 0 -2px 5px rgba(0,0,0,0.6);        /* bottom bevel */
+  z-index: 20;
+}
+```
+
+### Inverted block (active element)
+
+```css
+.lcd-inverted-block {
+  background: #06121c;     /* Crystals CLOSED — blocks backlight */
+  color: #8ae0ff;          /* Light passes through */
+  padding: 4px 12px;
+  border: 1px solid #06121c;
+  box-shadow: 0 0 15px rgba(138,224,255,0.3);
+  text-shadow: 0 0 5px rgba(138,224,255,0.8);
+}
+```
+
+### LCD text with optical bleed
+
+```css
+.lcd-text {
+  color: #06121c;
+  text-shadow:
+    0 0 10px rgba(180,230,255,0.5),
+    0 1px 0 rgba(255,255,255,0.2);
+  z-index: 10;
+}
+```
+
+### Screen cutout (deep gorge)
+
+```css
+.screen-cutout {
+  background: #020304;
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 25px 35px -10px rgba(0,0,0,1),
+    inset 0 4px 10px rgba(0,0,0,1),
+    0 1px 1px rgba(255,255,255,0.1);
+}
+```
+
+**Full working demo**: `assets/codepen-synth-lcd-deep3d.html`
+
+---
+
+## 67. Glass Power Button — Forge Edition
+
+A **square glass power button** (150×150px) in a conic-gradient bezel with LED ring, SVG power icon that transitions from engraved to neon, and `color-dodge` glow layers under the glass surface.
+
+### Conic bezel + inner chamfer
+
+```css
+.bezel {
+  background: conic-gradient(from 0deg,
+    #1e2024 0deg, #2a2d32 30deg, #18191d 60deg,
+    #2c2f34 120deg, #1b1c20 180deg,
+    #272a2f 240deg, #1d1e22 300deg, #1e2024 360deg);
+  padding: 8px;
+  border-radius: 32px;
+  box-shadow:
+    0 15px 30px rgba(0,0,0,0.7),
+    inset 0 1px 1px rgba(255,255,255,0.08),
+    inset 0 -1px 2px rgba(0,0,0,0.9);
+}
+.bezel-inner {
+  background: linear-gradient(160deg, #111215 0%, #0a0a0d 100%);
+  padding: 6px;
+  border-radius: 26px;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.9),
+    inset 0 -1px 1px rgba(255,255,255,0.04);
+}
+```
+
+### Glass button with Fresnel reflection
+
+```css
+.glass-btn {
+  width: 150px; height: 150px;
+  border-radius: 22px;
+  background: linear-gradient(155deg,
+    rgba(52,56,64,0.92) 0%, rgba(16,18,22,0.96) 100%);
+  box-shadow:
+    0 12px 24px rgba(0,0,0,0.8),
+    inset 0 2px 3px rgba(255,255,255,0.18),
+    inset 0 -4px 12px rgba(0,0,0,0.85);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* Fresnel reflection */
+.glass-btn::before {
+  background: linear-gradient(128deg,
+    rgba(255,255,255,0.14) 0%,
+    rgba(255,255,255,0.04) 35%, transparent 36%);
+}
+/* Mechanical press */
+.glass-btn:active {
+  transform: translateY(6px) scale(0.985);
+  box-shadow: inset 0 8px 18px rgba(0,0,0,0.9);
+}
+```
+
+### LED ring (peripheral border glow)
+
+```css
+.led-ring {
+  position: absolute;
+  inset: 2px;
+  border-radius: 24px;
+  border: 2px solid transparent;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+.is-on .led-ring {
+  border-color: rgba(255,40,0,0.5);
+  box-shadow:
+    0 0 8px rgba(255,30,0,0.4),
+    0 0 20px rgba(255,0,0,0.2),
+    inset 0 0 12px rgba(255,20,0,0.15);
+  opacity: 1;
+}
+```
+
+### SVG power icon: engrave → neon
+
+```css
+/* OFF — engraved into glass surface */
+.power-icon-off {
+  stroke: #1a1a1a;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08));
+}
+/* ON — neon glow with breathing animation */
+.power-icon-on {
+  stroke: #fff;
+  filter:
+    drop-shadow(0 0 4px rgba(255,255,255,0.9))
+    drop-shadow(0 0 12px rgba(255,60,10,0.9))
+    drop-shadow(0 0 28px rgba(255,0,0,0.4))
+    drop-shadow(0 0 50px rgba(255,20,0,0.15));
+  animation: led-breathe 2s ease-in-out infinite alternate;
+}
+@keyframes led-breathe {
+  0%   { opacity: 0.88; }
+  100% { opacity: 1; }
+}
+```
+
+### Under-glass glow layers (color-dodge + screen)
+
+```css
+.glow-radial {
+  background: radial-gradient(circle at 50% 50%,
+    var(--led-core) 0%, rgba(255,30,0,0.3) 25%, transparent 55%);
+  mix-blend-mode: color-dodge;
+}
+.is-on .glow-radial { opacity: 0.7; }
+
+.glow-ambient {
+  background: radial-gradient(ellipse at 50% 60%,
+    rgba(255,20,0,0.08) 0%, transparent 70%);
+  mix-blend-mode: screen;
+}
+.is-on .glow-ambient { opacity: 1; }
+```
+
+### LED color palette (CSS custom properties)
+
+```css
+:root {
+  --led-core: #ff2800;
+  --led-mid: rgba(255, 60, 10, 0.9);
+  --led-outer: rgba(255, 0, 0, 0.4);
+  --led-bleed: rgba(255, 20, 0, 0.15);
+}
+```
+
+**Full working demo**: `assets/codepen-power-button-forge.html`
+
+---
+
+## 68. Hardware Gauge Dashboard (Asymmetric Ballistic Needle)
+
+A complete **instrument dashboard** with a circular gauge (glass dome, SVG tick marks, color-coded zones), a **VFD digital readout**, and an industrial mode switch. The needle uses **asymmetric ballistic physics** (fast attack, slow release) with direct DOM manipulation for zero React re-renders.
+
+### Gauge construction hierarchy
+
+```
+hardware-panel (gunmetal plate)
+└── gauge-bezel (gradient ring + massive shadow)
+    └── gauge-face (radial dark gradient)
+        ├── GaugeFaceSVG (ticks, labels, red zone arc)
+        ├── VFD display (bottom center)
+        ├── needle-wrapper (direct DOM transform)
+        ├── pivot (chrome hub)
+        └── glass-dome (top specular + bottom shadow)
+```
+
+### Asymmetric ballistic needle (attack ≠ release)
+
+```js
+// Physics state outside React (zero re-renders)
+const physics = useRef({ current: 0, velocity: 0 });
+
+function animate() {
+  const target = targetBase + (Math.random() * 6 - 3); // analog jitter
+  const diff = target - physics.current;
+
+  // ASYMMETRIC damping: attack fast (0.15), release slow (0.05)
+  const damping = diff > 0 ? 0.15 : 0.05;
+  physics.velocity = (physics.velocity + diff * damping) * 0.7; // spring friction
+  physics.current += physics.velocity;
+
+  // Direct DOM manipulation — bypass React
+  needleRef.current.style.transform = `rotate(${angle}deg)`;
+  textRef.current.innerText = physics.current.toFixed(1).padStart(5, '0');
+
+  requestAnimationFrame(animate);
+}
+```
+
+### Gauge face SVG (color-coded ticks)
+
+```jsx
+// Tick color by zone
+let color = "#38bdf8";     // Cyan (normal)
+if (i >= 80) color = "#eab308";  // Yellow (warning)
+if (i >= 100) color = "#f43f5e"; // Red (danger)
+
+// Each tick gets drop-shadow matching its color
+<line ... stroke={color}
+      style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
+```
+
+### Red zone arc background
+
+```jsx
+<path d="M 177.78 145 A 90 90 0 0 0 186.6 69.1"
+      fill="none"
+      stroke="rgba(244,63,94,0.15)"
+      strokeWidth="15"
+      filter="blur(4px)" />
+```
+
+### Needle with red glow
+
+```css
+.needle-arm {
+  width: 4px; height: 42%;
+  background: linear-gradient(to right, #fff, #d4d4d8, #a1a1aa);
+  transform-origin: bottom center;
+  box-shadow: 0 0 10px rgba(244,63,94,0.4);
+  filter: drop-shadow(0 15px 10px rgba(0,0,0,0.6));
+}
+.needle-arm::after {
+  background: linear-gradient(to bottom, #f43f5e, #9f1239);
+  box-shadow: 0 0 10px rgba(244,63,94,0.8);
+}
+```
+
+### Chrome pivot hub
+
+```css
+.pivot {
+  width: 32px; height: 32px;
+  background: radial-gradient(circle at 30% 30%, #4a4d52, #181a1d);
+  border-radius: 50%;
+  box-shadow:
+    0 5px 10px rgba(0,0,0,0.8),
+    inset 1px 1px 2px rgba(255,255,255,0.3);
+  z-index: 45;
+}
+```
+
+### Glass dome (specular + depth)
+
+```css
+.glass-dome {
+  background:
+    radial-gradient(120% 90% at 50% -10%,
+      rgba(255,255,255,0.08) 0%, transparent 45%),
+    linear-gradient(180deg,
+      rgba(255,255,255,0.02) 0%, transparent 40%,
+      rgba(0,0,0,0.5) 100%);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+  z-index: 50;
+}
+```
+
+### VFD display (vacuum fluorescent)
+
+```css
+.vfd-display {
+  background: #020406;
+  border: 1px solid #000;
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,0.9),
+    0 1px 0 rgba(255,255,255,0.05);
+  font-family: 'Orbitron', monospace;
+  color: #0ff;
+  text-shadow: 0 0 8px rgba(0,255,255,0.6);
+}
+.vfd-display.red {
+  color: #f43f5e;
+  text-shadow: 0 0 10px rgba(244,63,94,0.6);
+}
+```
+
+### Industrial switch (mode toggle)
+
+```css
+.industrial-switch {
+  background: linear-gradient(180deg, #32363b 0%, #1a1c1f 100%);
+  border-radius: 12px;
+  border: 1px solid #444;
+  box-shadow:
+    0 8px 15px rgba(0,0,0,0.6),
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    0 0 0 2px #0a0a0c;
+}
+.industrial-switch:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 5px rgba(0,0,0,0.8),
+    inset 0 2px 4px rgba(0,0,0,0.5);
+}
+```
+
+### LED indicators
+
+```css
+.indicator-led {
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), 0 0 10px currentColor;
+}
+/* Cyan when AVG mode */
+.bg-cyan-400 { color: cyan; }
+/* Rose when PEAK mode */
+.bg-rose-500 { color: #f43f5e; }
+```
+
+**Full working demo**: `assets/codepen-hardware-dashboard.html`
