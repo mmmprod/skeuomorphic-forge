@@ -167,6 +167,7 @@ text-transform: uppercase;
 - Neumorphism on wrong background (must be mid-tone)
 - Missing focus indicators
 - Unscaled mobile shadows
+- **`conic-gradient` for point-source lighting** — conic models angular sweep (lighthouse), not distance falloff (light bulb). Use `radial-gradient` + `mask-composite: exclude` for stationary point sources (see 25.5). Conic needs 20-30 stops, wraps corners poorly, and shifts on resize.
 
 ## References (10 thematic files — load only what is needed)
 
@@ -203,8 +204,8 @@ text-transform: uppercase;
 **Load for:** Any metal surface — brushed metal buttons, chrome/gold/silver text, metallic borders/frames, conic gradient metal buttons, procedural metal textures.
 
 ### references/09-rim-light-effects.md
-**Section 25.** Rim Light Effects (4 subsections): Rim Light Physics (edge glow, concentration, falloff), Dark Card with Rim Light (4-layer box-shadow system + ::before top highlight + ::after bottom highlight using dual radial gradients + mix-blend-mode screen), Rim Light Variations (colored/branded, full-perimeter, animated hover intensification), Quick Reference recipes + opacity guidelines table.
-**Load for:** Dark UI cards/panels with edge lighting, backlit containers, ambient rim glow on dark backgrounds.
+**Section 25.** Rim Light Effects (5 subsections): Rim Light Physics (edge glow, concentration, falloff), Dark Card with Rim Light (4-layer box-shadow system + ::before top highlight + ::after bottom highlight using dual radial gradients + mix-blend-mode screen), Rim Light Variations (colored/branded, full-perimeter, animated hover intensification), Quick Reference recipes + opacity guidelines table, **Radial Point-Source Rim Light** (25.5: `radial-gradient` + `mask-composite: exclude` 2-layer pseudo-element system — sharp 1px specular rim + diffuse halo with `blur(6px)` + `mix-blend-mode: screen`, physically-correct distance-based falloff with 3 stops vs conic's 20-30, `border-radius: inherit` for automatic curvature, warm amber variant for Retro-Industrial, React inline-style implementation, combination recipe with 25.2 box-shadow system).
+**Load for:** Dark UI cards/panels with edge lighting, backlit containers, ambient rim glow on dark backgrounds, **point-source directional lighting, LED accent glow on panel borders**.
 
 ### references/10-particle-effects.md
 **Section 26.** Particle Effects (10 subsections): Particle System Fundamentals (CSS vs Canvas vs WebGL decision matrix, performance budgets), CSS-Only Starfield SCSS (box-shadow mixin + parallax layers + @keyframes drift), Canvas Particle Engine multi-layer (CreateJS-style depth sorting + cached sprite optimization), Click-Burst Space Dust (inverse-square gravity + radial burst + fade trails), Mouse-Attracted Fire Particles (cursor tracking + HSL flame gradient + globalCompositeOperation lighter), Starfield Orbital + Twinkle (elliptical orbits + sine-wave opacity + nebula clouds), Black Hole Vortex (spiral infall + accretion disk + gravitational lensing + Doppler color shift), WebGL GPGPU Cursor Particles (Three.js FBO ping-pong + curl noise + 262K particles + RawShaderMaterial), Three.js Text Disintegration BAS (per-face centroid animation + turbulence displacement + stagger by distance), Quick Reference recipes + performance guidelines table.
