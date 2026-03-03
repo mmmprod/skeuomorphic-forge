@@ -734,6 +734,12 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Frequency analyzer | 37 (Analyzer screen) | SVG filter neon glow + Butterworth curves + FFT bars |
 | Anomaly warning | 38 (Erratic curve) | 60-seed chaotic sine sum + fog blur + warning overlay |
 | 3D push button | 39 (Glow projection button) | 14px translateY travel + massive glow + rim light bleed |
+| Thick info card | 40 (Thick card surface) | Top specular + bottom bevel darkness + inner recess |
+| Toggle / binary switch | 41 (Trench toggle) | 3-layer (outer → trench → thumb) + LED indicator dot |
+| CNC-milled pushbutton | 42 (Well-mounted button) | Button in machined well + 8-radial light projection |
+| Mechanical key | 43 (Keyboard key) | 14-layer shadow + 4px→1px border travel + spring bezier |
+| OEM EQ / parametric curve | 44 (OEM EQ curve) | SVG bell/shelf filters + annotated callouts + neon glow |
+| Flat response display | 45 (Full-range display) | `<rect>` bands + log-frequency axis + bandwidth arrows |
 
 ---
 
@@ -1444,3 +1450,566 @@ When one button is active, its color bleeds a subtle rim light onto the facing e
 ```
 
 **Full working demo**: `assets/codepen-audio-interface-pro.html`
+
+---
+
+## 40. Thick Card Surface (Reports Card)
+
+A raised card component with visible material thickness — top specular highlight, bottom bevel darkness, and a recessed inner container for content. Bridges neumorphic softness with skeuomorphic depth.
+
+### Card surface (outer slab)
+
+```css
+.card-surface {
+  background: linear-gradient(145deg, #32343a, #1a1b1f);
+  border-radius: 48px;
+  position: relative;
+  box-shadow:
+    /* Deep drop shadow */
+    0 50px 100px -20px rgba(0,0,0,0.9),
+    /* Outline rim */
+    0 0 0 1px rgba(255,255,255,0.05),
+    /* Bottom bevel (visible thickness) */
+    inset 0 -10px 15px rgba(0,0,0,0.6),
+    /* Top specular (light source above) */
+    inset 0 3px 3px rgba(255,255,255,0.18);
+}
+
+/* ::after — subtle upper sheen wash */
+.card-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 48px;
+  pointer-events: none;
+  box-shadow: inset 0 25px 50px rgba(255,255,255,0.04);
+}
+```
+
+### Inner content recess
+
+```css
+.card-inner {
+  background: #121317;
+  border-radius: 40px;
+  box-shadow:
+    /* Depth hole */
+    inset 0 12px 24px rgba(0,0,0,0.7),
+    /* Rim highlight (top of inner lip) */
+    0 2px 2px rgba(255,255,255,0.12),
+    /* Outer bevel thickness */
+    0 5px 8px rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+```
+
+### Status pill (glossy colored badge)
+
+```tsx
+// Green status badge
+const STATUS_PILL: React.CSSProperties = {
+  background: 'linear-gradient(to bottom right, #194a2b, #0f2218)',
+  border: '1px solid rgba(58,255,116,0.3)',
+  borderRadius: 16,
+  padding: '12px 20px',
+  boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.15), 0 10px 20px rgba(0,0,0,0.5)',
+};
+
+// Blue channel badge
+const CHANNEL_PILL: React.CSSProperties = {
+  background: 'linear-gradient(to bottom right, #5fa2ff, #3b6bff)',
+  color: '#0b1120',
+  fontWeight: 700,
+  borderRadius: 12,
+  padding: '8px 16px',
+  boxShadow: 'inset 0 2px 3px rgba(255,255,255,0.35), 0 8px 18px rgba(0,0,0,0.45)',
+  border: '1px solid rgba(255,255,255,0.2)',
+};
+```
+
+**Full working demo**: `assets/codepen-reports-card.html`
+
+---
+
+## 41. Trench Toggle (Sliding Switch)
+
+A large binary toggle where a beveled thumb slides inside a machined trench. 3-layer construction: outer housing → trench cavity → sliding thumb with LED indicator.
+
+### Outer housing
+
+```css
+.toggle-outer {
+  position: relative;
+  width: 480px; height: 110px;
+  padding: 3px;
+  border-radius: 100px;
+  background: linear-gradient(180deg, #14181c 0%, #242a31 100%);
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.5),
+    0 2px 3px rgba(255,255,255,0.1);
+  cursor: pointer;
+  user-select: none;
+}
+```
+
+### Trench (deep cavity)
+
+```css
+.toggle-trench {
+  position: relative;
+  width: 100%; height: 100%;
+  background: #0d0f12;
+  border-radius: 100px;
+  box-shadow:
+    inset 0 12px 20px rgba(0,0,0,0.9),
+    inset 0 -4px 8px rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+```
+
+### Sliding thumb
+
+```css
+.thumb {
+  position: absolute;
+  top: 2px; bottom: 2px; left: 2px;
+  width: calc(50% - 4px);
+  border-radius: 100px;
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 10;
+  /* Directional bevel borders */
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-left: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(0,0,0,0.3);
+  border-bottom: 2px solid rgba(0,0,0,0.5);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.6),
+    inset 0 1px 1px rgba(255,255,255,0.15);
+}
+/* Left position */
+.thumb.left {
+  background: linear-gradient(165deg, #586170 0%, #3a424b 48%, #22272e 100%);
+}
+/* Right position (slides 100%) */
+.thumb.right {
+  background: linear-gradient(165deg, #4c5560 0%, #303740 50%, #1b1f25 100%);
+  transform: translateX(100%);
+}
+```
+
+### Color-switching glow text
+
+```css
+.glow-cyan {
+  color: #cffafe;
+  text-shadow: 0 0 10px rgba(103,232,249,0.7), 0 0 20px rgba(103,232,249,0.4);
+}
+.glow-amber {
+  color: #ffedd5;
+  text-shadow: 0 0 10px rgba(251,191,36,0.6), 0 0 20px rgba(251,191,36,0.3);
+}
+```
+
+### LED indicator dot (recessed in thumb)
+
+```css
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #111418;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);
+}
+.dot-active {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  /* Cyan or amber depending on state */
+  background: rgba(103,232,249,0.8);
+  box-shadow: 0 0 6px rgba(103,232,249,1);
+}
+```
+
+**Full working demo**: `assets/codepen-toggle-hifi.html`
+
+---
+
+## 42. Well-Mounted Button (Anodized with Light Projection)
+
+A large oval button recessed in a machined well, with full lighting system: OFF state (dark anodized), ON state (lit with rim light, internal glow, and light projected onto the surrounding panel surface).
+
+### Button well (machined recess)
+
+```css
+.button-well {
+  position: relative;
+  padding: 14px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #040404, #080808, #060606);
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,0.9),
+    inset 0 6px 20px rgba(0,0,0,0.5),
+    inset 0 -1px 2px rgba(255,255,255,0.02),
+    0 -1px 0 rgba(255,255,255,0.05),
+    0 1px 0 rgba(0,0,0,0.8),
+    0 4px 20px rgba(0,0,0,0.6);
+  border: 1px solid #060606;
+  transition: box-shadow 0.5s ease, border-color 0.5s ease;
+}
+```
+
+### Well-lit state (8-layer rim light on chassis lip)
+
+```css
+.button-well.well-lit {
+  border-color: rgba(220,60,50,0.24);
+  box-shadow:
+    /* Retained depth shadows */
+    inset 0 3px 8px rgba(0,0,0,0.9),
+    inset 0 6px 20px rgba(0,0,0,0.5),
+    inset 0 -1px 2px rgba(255,255,255,0.02),
+    /* RIM LIGHT on chassis lip (8 layers, directional) */
+    0 -1px 0 rgba(255,180,160,0.36),     /* top: primary catch */
+    0 -2px 4px rgba(220,50,40,0.28),
+    0 -3px 10px rgba(200,40,30,0.16),
+    -1px 0 0 rgba(255,170,150,0.24),     /* left: light-side */
+    -2px 0 6px rgba(200,45,35,0.16),
+    0 1px 0 rgba(220,60,50,0.16),        /* bottom: bounce */
+    0 2px 6px rgba(200,40,30,0.12),
+    1px 0 0 rgba(200,50,40,0.08),        /* right: weakest */
+    0 4px 20px rgba(0,0,0,0.6);
+}
+```
+
+### Red light bouncing inside well walls (::before, 8 radial gradients)
+
+```css
+.button-well.well-lit::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 9999px;
+  pointer-events: none; z-index: 1;
+  background:
+    /* top rim (hot spot) */
+    radial-gradient(ellipse 70% 12% at 50% 0%,
+      rgba(240,60,50,0.44) 0%, rgba(220,50,40,0.2) 40%, transparent 100%),
+    radial-gradient(ellipse 85% 18% at 50% 2%,
+      rgba(200,40,30,0.16) 0%, transparent 100%),
+    /* bottom rim */
+    radial-gradient(ellipse 60% 10% at 50% 100%,
+      rgba(220,50,40,0.28) 0%, transparent 100%),
+    radial-gradient(ellipse 75% 15% at 50% 98%,
+      rgba(190,35,25,0.1) 0%, transparent 100%),
+    /* left rim */
+    radial-gradient(ellipse 6% 40% at 0% 50%,
+      rgba(230,55,45,0.32) 0%, transparent 100%),
+    radial-gradient(ellipse 10% 55% at 1% 50%,
+      rgba(190,35,25,0.1) 0%, transparent 100%),
+    /* right rim */
+    radial-gradient(ellipse 5% 35% at 100% 50%,
+      rgba(210,45,35,0.24) 0%, transparent 100%),
+    radial-gradient(ellipse 8% 50% at 99% 50%,
+      rgba(180,30,20,0.08) 0%, transparent 100%);
+}
+```
+
+### Button ON state (multi-layer lit surface)
+
+```css
+.skeuo-on {
+  background-color: #8a1515;
+  background-image:
+    /* Surface glow (on the button itself) */
+    radial-gradient(ellipse 80% 50% at 50% 35%,
+      rgba(255,80,60,0.14) 0%, transparent 70%),
+    /* Specular: top-left offset */
+    radial-gradient(ellipse 40% 25% at 35% 20%,
+      rgba(255,255,255,0.22) 0%, rgba(255,200,200,0.06) 50%, transparent 100%),
+    /* Brush texture */
+    repeating-radial-gradient(ellipse at 50% 50%,
+      transparent 0%, transparent 2.5%, rgba(255,255,255,0.015) 2.8%, transparent 3.1%),
+    /* Curvature */
+    radial-gradient(ellipse 130% 90% at 50% 38%,
+      #cc2222 0%, #a01818 30%, #651010 65%, #350808 100%);
+  box-shadow:
+    /* Rim light (directional, 5 edges) */
+    inset 0 1px 0 rgba(255,220,200,0.18),
+    inset 1px 1px 0 rgba(255,200,180,0.08),
+    inset 1px 0 0 rgba(255,180,160,0.06),
+    inset 0 -1px 0 rgba(255,150,130,0.03),
+    inset -1px 0 0 rgba(0,0,0,0.3),
+    /* Body surface glow */
+    inset 0 0 24px rgba(255,60,50,0.14),
+    inset 0 0 40px rgba(255,40,30,0.06),
+    /* Depth */
+    inset 0 -8px 20px rgba(0,0,0,0.5),
+    /* Projected light (close) */
+    0 0 12px rgba(200,30,30,0.12),
+    0 0 30px rgba(180,20,20,0.06);
+}
+```
+
+### Surface light projection (onto panel behind)
+
+```css
+.light-projection {
+  position: absolute;
+  width: 550px; height: 350px;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%,
+      rgba(220,40,30,0.2) 0%, rgba(200,30,20,0.1) 40%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 50% 38%,
+      rgba(180,25,15,0.1) 0%, transparent 80%);
+  animation: projection-breathe 3s infinite ease-in-out;
+}
+.light-projection.active { opacity: 1; }
+```
+
+**Full working demo**: `assets/codepen-bouton-skeuomorphique.html`
+
+---
+
+## 43. Mechanical Keyboard Key (Spring Return)
+
+A compact rectangular button with 14-layer shadow stack, 4px bottom border simulating key travel, and spring-back animation. Pure CSS mechanical press feel.
+
+### Key construction (OFF/resting state)
+
+```css
+.key-button {
+  padding: 22px 58px;
+  border-radius: 10px;
+  cursor: pointer;
+  /* 3-stop gradient for curvature */
+  background: linear-gradient(180deg, #2e2e34 0%, #222226 35%, #161618 100%);
+  /* Thick directional bevel */
+  border-top: 2px solid rgba(255,255,255,0.11);
+  border-left: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(0,0,0,0.4);
+  border-bottom: 4px solid #050506;   /* ← travel height */
+  /* 14-layer shadow stack */
+  box-shadow:
+    /* Inner depth */
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    inset 0 2px 1px rgba(255,255,255,0.05),
+    inset 0 6px 8px rgba(255,255,255,0.02),
+    inset 0 -2px 3px rgba(0,0,0,0.5),
+    inset 0 -5px 10px rgba(0,0,0,0.3),
+    inset 0 -8px 16px rgba(0,0,0,0.15),
+    inset 3px 0 4px rgba(0,0,0,0.2),
+    inset -3px 0 4px rgba(0,0,0,0.2),
+    /* External cast (6 progressive distances) */
+    0 2px 1px rgba(0,0,0,0.7),
+    0 4px 6px rgba(0,0,0,0.6),
+    0 8px 16px rgba(0,0,0,0.5),
+    0 16px 32px rgba(0,0,0,0.4),
+    0 24px 48px rgba(0,0,0,0.25),
+    0 32px 64px rgba(0,0,0,0.15);
+  /* Spring return animation */
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.15s ease-out,
+              border-bottom-width 0.08s ease-out;
+}
+```
+
+### Pressed state (mechanical travel)
+
+```css
+.key-button:active {
+  transform: translateY(3px);          /* physical press */
+  border-bottom-width: 1px;            /* border shrinks = key sinks */
+  background: linear-gradient(180deg, #1a1a1e, #121214 35%, #0a0a0c);
+  box-shadow:
+    /* Reduced inner glow */
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 3px 6px rgba(0,0,0,0.4),
+    inset 0 -1px 2px rgba(0,0,0,0.3),
+    inset 3px 0 4px rgba(0,0,0,0.2),
+    inset -3px 0 4px rgba(0,0,0,0.2),
+    /* Reduced cast (closer to surface) */
+    0 1px 1px rgba(0,0,0,0.6),
+    0 2px 4px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.4),
+    0 8px 16px rgba(0,0,0,0.3);
+}
+```
+
+### Neon text activation (lit after press)
+
+```css
+.key-text.lit {
+  color: #38bdf8;
+  text-shadow:
+    0 0 4px rgba(56,189,248,0.9),
+    0 0 12px rgba(56,189,248,0.6),
+    0 0 28px rgba(56,189,248,0.3),
+    0 0 50px rgba(56,189,248,0.12);
+}
+```
+
+**Key insight**: The `border-bottom: 4px → 1px` on `:active` combined with `translateY(3px)` creates a convincing mechanical key travel. The `cubic-bezier(0.34, 1.56, 0.64, 1)` spring overshoot makes the return feel physical.
+
+**Full working demo**: `assets/codepen-valider-button.html`
+
+---
+
+## 44. OEM EQ Curve Analyzer (Annotated Parametric Display)
+
+Extends the frequency analyzer screen (pattern 37) with **parametric EQ modeling** — bass boost, mid scoop, presence peak, treble rolloff — and annotated callout markers. Designed for OEM factory signal analysis.
+
+### Parametric EQ filter math
+
+```tsx
+// Bell (peaking) filter approximation
+const parametricBell = (freq: number, fc: number, gainDb: number, Q: number) => {
+  const ratio = freq / fc;
+  const x2 = ratio * ratio;
+  const bw = 1 / Q;
+  const denom = (1 - x2) * (1 - x2) + (bw * ratio) * (bw * ratio);
+  const response = (bw * ratio) * (bw * ratio) / denom;
+  return gainDb * response;
+};
+
+// High shelf filter
+const highShelf = (freq: number, fc: number, gainDb: number, slope: number) => {
+  const rn = Math.pow(freq / fc, slope);
+  return gainDb * rn / (1 + rn);
+};
+```
+
+### Typical OEM EQ shape
+
+```tsx
+const getOemEqDb = (freq: number) => {
+  let db = 0;
+  // Sub-bass rolloff (HPF ~35Hz, gentle)
+  const subR4 = Math.pow(freq / 35, 4);
+  db += 10 * Math.log10(subR4 / (1 + subR4));
+  // Bass boost: +5.5dB at 100Hz, Q=1.2
+  db += parametricBell(freq, 100, 5.5, 1.2);
+  // Mid scoop: -4dB at 500Hz, Q=0.8
+  db += parametricBell(freq, 500, -4.0, 0.8);
+  // Presence peak: +3dB at 2500Hz, Q=1.5
+  db += parametricBell(freq, 2500, 3.0, 1.5);
+  // Treble rolloff: -10dB above 8kHz
+  db += highShelf(freq, 8000, -10, 3);
+  return db;
+};
+```
+
+### SVG annotation callouts
+
+```xml
+<!-- Dot marker + dashed leader line + label -->
+<g opacity="0.6">
+  <circle cx={freqToX(100)} cy={dbToY(5.5)} r="5" fill="#f59e0b"
+    filter="url(#annotGlow)" />
+  <line x1={x} y1={y-8} x2={x} y2={y-35}
+    stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 2" />
+  <text x={x} y={y-40} fill="#f59e0b" font-size="9" font-weight="700"
+    text-anchor="middle">BASS BOOST</text>
+  <text x={x} y={y-28} fill="#b37a0a" font-size="8" font-weight="600"
+    text-anchor="middle">+5.5 dB @ 100 Hz</text>
+</g>
+```
+
+### Blinking detection label
+
+```xml
+<text x="500" y="340" fill="#f59e0b" font-size="36" font-weight="700"
+  text-anchor="middle" filter="url(#neonGlow)">
+  <animate attributeName="opacity" values="1;0.3;1" dur="1.5s"
+    repeatCount="indefinite" />
+  OEM EQ DETECTED
+</text>
+```
+
+### Info panel (DSP-style readout)
+
+```xml
+<rect x="780" y="48" width="170" height="120" rx="4"
+  fill="rgba(0,0,0,0.5)" stroke="rgba(245,158,11,0.15)" />
+<!-- Key/value rows -->
+<text x="795" y="110" fill="#4a5a78" font-size="9">SOURCE</text>
+<text x="940" y="110" fill="#8898b8" font-size="10" text-anchor="end">Head Unit</text>
+<text x="795" y="142" fill="#4a5a78" font-size="9">CORRECTION</text>
+<text x="940" y="142" fill="#ef4444" font-size="10" text-anchor="end">REQUIRED</text>
+```
+
+### Color scheme: amber for OEM (vs cyan for crossover)
+
+| Element | Crossover (37) | OEM EQ (44) |
+|---|---|---|
+| Curve stroke | `#38bdf8` cyan | `#f59e0b` amber |
+| Fill gradient | blue tones | amber/brown tones |
+| Ambient glow | `#0a1830` | `#061020` |
+| Badge | `DSP CROSSOVER` | `DSP INPUT ANALYSIS` |
+
+**Full working demo**: `assets/codepen-oem-eq-curve.html`
+
+---
+
+## 45. Full-Range / Flat Response Display
+
+Extends the analyzer screen (pattern 37) for displaying a **flat 0dB passband** (no crossover applied). Uses a thick neon line at 0dB with endpoint markers and bandwidth arrows.
+
+### Flat response rendering
+
+Unlike Butterworth curves, the full-range display uses a simple horizontal rect at `zeroDbY` with neon glow filter, since `preserveAspectRatio="none"` would squish a horizontal SVG path to invisible.
+
+```xml
+<!-- Thick flat line (rect instead of path) -->
+<rect x={MARGIN_L} y={zeroDbY - 3} width={PLOT_W} height="6"
+  rx="3" fill="#38bdf8" filter="url(#neonGlow)" />
+
+<!-- Endpoint markers -->
+<circle cx={MARGIN_L} cy={zeroDbY} r="4" fill="#38bdf8" filter="url(#softGlow)" />
+<circle cx={MARGIN_R} cy={zeroDbY} r="4" fill="#38bdf8" filter="url(#softGlow)" />
+```
+
+### Bandwidth indicator arrows
+
+```xml
+<g opacity="0.35">
+  <!-- Left arrow -->
+  <line x1={MARGIN_L+10} y1={y+20} x2={MARGIN_L+60} y2={y+20}
+    stroke="#4ade80" stroke-width="1.5" />
+  <line x1={MARGIN_L+10} y1={y+16} x2={MARGIN_L+10} y2={y+24}
+    stroke="#4ade80" stroke-width="1.5" />
+  <!-- Right arrow -->
+  <line x1={MARGIN_R-60} y1={y+20} x2={MARGIN_R-10} y2={y+20}
+    stroke="#4ade80" stroke-width="1.5" />
+  <!-- Center label -->
+  <text x="500" y={y+24} fill="#4ade80" font-size="10" text-anchor="middle">
+    20 Hz ~ 20 kHz
+  </text>
+</g>
+```
+
+### Color scheme: green for full-range pass
+
+| Element | Crossover (37) | Full Range (45) |
+|---|---|---|
+| Curve/line | `#38bdf8` cyan | `#38bdf8` cyan + `#4ade80` green markers |
+| Fill | Blue gradient | Green gradient (`#0ea5e9` → transparent) |
+| Info panel | — | Green border `rgba(74,222,128,0.15)` |
+| Badge | `DSP CROSSOVER — SCANNING` | `DSP CROSSOVER` (green glow) |
+| Status | HPF/LPF values | `BYPASS` / `BYPASS` |
+
+### Info panel (bypass status)
+
+```xml
+<rect x="780" y="300" width="170" height="105" rx="4"
+  fill="rgba(0,0,0,0.5)" stroke="rgba(74,222,128,0.15)" />
+<text x="865" y="322" fill="#4ade80" font-size="20" font-weight="700"
+  text-anchor="middle">FULL RANGE</text>
+<text x="865" y="338" fill="#2a6545" font-size="10">NO CROSSOVER</text>
+<!-- HPF/LPF both BYPASS -->
+<text x="795" y="362" fill="#4a5a78" font-size="9">HPF</text>
+<text x="940" y="362" fill="#5a6a4a" font-size="10" text-anchor="end">BYPASS</text>
+```
+
+**Full working demo**: `assets/codepen-fullrange-no-crossover.html`
