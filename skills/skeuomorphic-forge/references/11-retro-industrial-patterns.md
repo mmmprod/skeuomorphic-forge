@@ -751,6 +751,12 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Dual toggle w/ cross-light | 54 (Cross-light toggle) | Bevel ring + cross-projected light + color spill gradient |
 | 5-layer bezel button | 55 (FX neon ring button) | Backplate→outer→mid→gorge→button + neon ring 7-layer glow |
 | Mechanical counter display | 56 (Alternator counter) | 4-ring bezel + digit columns + scanlines + separator grooves |
+| 7-segment ghost display | 57 (Digital display) | 8-layer screen + ghost segments `rgba(40,80,150,0.15)` + dual phosphor |
+| LED matrix push button | 58 (LED matrix button) | 5×7 LED grid + `@property --glow-opacity` + purple halo `mix-blend-mode: screen` |
+| Large neomorphic toggle | 59 (DSP toggle switch) | 80px card + mask-composite border + handle floor shadow + blue rim glow |
+| Full circular gauge | 60 (Watt gauge forge) | Spring-damper needle physics + 5-layer glass + warn lamp + condensation droplets |
+| Minimal arc gauge | 61 (Watt gauge simple) | SVG `describeArc` + thick red track (strokeWidth 55) + diamond pointer + concentric rings |
+| Start/Stop toggle button | 62 (Start/Stop button) | Conic well + 4-layer orange rim glow + engraved→illuminated text + WebAudio click |
 
 ---
 
@@ -3364,3 +3370,974 @@ Outer bezel (8-stop chrome gradient, 10px padding)
 ```
 
 **Full working demo**: `assets/codepen-alternator-counter.html`
+
+---
+
+## 57. 7-Segment Ghost Display (Digital Display)
+
+A scientific instrument readout that simulates real LCD/VFD displays where **all segment positions are faintly visible** behind the lit content. Uses an 8-layer screen construction from backplate to noise overlay.
+
+### Screen construction hierarchy
+
+```
+backplate (brushed aluminum + screws)
+└── outer-bezel (chrome gradient 3-stop)
+    └── inner-bezel (deep gorge, dark bg)
+        └── screen (#001a33)
+            ├── scanlines (repeating-linear-gradient)
+            ├── glass (4 radial gradients)
+            ├── ambient-glow (radial color wash)
+            └── noise (feTurbulence overlay)
+```
+
+### 8-layer screen stack
+
+```css
+/* Backplate — brushed aluminum */
+.backplate {
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0px, rgba(255,255,255,0.015) 1px,
+      transparent 2px, transparent 4px),
+    linear-gradient(145deg, #3a3a3f 0%, #28282c 50%, #1e1e22 100%);
+  border-radius: 30px;
+  padding: 20px;
+  box-shadow:
+    0 50px 100px -20px rgba(0,0,0,0.9),
+    inset 0 1px 2px rgba(255,255,255,0.15),
+    inset 0 -1px 2px rgba(0,0,0,0.8);
+}
+
+/* Outer bezel — chrome gradient */
+.outer-bezel {
+  background: linear-gradient(145deg, #555, #222, #444);
+  border-radius: 24px;
+  padding: 6px;
+  box-shadow:
+    inset 0 1px 3px rgba(255,255,255,0.3),
+    inset 0 -1px 2px rgba(0,0,0,0.8);
+}
+
+/* Inner bezel — deep gorge */
+.inner-bezel {
+  background: linear-gradient(180deg, #0a0a0e, #151520);
+  border-radius: 20px;
+  padding: 3px;
+  box-shadow:
+    inset 0 4px 12px rgba(0,0,0,0.95),
+    inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Screen surface */
+.screen {
+  background: #001a33;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scanlines */
+.scanlines::after {
+  background: repeating-linear-gradient(0deg,
+    transparent, transparent 2px,
+    rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 3px);
+  pointer-events: none;
+}
+
+/* Glass reflection */
+.glass::before {
+  background:
+    radial-gradient(ellipse 50% 20% at 25% 15%,
+      rgba(255,255,255,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 40% at 50% 5%,
+      rgba(200,220,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 20% at 75% 80%,
+      rgba(255,255,255,0.03) 0%, transparent 60%),
+    linear-gradient(160deg,
+      rgba(255,255,255,0.04) 0%, transparent 50%,
+      rgba(0,0,0,0.1) 100%);
+}
+```
+
+### Ghost segment layer
+
+The key technique: render all "8888" text behind the lit value at very low opacity.
+
+```css
+.ghost-text {
+  font-family: 'Digital-7', monospace;
+  color: rgba(40, 80, 150, 0.15);  /* blue ghost segments */
+  position: absolute;
+  pointer-events: none;
+}
+.lit-text {
+  font-family: 'Digital-7', monospace;
+  position: relative;
+  z-index: 1;
+}
+```
+
+### Dual-color phosphor system
+
+```css
+/* Blue — labels, description text */
+.phosphor-blue {
+  color: #b0e0ff;
+  text-shadow:
+    0 0 5px rgba(100, 180, 255, 0.8),
+    0 0 15px rgba(100, 180, 255, 0.4),
+    0 0 30px rgba(50, 120, 200, 0.2);
+}
+
+/* Amber — numeric values */
+.phosphor-amber {
+  color: #ffe880;
+  text-shadow:
+    0 0 5px rgba(255, 220, 100, 0.8),
+    0 0 15px rgba(255, 200, 60, 0.4),
+    0 0 30px rgba(200, 150, 30, 0.2);
+}
+```
+
+### Status LED with pulse
+
+```css
+.status-led {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #80ffa0, #30cc55, #1a8833);
+  box-shadow: 0 0 3px #50ff70, 0 0 8px rgba(80,255,120,0.6);
+  animation: pulse-led 2s ease-in-out infinite;
+}
+@keyframes pulse-led {
+  0%, 100% { opacity: 0.7; box-shadow: 0 0 3px #50ff70; }
+  50% { opacity: 1; box-shadow: 0 0 3px #50ff70, 0 0 12px rgba(80,255,120,0.8); }
+}
+```
+
+### Silkscreen brand label on bezel
+
+```css
+.brand-silk {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.04);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.06);
+}
+```
+
+**Full working demo**: `assets/codepen-digital-display-7seg.html`
+
+---
+
+## 58. LED Matrix Push Button
+
+A hardware push button with an embedded **5×7 LED matrix** display well and a purple glow halo. Uses CSS Houdini `@property` for smooth pseudo-element opacity transitions.
+
+### LED matrix grid
+
+```css
+.led-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 7px);
+  grid-template-rows: repeat(7, 7px);
+  gap: 4px;
+}
+.led-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+.led-dot.off {
+  background: #1a1a2e;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+.led-dot.on {
+  background: radial-gradient(circle at 35% 35%, #c084fc, #7c3aed);
+  box-shadow: 0 0 3px #a855f7, 0 0 8px rgba(168,85,247,0.5);
+}
+```
+
+### `@property` for pseudo-element transition
+
+CSS custom properties don't normally animate on pseudo-elements. Register them with `@property`:
+
+```css
+@property --glow-opacity {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: false;
+}
+
+.button-wrapper {
+  --glow-opacity: 0;
+  transition: --glow-opacity 0.3s ease;
+}
+.button-wrapper:hover { --glow-opacity: 0.85; }
+.button-wrapper:active { --glow-opacity: 1; }
+
+/* Purple halo on ::after */
+.button-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: -15px;
+  border-radius: 30px;
+  background: radial-gradient(
+    ellipse 80% 100% at 25% 50%,
+    rgba(168, 85, 247, 0.65),
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: var(--glow-opacity);
+  pointer-events: none;
+}
+```
+
+### Frame-based LED animation (vanilla JS)
+
+```js
+const frames = [
+  [0,0,1,0,0, 0,0,1,0,0, 0,1,1,1,0, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0, 0,0,1,0,0],
+  // ... more arrow/pattern frames
+];
+let frameIndex = 0;
+setInterval(() => {
+  const f = frames[frameIndex % frames.length];
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('on', f[i] === 1);
+    dot.classList.toggle('off', f[i] === 0);
+  });
+  frameIndex++;
+}, 220);
+```
+
+### Button 3-state depth
+
+```css
+/* Default — raised */
+.hw-button {
+  transform: translateY(0);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.7),
+    0 4px 8px rgba(0,0,0,0.5),
+    inset 0 2px 3px rgba(255,255,255,0.15),
+    inset 0 -3px 6px rgba(0,0,0,0.4);
+}
+/* Hover — slightly elevated */
+.hw-button:hover {
+  transform: translateY(-1px);
+}
+/* Active — pressed */
+.hw-button:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.6),
+    inset 0 4px 10px rgba(0,0,0,0.7),
+    inset 0 2px 4px rgba(0,0,0,0.5);
+}
+```
+
+**Full working demo**: `assets/codepen-led-matrix-push-button.html`
+
+---
+
+## 59. DSP Toggle Switch (Neomorphic Card)
+
+A large (450×450px) neomorphic card with an **ON/OFF sliding toggle**. Features mask-composite gradient borders, a handle with floor shadow and lateral shadow shift, and blue glow states.
+
+### Neomorphic card with mask-composite border
+
+```css
+.neomorphic-card {
+  background: linear-gradient(145deg, #323237, #0f0f11);
+  box-shadow:
+    0 70px 100px -20px rgba(0,0,0,0.95),
+    inset 0 2px 3px rgba(255,255,255,0.1),
+    inset 0 -10px 20px rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 80px;
+}
+
+/* Gradient border trick — mask-composite exclude */
+.neomorphic-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 80px;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.2) 0%, transparent 50%,
+    rgba(0,0,0,0.5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+               linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box,
+       linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+```
+
+### Switch track (recessed channel)
+
+```css
+.switch-container {
+  background: linear-gradient(180deg, #050506, #121214);
+  box-shadow:
+    inset 0 15px 30px rgba(0,0,0,0.9),
+    0 1px 2px rgba(255,255,255,0.05);
+  border: 1px solid rgba(0,0,0,1);
+  border-radius: 60px;
+}
+```
+
+### Handle with floor shadow + lateral shift
+
+```css
+.switch-handle {
+  background: linear-gradient(135deg, #5a5a60 0%, #2a2a2e 45%, #141416 100%);
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.9),
+    0 15px 40px rgba(0,0,0,0.7),
+    0 25px 60px rgba(0,0,0,0.4),
+    0 3px 6px rgba(0,0,0,0.95),
+    inset 0 3px 6px rgba(255,255,255,0.2),
+    inset -4px -4px 10px rgba(0,0,0,0.6);
+}
+
+/* ON state: lateral shadow simulates directional blue light */
+.active .switch-handle {
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.9),
+    0 15px 40px rgba(0,0,0,0.7),
+    0 25px 60px rgba(0,0,0,0.4),
+    0 3px 6px rgba(0,0,0,0.95),
+    15px 5px 35px rgba(0,0,0,0.85),  /* ← lateral shift */
+    inset 0 3px 6px rgba(255,255,255,0.2),
+    inset -4px -4px 10px rgba(0,0,0,0.6);
+}
+
+/* Floor shadow pseudo */
+.handle-floor-shadow {
+  position: absolute;
+  bottom: -4px;
+  left: 10%; right: 10%;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse,
+    rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 80%);
+  filter: blur(4px);
+  z-index: -1;
+}
+```
+
+### Blue rim glow (mask-composite, appears on ON)
+
+```css
+.blue-rim-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 60px;
+  padding: 2px;
+  background: linear-gradient(135deg,
+    rgba(0,150,255,0.6), transparent,
+    rgba(0,80,255,0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+               linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.active .blue-rim-glow { opacity: 1; }
+```
+
+### Handle sub-layers (metallic shine, rim light, blue reflection)
+
+```css
+.metallic-shine {
+  background: linear-gradient(105deg,
+    transparent 30%,
+    rgba(255,255,255,0.08) 40%,
+    rgba(255,255,255,0.15) 45%,
+    rgba(255,255,255,0.08) 50%,
+    transparent 60%);
+}
+.rim-light {
+  position: absolute;
+  top: 1px; left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  filter: blur(0.5px);
+}
+.handle-blue-reflection {
+  background: radial-gradient(circle at 100% 50%,
+    rgba(0,150,255,0.3), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.active .handle-blue-reflection { opacity: 1; }
+```
+
+### Neon text glow (ON label)
+
+```css
+.glow-text-blue {
+  color: #b3e5ff;
+  text-shadow:
+    0 0 10px rgba(0,150,255,1),
+    0 0 25px rgba(0,150,255,0.8),
+    0 0 50px rgba(0,100,255,0.5);
+}
+```
+
+**Full working demo**: `assets/codepen-dsp-toggle-switch.html`
+
+---
+
+## 60. Watt Gauge — Forge Edition (Full Circular Gauge)
+
+A complete industrial circular watt meter with **spring-damper needle physics**, a 5-layer glass system, warn lamp assembly, condensation droplets, and 3-tier light spill. The most complex gauge in the collection.
+
+### Chassis construction
+
+```css
+.chassis {
+  background:
+    /* Brushed metal */
+    repeating-linear-gradient(90deg,
+      transparent, rgba(255,255,255,0.008) 1px,
+      transparent 2px, transparent 4px),
+    linear-gradient(155deg,
+      #3a3d42 0%, #2e3035 30%, #252830 60%, #1e2028 100%);
+  border-radius: 28px;
+  box-shadow:
+    0 70px 120px -30px rgba(0,0,0,0.95),
+    0 30px 50px rgba(0,0,0,0.6),
+    inset 1px 1px 2px rgba(255,255,255,0.08),
+    inset -1px -1px 2px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 0 0 3px #0e1014,
+    0 0 0 4px rgba(255,255,255,0.02);
+}
+```
+
+### Conic-gradient bezel ring (SVG + CSS)
+
+```css
+.gauge-bezel {
+  fill: none;
+  stroke: url(#bezelGradient);
+  stroke-width: 16;
+}
+/* In SVG defs — conic simulated with radialGradient */
+```
+
+### 5-layer glass system
+
+```css
+/* Specular highlight */
+.glass-specular {
+  background: radial-gradient(ellipse 50% 30% at 38% 22%,
+    rgba(255,255,255,0.18) 0%, transparent 70%);
+}
+
+/* Fresnel edge */
+.glass-fresnel {
+  background: radial-gradient(circle,
+    transparent 60%,
+    rgba(255,255,255,0.04) 80%,
+    rgba(255,255,255,0.08) 95%);
+}
+
+/* Caustic (conic light refraction) */
+.glass-caustic {
+  background: conic-gradient(
+    from 200deg,
+    transparent, rgba(255,255,255,0.02),
+    transparent 30%, rgba(255,255,255,0.04),
+    transparent 70%);
+}
+
+/* Condensation droplets (9 tiny circles) */
+.glass-condensation {
+  background:
+    radial-gradient(circle 2px at 25% 35%, rgba(255,255,255,0.06), transparent),
+    radial-gradient(circle 1.5px at 68% 42%, rgba(255,255,255,0.04), transparent),
+    radial-gradient(circle 2px at 42% 72%, rgba(255,255,255,0.05), transparent),
+    radial-gradient(circle 1px at 55% 28%, rgba(255,255,255,0.03), transparent),
+    radial-gradient(circle 1.5px at 78% 65%, rgba(255,255,255,0.04), transparent),
+    radial-gradient(circle 1px at 32% 58%, rgba(255,255,255,0.03), transparent),
+    radial-gradient(circle 2px at 85% 30%, rgba(255,255,255,0.04), transparent),
+    radial-gradient(circle 1px at 48% 48%, rgba(255,255,255,0.02), transparent),
+    radial-gradient(circle 1.5px at 20% 75%, rgba(255,255,255,0.04), transparent);
+}
+
+/* Edge ring */
+.glass-edge {
+  box-shadow:
+    inset 0 0 30px rgba(0,0,0,0.3),
+    inset 0 0 60px rgba(0,0,0,0.15);
+}
+```
+
+### Spring-damper needle physics
+
+```js
+// Constants
+const SPRING = 0.12;    // k — stiffness
+const DAMPING = 0.16;   // d — friction
+
+// In animation loop (requestAnimationFrame):
+velocity += (targetAngle - currentAngle) * SPRING;
+velocity *= (1 - DAMPING);  // friction
+currentAngle += velocity;
+```
+
+### Boot sequence (power-on sweep)
+
+```js
+const BOOT_DURATION = 1200; // ms
+const bootStart = Date.now();
+
+function animate() {
+  const elapsed = Date.now() - bootStart;
+  if (elapsed < BOOT_DURATION) {
+    // Sweep from 0° to ~280° then back to 0°
+    const t = elapsed / BOOT_DURATION;
+    const sweep = Math.sin(t * Math.PI) * 280;
+    setNeedleAngle(sweep);
+  } else {
+    // Physics takes over
+    applySpringDamper();
+  }
+  requestAnimationFrame(animate);
+}
+```
+
+### Warn lamp assembly
+
+```css
+/* Housing */
+.warn-housing {
+  background: linear-gradient(180deg, #3a3d42, #252830);
+  border-radius: 10px;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.5);
+}
+
+/* Recess */
+.warn-recess {
+  background: #0a0c10;
+  border-radius: 8px;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);
+}
+
+/* Lens (OFF) */
+.warn-lens {
+  background: radial-gradient(circle at 40% 35%, #5a3020, #2a1510);
+  border-radius: 6px;
+}
+
+/* Lens (LIT) — 9-layer glow */
+.warn-lens.lit {
+  background: radial-gradient(circle at 40% 35%, #ffe0a0, #ff6020, #cc3010);
+  box-shadow:
+    0 0 4px rgba(255,100,20,0.9),
+    0 0 8px rgba(255,80,10,0.7),
+    0 0 16px rgba(255,60,0,0.5),
+    0 0 30px rgba(255,40,0,0.35),
+    0 0 50px rgba(255,30,0,0.2),
+    0 0 80px rgba(255,20,0,0.1),
+    inset 0 0 6px rgba(255,200,100,0.5),
+    inset 0 -2px 4px rgba(255,120,30,0.4),
+    inset 0 1px 2px rgba(255,255,200,0.6);
+}
+
+/* Flash animation */
+@keyframes warn-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+```
+
+### 3-tier light spill (projected below gauge)
+
+```css
+.spill-1 {
+  bottom: -10px; width: 200px; height: 10px;
+  filter: blur(8px);
+  background: radial-gradient(ellipse, rgba(255,100,20,0.15), transparent);
+}
+.spill-2 {
+  bottom: -25px; width: 350px; height: 20px;
+  filter: blur(18px);
+  background: radial-gradient(ellipse, rgba(255,80,0,0.06), transparent);
+}
+.spill-3 {
+  bottom: -45px; width: 500px; height: 35px;
+  filter: blur(35px);
+  background: radial-gradient(ellipse, rgba(255,60,0,0.025), transparent);
+}
+```
+
+**Full working demo**: `assets/codepen-watt-gauge-forge.html`
+
+---
+
+## 61. Watt Gauge — Simple (Minimal Arc Gauge)
+
+A **minimal circular gauge** using pure SVG with a thick red arc track, diamond pointer, and concentric ring decorations. No physical housing — just the gauge itself. Much simpler than pattern 60 but still visually rich.
+
+### SVG arc helper (`describeArc`)
+
+```js
+const polarToCartesian = (cx, cy, r, degrees) => {
+  const rad = degrees * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+};
+
+const describeArc = (x, y, radius, startAngle, endAngle) => {
+  const start = polarToCartesian(x, y, radius, endAngle);
+  const end = polarToCartesian(x, y, radius, startAngle);
+  const large = endAngle - startAngle <= 180 ? "0" : "1";
+  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${large} 0 ${end.x} ${end.y}`;
+};
+```
+
+### Thick red active track
+
+```jsx
+{/* Background track */}
+<path d={describeArc(center, center, radius, 30, 300)}
+      fill="none" stroke="#1a1a1c" strokeWidth={55} />
+
+{/* Active red track */}
+<path d={describeArc(center, center, radius, 30, currentAngle)}
+      fill="none" stroke="url(#redGradient)" strokeWidth={55}
+      className="glow-red" />
+```
+
+```css
+.glow-red {
+  filter: drop-shadow(0 0 10px rgba(255,0,80,0.8))
+         drop-shadow(0 0 20px rgba(255,0,80,0.4));
+}
+```
+
+### Concentric ring decorations inside track
+
+```jsx
+{[radius - 15, radius - 5, radius + 5, radius + 15].map((r, i) => (
+  <path key={i}
+    d={describeArc(center, center, r, startAngle, currentAngle)}
+    fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+))}
+```
+
+### Diamond pointer (SVG polygon)
+
+```js
+const pointerTip = polarToCartesian(center, center, radius + 40, angle);
+const pointerBaseL = polarToCartesian(center, center, radius + 60, angle - 4);
+const pointerBaseR = polarToCartesian(center, center, radius + 60, angle + 4);
+const pointerBack = polarToCartesian(center, center, radius + 75, angle);
+```
+
+```jsx
+<polygon
+  points={`${tip.x},${tip.y} ${baseL.x},${baseL.y} ${back.x},${back.y} ${baseR.x},${baseR.y}`}
+  fill="#ff4d8d"
+  className="glow-red"
+/>
+{/* Center line for depth */}
+<line x1={tip.x} y1={tip.y} x2={back.x} y2={back.y}
+      stroke="rgba(255,255,255,0.5)" strokeWidth="1" />
+```
+
+### Eased interpolation (simple approach)
+
+```js
+// Simpler than spring-damper — good for lightweight gauges
+const timer = setInterval(() => {
+  setSpeed(prev => {
+    if (Math.abs(prev - targetSpeed) < 0.5) return targetSpeed;
+    return prev + (targetSpeed - prev) * 0.1;  // ease factor
+  });
+}, 30);
+```
+
+### Outer bezel (3 concentric circles)
+
+```jsx
+<circle cx={center} cy={center} r={radius + 60}
+        fill="#222" stroke="#333" strokeWidth="4" />
+<circle cx={center} cy={center} r={radius + 55}
+        fill="url(#outerGradient)" />
+<circle cx={center} cy={center} r={radius + 40}
+        fill="#141416" stroke="#000" strokeWidth="2" />
+```
+
+### Tick brightness tied to value
+
+```jsx
+<line x1={tick.x1} y1={tick.y1} x2={tick.x2} y2={tick.y2}
+      stroke={speed >= tick.label
+        ? "rgba(255,255,255,0.8)"   /* passed — bright */
+        : "rgba(255,255,255,0.3)"}  /* ahead — dim */
+      strokeWidth="2" />
+```
+
+**Full working demo**: `assets/codepen-watt-gauge-simple.html`
+
+---
+
+## 62. Start/Stop Toggle Button
+
+A **mechanical toggle button** on a mounting plate with conic-gradient well, engraved→illuminated text transition, LED bar indicator, 4-layer orange rim glow, and WebAudio click sound synthesis.
+
+### Mounting plate with screws
+
+```css
+.plate {
+  background:
+    /* Brushed texture */
+    repeating-linear-gradient(90deg,
+      transparent 0px, rgba(255,255,255,0.003) 1px,
+      transparent 2px, transparent 3px),
+    linear-gradient(160deg, var(--flint-300) 0%, var(--flint-600) 100%);
+  border-radius: 24px;
+  padding: 55px 70px;
+  box-shadow:
+    0 55px 100px -20px rgba(0,0,0,0.95),
+    0 25px 45px rgba(0,0,0,0.75),
+    0 10px 15px rgba(0,0,0,0.5),
+    inset 1px 1px 2px rgba(255,255,255,0.07),
+    inset -1px -1px 2px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 0 0 2.5px var(--flint-800),
+    0 0 0 3.5px rgba(255,255,255,0.015);
+}
+```
+
+### Phillips screws with random angles
+
+```css
+.torx {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--flint-200), var(--flint-700));
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.14),
+    inset 0 -1px 1px rgba(0,0,0,0.8),
+    0 2px 4px rgba(0,0,0,0.5);
+}
+.torx::before {
+  content: ""; width: 5.5px; height: 1.2px;
+  background: rgba(0,0,0,0.65);
+  transform: translate(-50%, -50%);
+}
+.torx::after {
+  content: ""; width: 1.2px; height: 5.5px;
+  background: rgba(0,0,0,0.65);
+  transform: translate(-50%, -50%);
+}
+```
+
+### Conic-gradient button well
+
+```css
+.btn-well {
+  background: conic-gradient(from 0deg,
+    var(--flint-400), var(--flint-200), var(--flint-500),
+    var(--flint-300), var(--flint-500), var(--flint-200), var(--flint-400));
+  border-radius: 26px;
+  padding: 4px;
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    inset 0 -1px 1px rgba(0,0,0,0.8);
+}
+.btn-recess {
+  background: var(--flint-800);
+  border-radius: 22px;
+  padding: 6px;
+  box-shadow:
+    inset 0 5px 12px rgba(0,0,0,0.95),
+    inset 0 2px 4px rgba(0,0,0,0.8),
+    inset 3px 0 6px rgba(0,0,0,0.4),
+    inset -3px 0 6px rgba(0,0,0,0.4);
+}
+```
+
+### Button UP/DOWN states
+
+```css
+/* UP — raised */
+.skeuo-btn {
+  background: linear-gradient(170deg,
+    #4a4f5a 0%, #3c414c 15%, #30353f 35%,
+    #282d38 55%, #222730 75%, #1c2028 100%);
+  transform: translateY(0px);
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.7),
+    0 5px 8px rgba(0,0,0,0.5),
+    0 2px 3px rgba(0,0,0,0.4),
+    inset 0 2px 2px rgba(255,255,255,0.18),
+    inset 1px 0 1px rgba(255,255,255,0.06),
+    inset 0 -3px 6px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.06);
+}
+
+/* DOWN — pressed + 4-layer orange rim glow */
+.skeuo-btn.pressed {
+  transform: translateY(4px);
+  background: linear-gradient(170deg,
+    #2e3340 0%, #282d36 20%, #22272f 45%,
+    #1c2028 65%, #181c24 85%, #14181f 100%);
+  box-shadow:
+    inset 0 4px 10px rgba(0,0,0,0.7),
+    inset 0 2px 4px rgba(0,0,0,0.5),
+    inset 3px 0 6px rgba(0,0,0,0.3),
+    inset -3px 0 6px rgba(0,0,0,0.3),
+    /* 4-layer orange rim glow */
+    0 0 0 1.5px rgba(255,130,20,0.5),   /* liseré net */
+    0 0 6px rgba(255,110,0,0.5),          /* glow serré */
+    0 0 6px rgba(255,110,0,0.3),
+    0 0 16px rgba(255,90,0,0.25),         /* halo moyen */
+    0 0 35px rgba(255,70,0,0.12),         /* bloom large */
+    0 0 60px rgba(255,50,0,0.06);
+}
+```
+
+### Engraved → Illuminated text
+
+```css
+/* OFF — barely visible engraving */
+.btn-text {
+  color: rgba(255,255,255,0.08);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.03),
+    0 -1px 1px rgba(0,0,0,0.8);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  letter-spacing: 5px;
+}
+
+/* ON — amber illumination, 5-layer glow */
+.pressed .btn-text {
+  color: rgba(255,170,50,0.95);
+  text-shadow:
+    0 0 3px rgba(255,160,30,1),
+    0 0 8px rgba(255,120,0,0.8),
+    0 0 18px rgba(255,90,0,0.5),
+    0 0 35px rgba(255,70,0,0.25),
+    0 0 60px rgba(255,50,0,0.1);
+}
+```
+
+### LED bar indicator
+
+```css
+.led-bar {
+  position: absolute;
+  bottom: 8px; left: 15%; right: 15%;
+  height: 1px;
+  background: transparent;
+  transition: all 0.25s ease;
+}
+.pressed .led-bar {
+  background: rgba(255,180,60,1);
+  box-shadow:
+    0 0 2px rgba(255,180,60,1),
+    0 0 6px rgba(255,140,20,0.8),
+    0 0 14px rgba(255,100,0,0.4),
+    0 0 30px rgba(255,80,0,0.15);
+}
+```
+
+### WebAudio click synthesis (3 oscillators)
+
+```js
+const useClickSound = () => {
+  const ctx = useRef(null);
+  return useCallback((toOn) => {
+    if (!ctx.current) ctx.current = new AudioContext();
+    const c = ctx.current;
+
+    // 1. Click — high-frequency snap
+    const o1 = c.createOscillator(), g1 = c.createGain();
+    o1.connect(g1); g1.connect(c.destination);
+    o1.frequency.value = toOn ? 2400 : 1200;
+    o1.type = 'sine';
+    g1.gain.setValueAtTime(0.06, c.currentTime);
+    g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.02);
+    o1.start(c.currentTime); o1.stop(c.currentTime + 0.02);
+
+    // 2. Thud — low-frequency body
+    const o2 = c.createOscillator(), g2 = c.createGain();
+    o2.connect(g2); g2.connect(c.destination);
+    o2.frequency.value = toOn ? 55 : 80;
+    g2.gain.setValueAtTime(toOn ? 0.12 : 0.06, c.currentTime + 0.008);
+    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+    o2.start(c.currentTime + 0.008); o2.stop(c.currentTime + 0.1);
+
+    // 3. Contact snap — ON only
+    if (toOn) {
+      const o3 = c.createOscillator(), g3 = c.createGain();
+      o3.connect(g3); g3.connect(c.destination);
+      o3.frequency.value = 5000;
+      g3.gain.setValueAtTime(0.02, c.currentTime + 0.012);
+      g3.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.025);
+      o3.start(c.currentTime + 0.012); o3.stop(c.currentTime + 0.025);
+    }
+  }, []);
+};
+```
+
+### 3-tier projected light + reflect glow
+
+```css
+.glow-1 { bottom: -16px; width: 160px; height: 12px; filter: blur(7px); }
+.glow-2 { bottom: -30px; width: 280px; height: 25px; filter: blur(16px); }
+.glow-3 { bottom: -50px; width: 400px; height: 40px; filter: blur(30px); }
+.glow-reflect { top: -12px; width: 200px; height: 12px; filter: blur(8px); }
+
+/* Each gets orange radial-gradient when ON */
+/* background: radial-gradient(ellipse, rgba(255,110,0,0.18), transparent 70%) */
+```
+
+### Silkscreen labels
+
+```css
+.silk {
+  font-family: system-ui;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.05);
+}
+```
+
+### Flint color palette (CSS custom properties)
+
+```css
+:root {
+  --flint-100: #5a5e68;
+  --flint-200: #44474f;
+  --flint-300: #353840;
+  --flint-400: #282b32;
+  --flint-500: #1e2028;
+  --flint-600: #15171d;
+  --flint-700: #0e1014;
+  --flint-800: #08090c;
+  --ember: #ff6a00;
+  --ember-hot: #ffaa30;
+  --ember-white: #fff4e0;
+}
+```
+
+**Full working demo**: `assets/codepen-start-stop-button.html`

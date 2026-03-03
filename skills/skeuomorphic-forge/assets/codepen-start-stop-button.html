@@ -1,0 +1,1029 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Start/Stop Button</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+
+        :root {
+
+            --flint-100: #5a5e68;
+
+            --flint-200: #44474f;
+
+            --flint-300: #353840;
+
+            --flint-400: #282b32;
+
+            --flint-500: #1e2028;
+
+            --flint-600: #15171d;
+
+            --flint-700: #0e1014;
+
+            --flint-800: #08090c;
+
+            --ember: #ff6a00;
+
+            --ember-hot: #ffaa30;
+
+            --ember-white: #fff4e0;
+
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+
+        body {
+
+            background: var(--flint-700);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            overflow: hidden;
+
+            font-family: 'Barlow Condensed', sans-serif;
+
+        }
+
+
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+
+                radial-gradient(ellipse at 50% 45%, rgba(22, 25, 32, 0.9) 0%, rgba(8, 9, 12, 1) 70%),
+
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+
+            z-index: -1;
+
+        }
+
+
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background: radial-gradient(ellipse, transparent 35%, rgba(0,0,0,0.5) 100%);
+
+            pointer-events: none;
+
+            z-index: 200;
+
+        }
+
+
+
+        /* ============================================
+
+           PLAQUE DE MONTAGE
+
+           ============================================ */
+
+        .plate {
+
+            position: relative;
+
+            background:
+
+                repeating-linear-gradient(90deg, transparent 0px, rgba(255,255,255,0.003) 1px, transparent 2px, transparent 3px),
+
+                linear-gradient(160deg, var(--flint-300) 0%, var(--flint-600) 100%);
+
+            border-radius: 24px;
+
+            padding: 55px 70px;
+
+            box-shadow:
+
+                0 55px 100px -20px rgba(0,0,0,0.95),
+
+                0 25px 45px rgba(0,0,0,0.75),
+
+                0 10px 15px rgba(0,0,0,0.5),
+
+                inset 1px 1px 2px rgba(255,255,255,0.07),
+
+                inset -1px -1px 2px rgba(0,0,0,0.7),
+
+                0 0 0 1px rgba(255,255,255,0.04),
+
+                0 0 0 2.5px var(--flint-800),
+
+                0 0 0 3.5px rgba(255,255,255,0.015);
+
+        }
+
+
+
+        /* Vis */
+
+        .torx {
+
+            position: absolute;
+
+            width: 12px; height: 12px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(circle at 35% 35%, var(--flint-200), var(--flint-700));
+
+            box-shadow:
+
+                inset 0 1px 1px rgba(255,255,255,0.14),
+
+                inset 0 -1px 1px rgba(0,0,0,0.8),
+
+                0 2px 4px rgba(0,0,0,0.5);
+
+            z-index: 30;
+
+        }
+
+        .torx::before, .torx::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            background: rgba(0,0,0,0.65);
+
+            border-radius: 0.5px;
+
+        }
+
+        .torx::before { width: 5.5px; height: 1.2px; transform: translate(-50%, -50%); }
+
+        .torx::after { width: 1.2px; height: 5.5px; transform: translate(-50%, -50%); }
+
+
+
+        .silk {
+
+            font-family: system-ui;
+
+            font-size: 7px;
+
+            font-weight: 600;
+
+            letter-spacing: 2.5px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.05);
+
+            position: absolute;
+
+            pointer-events: none;
+
+            z-index: 30;
+
+        }
+
+
+
+        /* ============================================
+
+           BUTTON WELL — Gorge enfoncée
+
+           ============================================ */
+
+        .btn-well {
+
+            background: conic-gradient(
+
+                from 0deg,
+
+                var(--flint-400), var(--flint-200), var(--flint-500),
+
+                var(--flint-300), var(--flint-500), var(--flint-200), var(--flint-400)
+
+            );
+
+            border-radius: 26px;
+
+            padding: 4px;
+
+            box-shadow:
+
+                0 10px 20px rgba(0,0,0,0.5),
+
+                0 4px 8px rgba(0,0,0,0.3),
+
+                inset 0 1px 1px rgba(255,255,255,0.1),
+
+                inset 0 -1px 1px rgba(0,0,0,0.8);
+
+        }
+
+
+
+        .btn-recess {
+
+            background: var(--flint-800);
+
+            border-radius: 22px;
+
+            padding: 6px;
+
+            box-shadow:
+
+                inset 0 5px 12px rgba(0,0,0,0.95),
+
+                inset 0 2px 4px rgba(0,0,0,0.8),
+
+                inset 3px 0 6px rgba(0,0,0,0.4),
+
+                inset -3px 0 6px rgba(0,0,0,0.4),
+
+                inset 0 -2px 4px rgba(0,0,0,0.5);
+
+            transition: box-shadow 0.3s ease;
+
+        }
+
+
+
+        /* ============================================
+
+           LE BOUTON — Deux états mécaniques
+
+           ============================================ */
+
+        .skeuo-btn {
+
+            position: relative;
+
+            border: none;
+
+            cursor: pointer;
+
+            border-radius: 18px;
+
+            padding: 24px 60px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            outline: none;
+
+            user-select: none;
+
+            -webkit-tap-highlight-color: transparent;
+
+            overflow: hidden;
+
+
+
+            background: linear-gradient(170deg,
+
+                #4a4f5a 0%, #3c414c 15%, #30353f 35%,
+
+                #282d38 55%, #222730 75%, #1c2028 100%
+
+            );
+
+
+
+            /* ÉTAT UP : en relief */
+
+            transform: translateY(0px);
+
+            box-shadow:
+
+                0 10px 20px rgba(0,0,0,0.7),
+
+                0 5px 8px rgba(0,0,0,0.5),
+
+                0 2px 3px rgba(0,0,0,0.4),
+
+                inset 0 2px 2px rgba(255,255,255,0.18),
+
+                inset 1px 0 1px rgba(255,255,255,0.06),
+
+                inset 0 -3px 6px rgba(0,0,0,0.5),
+
+                0 0 0 1px rgba(255,255,255,0.06);
+
+
+
+            transition:
+
+                transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+
+                box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+
+        }
+
+
+
+        /* Texture brossée */
+
+        .skeuo-btn::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 18px;
+
+            background: repeating-linear-gradient(
+
+                165deg,
+
+                transparent 0px,
+
+                rgba(255,255,255,0.01) 1px,
+
+                transparent 2px,
+
+                transparent 4px
+
+            );
+
+            pointer-events: none;
+
+            z-index: 1;
+
+        }
+
+
+
+        /* Highlight spéculaire */
+
+        .skeuo-btn::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 0; left: 0; right: 0;
+
+            height: 45%;
+
+            border-radius: 18px 18px 0 0;
+
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+
+            pointer-events: none;
+
+            z-index: 2;
+
+            transition: opacity 0.15s ease;
+
+        }
+
+
+
+        /* ÉTAT PRESSED (toggle ON) */
+
+        .skeuo-btn.pressed {
+
+            transform: translateY(4px);
+
+            background: linear-gradient(170deg,
+
+                #2e3340 0%, #282d36 20%, #22272f 45%,
+
+                #1c2028 65%, #181c24 85%, #14181f 100%
+
+            );
+
+            box-shadow:
+
+                /* Inset mécanique */
+
+                inset 0 4px 10px rgba(0,0,0,0.7),
+
+                inset 0 2px 4px rgba(0,0,0,0.5),
+
+                inset 3px 0 6px rgba(0,0,0,0.3),
+
+                inset -3px 0 6px rgba(0,0,0,0.3),
+
+                inset 0 -1px 2px rgba(0,0,0,0.3),
+
+                /* === RIM LIGHT ORANGE — 4 couches === */
+
+                /* Couche 1 : liseré net */
+
+                0 0 0 1.5px rgba(255, 130, 20, 0.5),
+
+                /* Couche 2 : glow serré */
+
+                0 0 6px rgba(255, 110, 0, 0.5),
+
+                0 0 6px rgba(255, 110, 0, 0.3),
+
+                /* Couche 3 : halo moyen */
+
+                0 0 16px rgba(255, 90, 0, 0.25),
+
+                /* Couche 4 : bloom large */
+
+                0 0 35px rgba(255, 70, 0, 0.12),
+
+                0 0 60px rgba(255, 50, 0, 0.06);
+
+        }
+
+
+
+        .skeuo-btn.pressed::after {
+
+            opacity: 0;
+
+        }
+
+
+
+        /* Micro-enfoncement au clic */
+
+        .skeuo-btn:active:not(.pressed) {
+
+            transform: translateY(3px);
+
+            box-shadow:
+
+                0 2px 4px rgba(0,0,0,0.6),
+
+                0 1px 2px rgba(0,0,0,0.4),
+
+                inset 0 3px 8px rgba(0,0,0,0.5),
+
+                inset 0 1px 2px rgba(0,0,0,0.4),
+
+                0 0 0 1px rgba(255,255,255,0.04);
+
+            transition: all 0.04s ease-out;
+
+        }
+
+
+
+        .skeuo-btn.pressed:active {
+
+            transform: translateY(2px);
+
+            transition: all 0.04s ease-out;
+
+        }
+
+
+
+        /* ============================================
+
+           TEXTE — Gravé OFF, illuminé ON
+
+           ============================================ */
+
+        .btn-text {
+
+            position: relative;
+
+            z-index: 5;
+
+            font-family: 'Barlow Condensed', sans-serif;
+
+            font-size: 22px;
+
+            font-weight: 800;
+
+            letter-spacing: 5px;
+
+            text-transform: uppercase;
+
+            pointer-events: none;
+
+            transition: all 0.25s ease;
+
+
+
+            /* ÉTAT OFF : gravé */
+
+            color: rgba(255,255,255,0.08);
+
+            text-shadow:
+
+                0 1px 0 rgba(255,255,255,0.03),
+
+                0 -1px 1px rgba(0,0,0,0.8);
+
+        }
+
+
+
+        /* ÉTAT ON : illuminé multicouche */
+
+        .pressed .btn-text {
+
+            color: rgba(255, 170, 50, 0.95);
+
+            text-shadow:
+
+                0 0 3px rgba(255, 160, 30, 1),
+
+                0 0 8px rgba(255, 120, 0, 0.8),
+
+                0 0 18px rgba(255, 90, 0, 0.5),
+
+                0 0 35px rgba(255, 70, 0, 0.25),
+
+                0 0 60px rgba(255, 50, 0, 0.1);
+
+        }
+
+
+
+        /* ============================================
+
+           BARRE LED INDICATEUR — dans le bouton
+
+           ============================================ */
+
+        .led-bar {
+
+            position: absolute;
+
+            bottom: 8px;
+
+            left: 15%;
+
+            right: 15%;
+
+            height: 1px;
+
+            pointer-events: none;
+
+            z-index: 5;
+
+            transition: all 0.25s ease;
+
+            background: transparent;
+
+        }
+
+
+
+        .pressed .led-bar {
+
+            background: rgba(255, 180, 60, 1);
+
+            box-shadow:
+
+                0 0 2px rgba(255, 180, 60, 1),
+
+                0 0 6px rgba(255, 140, 20, 0.8),
+
+                0 0 14px rgba(255, 100, 0, 0.4),
+
+                0 0 30px rgba(255, 80, 0, 0.15);
+
+        }
+
+
+
+        /* ============================================
+
+           HALO INTÉRIEUR DU BOUTON — Glow sous la surface
+
+           ============================================ */
+
+        .btn-inner-glow {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 18px;
+
+            pointer-events: none;
+
+            z-index: 3;
+
+            opacity: 0;
+
+            transition: opacity 0.35s ease;
+
+            background: radial-gradient(ellipse at 50% 50%,
+
+                rgba(255, 100, 0, 0.06) 0%,
+
+                rgba(255, 60, 0, 0.02) 40%,
+
+                transparent 70%
+
+            );
+
+        }
+
+
+
+        .pressed .btn-inner-glow {
+
+            opacity: 1;
+
+        }
+
+
+
+        /* ============================================
+
+           LUMIÈRE PROJETÉE
+
+           ============================================ */
+
+        .glow-1 {
+
+            position: absolute;
+
+            bottom: -16px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 160px; height: 12px;
+
+            border-radius: 50%;
+
+            filter: blur(7px);
+
+            pointer-events: none;
+
+            transition: all 0.4s ease;
+
+            opacity: 0;
+
+        }
+
+        .glow-2 {
+
+            position: absolute;
+
+            bottom: -30px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 280px; height: 25px;
+
+            border-radius: 50%;
+
+            filter: blur(16px);
+
+            pointer-events: none;
+
+            transition: all 0.5s ease;
+
+            opacity: 0;
+
+        }
+
+        .glow-3 {
+
+            position: absolute;
+
+            bottom: -50px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 400px; height: 40px;
+
+            border-radius: 50%;
+
+            filter: blur(30px);
+
+            pointer-events: none;
+
+            transition: all 0.6s ease;
+
+            opacity: 0;
+
+        }
+
+        .glow-reflect {
+
+            position: absolute;
+
+            top: -12px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 200px; height: 12px;
+
+            border-radius: 50%;
+
+            filter: blur(8px);
+
+            pointer-events: none;
+
+            transition: all 0.4s ease;
+
+            opacity: 0;
+
+        }
+
+
+
+        .env-glow {
+
+            position: fixed;
+
+            top: 55%; left: 50%;
+
+            width: 500px; height: 350px;
+
+            transform: translate(-50%, -50%);
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            filter: blur(80px);
+
+            transition: opacity 0.6s ease;
+
+            z-index: -1;
+
+            opacity: 0;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState, useCallback, useRef } = React;
+
+
+
+        const useClickSound = () => {
+
+            const ctx = useRef(null);
+
+            return useCallback((toOn) => {
+
+                try {
+
+                    if (!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
+
+                    const c = ctx.current;
+
+
+
+                    // Click
+
+                    const o1 = c.createOscillator(), g1 = c.createGain();
+
+                    o1.connect(g1); g1.connect(c.destination);
+
+                    o1.frequency.value = toOn ? 2400 : 1200;
+
+                    o1.type = 'sine';
+
+                    g1.gain.setValueAtTime(0.06, c.currentTime);
+
+                    g1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.02);
+
+                    o1.start(c.currentTime); o1.stop(c.currentTime + 0.02);
+
+
+
+                    // Thud
+
+                    const o2 = c.createOscillator(), g2 = c.createGain();
+
+                    o2.connect(g2); g2.connect(c.destination);
+
+                    o2.frequency.value = toOn ? 55 : 80;
+
+                    o2.type = 'sine';
+
+                    g2.gain.setValueAtTime(toOn ? 0.12 : 0.06, c.currentTime + 0.008);
+
+                    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+
+                    o2.start(c.currentTime + 0.008); o2.stop(c.currentTime + 0.1);
+
+
+
+                    // Contact snap (ON only)
+
+                    if (toOn) {
+
+                        const o3 = c.createOscillator(), g3 = c.createGain();
+
+                        o3.connect(g3); g3.connect(c.destination);
+
+                        o3.frequency.value = 5000;
+
+                        o3.type = 'sine';
+
+                        g3.gain.setValueAtTime(0.02, c.currentTime + 0.012);
+
+                        g3.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.025);
+
+                        o3.start(c.currentTime + 0.012); o3.stop(c.currentTime + 0.025);
+
+                    }
+
+                } catch(e){}
+
+            }, []);
+
+        };
+
+
+
+        const App = () => {
+
+            const [pressed, setPressed] = useState(false);
+
+            const playClick = useClickSound();
+
+
+
+            const toggle = useCallback(() => {
+
+                const next = !pressed;
+
+                playClick(next);
+
+                setPressed(next);
+
+            }, [pressed, playClick]);
+
+
+
+            const on = pressed;
+
+
+
+            return (
+
+                <div style={{ position: 'relative' }}>
+
+                    <div className="env-glow" style={{
+
+                        background: 'radial-gradient(circle, rgba(255,90,0,0.05) 0%, transparent 60%)',
+
+                        opacity: on ? 1 : 0
+
+                    }} />
+
+
+
+                    <div className="plate">
+
+                        <div className="torx" style={{ top: 12, left: 12 }} />
+
+                        <div className="torx" style={{ top: 12, right: 12 }} />
+
+                        <div className="torx" style={{ bottom: 12, left: 12 }} />
+
+                        <div className="torx" style={{ bottom: 12, right: 12 }} />
+
+
+
+                        <div className="silk" style={{ top: 16, left: '50%', transform: 'translateX(-50%)' }}>
+
+                            ENGINE CONTROL
+
+                        </div>
+
+                        <div className="silk" style={{ bottom: 16, right: 18, fontSize: '6px', letterSpacing: '1.5px' }}>
+
+                            12V DC
+
+                        </div>
+
+
+
+                        <div className="btn-well">
+
+                            <div className="btn-recess">
+
+                                <button
+
+                                    className={`skeuo-btn ${on ? 'pressed' : ''}`}
+
+                                    onClick={toggle}
+
+                                >
+
+                                    <div className="btn-inner-glow" />
+
+                                    <span className="btn-text">START / STOP</span>
+
+                                    <div className="led-bar" />
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        {/* Lumière projetée */}
+
+                        <div className="glow-1" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,110,0,0.18) 0%, transparent 70%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                        <div className="glow-2" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,85,0,0.07) 0%, transparent 70%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                        <div className="glow-3" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,70,0,0.03) 0%, transparent 65%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                        <div className="glow-reflect" style={{
+
+                            background: on ? 'radial-gradient(ellipse, rgba(255,120,20,0.05) 0%, transparent 70%)' : 'none',
+
+                            opacity: on ? 1 : 0
+
+                        }} />
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>
