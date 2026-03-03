@@ -1,6 +1,6 @@
 ---
 name: skeuomorphic-forge
-description: "Create production-grade skeuomorphic UI with Tailwind CSS. Use when building physically-realistic elements: buttons with mechanical depth, gauges, meters, LED/nixie indicators, toggle switches, sliders, progress bars, cards with material textures (metal, glass, leather, wood, paper, fabric, concrete, plastic), industrial panels, CRT/VFD displays, neumorphic components, particle effects, or any UI mimicking real-world objects. Covers dark (industrial, military) and light (classic, iOS-era, neumorphic) themes. Triggers: skeuomorphic, realistic, 3D button, industrial UI, gauge, meter, LED, nixie, analog, physical, tactile, metal texture, glass effect, depth effect, neumorphic, soft UI, leather, wood grain, rim light, chrome, gold, brushed metal, particles, starfield, space dust, vortex, particle system, disintegration, GPGPU, material with depth. Do NOT trigger for flat/minimal UI, standard Material/Shadcn components, or conventional Tailwind layouts without physical realism."
+description: "Create production-grade skeuomorphic UI with Tailwind CSS. Use when building physically-realistic elements: buttons with mechanical depth, gauges, meters, LED/nixie indicators, toggle switches, sliders, progress bars, cards with material textures (metal, glass, leather, wood, paper, fabric, concrete, plastic), industrial panels, CRT/VFD displays, neumorphic components, particle effects, or any UI mimicking real-world objects. Covers dark (industrial, military) and light (classic, iOS-era, neumorphic) themes. Triggers: skeuomorphic, realistic, 3D button, industrial UI, gauge, meter, LED, nixie, analog, physical, tactile, metal texture, glass effect, depth effect, neumorphic, soft UI, leather, wood grain, rim light, chrome, gold, brushed metal, particles, starfield, space dust, vortex, particle system, disintegration, GPGPU, material with depth, retro-industrial, aerospace, vintage instrument, warm industrial, CRT terminal, mechanical counter, bezel assembly, phosphor glow, DSP panel, cockpit UI. Do NOT trigger for flat/minimal UI, standard Material/Shadcn components, or conventional Tailwind layouts without physical realism."
 ---
 
 # Skeuomorphic Forge
@@ -43,6 +43,17 @@ The catalog supports three distinct aesthetic families. Identify which family th
 ### Industrial / Dark
 Dark backgrounds (#050505-#1a1a1a). Brushed metal, gunmetal, cast iron. Amber/green/red glows. CRT displays, nixie tubes, VFD readouts. Mechanical switches, screws, ventilation slats.
 
+### Retro-Industrial / Aerospace
+Warm dark backgrounds (hue 25-40, `hsl(30 12% 6%)` to `hsl(35 10% 12%)`). Emulates **vintage 1970s-1990s aerospace/automotive instrumentation** — the kind of panels found in analog mixing consoles, aircraft cockpits, car audio DSP hardware, and laboratory test equipment. Key characteristics:
+- **Machined aluminum bezels**: Conic gradients with 7+ warm hue stops (`hsl(35 10% 28%)` → `hsl(40 8% 38%)` → `hsl(30 12% 22%)`)
+- **3-ring bezel assembly**: Outer chassis (machined metal) → bevel ring (chamfered edge) → inner well (deep CRT-style recess). See file 11 for full pattern.
+- **Cast iron / anodized textures**: SVG `feTurbulence` noise overlays (`baseFrequency='0.7'`) on dark gradient backgrounds
+- **CRT phosphor displays**: Scanline overlays, vignette shadows, Orbitron/Share Tech Mono typography with `textShadow` glow
+- **LED indicators**: Multi-shadow halos (core 2px + mid 6px + halo 16px) with pulse animations
+- **Warm amber palette**: Accents in `hsl(35-45)` range — golden ambers, aged cream, not cool blue-grays
+- **Torx/Phillips screws**: Physical mounting hardware with radial gradient heads and slot shadows
+- Differs from Industrial/Dark by being **warm-toned** (brown/amber/gold) vs. **cool-toned** (gunmetal/steel/blue)
+
 ### Classic Skeuomorphic / Light
 Light backgrounds (#d0d0d0-#f0f0f0). Leather, wood, paper, linen, glossy plastic. Warm or cool tones. iOS 6 / macOS pre-flat era. Stitched edges, embossed labels, physical book/notepad metaphors.
 
@@ -66,6 +77,68 @@ When asked to create a skeuomorphic component:
 ## Component Archetypes
 
 Button (industrial, iOS 6 glass, membrane, jelly), Toggle (spring, rocker), Card/Panel (metal, leather, wood, paper, glass), Gauge/Meter (VU, oscilloscope, bargraph), LED Indicator, Display/Screen (CRT, VFD, 7-segment, nixie tube, burn-through LED), Knob/Dial (machined, sphere, Arturia multi-layer, brushed anisotropic, detent rotary, chickenhead selector), Slider/Range, Progress Bar, Radio/Checkbox, Dropdown/Select, Tab Bar, Badge, Tooltip, Metallic Card, Vintage Radio, VU Meter, Watch Face, Compressor Faceplate, Footswitch (stomp box), Eurorack Jack + Patch Cable, 3D Toolbar Button, Dark Glass Widget, Rubber Overmold Panel, Wood Side Panel, **Glass Panel** (frosted, dark glassmorphism, glow+shine), **Glass Sphere/Bead** (multi-gradient radial, layered-div marble), **Glass Icon/Tile** (box-shadow stack + caustic), **SVG Filter Glass** (displacement warp, chromatic RGB split), **Glass Select/Dropdown** (frosted options panel), **Brushed Metal Button** (radial/linear repeating gradients + 6-layer bevel), **Metallic Button** (conic gradient 28+ stops: gold, silver, bronze, rose gold), **Chrome Text** (background-clip:text + animated shine), **Gold Text** (dual-layer repeating gradient), **Metallic Border** (padding-box/border-box: gold, silver, bronze, platinum, black), **Rim Light Card** (4-layer box-shadow + radial-gradient pseudo-elements), **CSS Starfield** (SCSS box-shadow mixin, parallax layers), **Canvas Particle Engine** (multi-layer depth, click-burst, mouse-attracted fire), **Orbital Starfield** (elliptical orbits + twinkle + nebula), **Black Hole Vortex** (spiral infall + accretion disk + gravitational lensing), **WebGL GPGPU Particles** (Three.js FBO ping-pong, 262K+ particles, curl noise), **Text Disintegration** (Three.js BAS per-face animation + turbulence). See file 03 for blueprints, file 04 for 94 community techniques, files 05-06 for physics, composition, interaction, typography, aging, safety, tokens, palettes, **file 07 for glass effects (10 techniques)**, **file 08 for metal effects (8 techniques)**, **file 09 for rim light effects (4 techniques)**, **file 10 for particle effects (10 techniques)**.
+
+## Warm Industrial Palette
+
+Dedicated color tokens for the Retro-Industrial / Aerospace aesthetic family. All hues in the 25-40 range (warm amber/brown).
+
+### Chassis & Surfaces
+
+| Token | Value | Usage |
+|---|---|---|
+| `--ri-chassis-dark` | `hsl(30 14% 5%)` | Deepest panel background |
+| `--ri-chassis-base` | `hsl(30 12% 8%)` | Standard panel/card background |
+| `--ri-chassis-mid` | `hsl(35 10% 12%)` | Elevated surface, SteelMountPlate |
+| `--ri-chassis-light` | `hsl(35 8% 18%)` | Bezel outer ring, raised elements |
+| `--ri-bevel` | `hsl(40 8% 26%)` | Bevel ring, chamfered edges |
+| `--ri-highlight` | `hsl(40 12% 38%)` | Conic gradient peak, specular spots |
+
+### Accent & Glow
+
+| Token | Value | Usage |
+|---|---|---|
+| `--ri-amber` | `hsl(35 100% 60%)` | Primary accent, CRT text, active state |
+| `--ri-amber-dim` | `hsl(35 60% 40%)` | Muted accent, corner brackets, borders |
+| `--ri-amber-glow` | `rgba(255,180,0,0.4)` | Text-shadow halo, LED ambient |
+| `--ri-cream` | `hsl(40 60% 72%)` | Counter digits, aged readout text |
+| `--ri-green` | `hsl(120 80% 55%)` | LED green, terminal text |
+| `--ri-red` | `hsl(0 80% 55%)` | LED red, critical/warning |
+
+### Silkscreen & Labels
+
+| Token | Value | Usage |
+|---|---|---|
+| `--ri-silk` | `rgba(255,255,255,0.06)` | Faint silkscreen text on dark metal |
+| `--ri-silk-active` | `rgba(245,158,11,0.8)` | Lit silkscreen label (backlit) |
+
+## Instrumental Typography
+
+Physical instruments use specific typefaces and rendering. Match font to context:
+
+| Context | Font | Weight | Tracking | Case |
+|---|---|---|---|---|
+| **CRT/VFD readout** | `'Orbitron', sans-serif` | 700 | `0.05em` | uppercase |
+| **Terminal/status lines** | `'Share Tech Mono', monospace` | 400 | `0.02em` | mixed |
+| **Mechanical counter digits** | `'Orbitron', sans-serif` | 700 | `0.1em` | numeric |
+| **Silkscreen labels** | `font-mono` (system) | 600 | `0.08-0.15em` | uppercase |
+| **Engraved panel text** | `font-mono` (system) | 700 | `0.05em` | uppercase |
+
+**Phosphor glow rendering** (CRT/LED text):
+```css
+color: hsl(35 100% 65%);
+text-shadow:
+  0 0 4px currentColor,    /* core glow */
+  0 0 10px currentColor,   /* mid halo */
+  0 0 20px rgba(255,180,0,0.3); /* ambient bloom */
+```
+
+**Silkscreen rendering** (panel labels):
+```css
+color: rgba(255,255,255,0.06);  /* faint, like real silkscreen on dark metal */
+text-shadow: 0 1px 0 rgba(0,0,0,0.9), 0 0 6px rgba(255,255,255,0.05);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+```
 
 ## Quality Checklist
 
@@ -140,6 +213,10 @@ Button (industrial, iOS 6 glass, membrane, jelly), Toggle (spring, rocker), Card
 ### assets/agile-tech-skeuomorphic-site.html
 Full 8000-line skeuomorphic website (Agile Tech) with 300+ advanced CSS techniques. Dark industrial aesthetic with conic gradient borders, volumetric light systems, 3D carousels, multi-layer metallic cards, starfield backgrounds, and Apple-style modals.
 **Load for:** Deep-dive inspiration when patterns 14.53-14.60 reference specific techniques. Too large to load fully — use grep -i "keyword" to find specific sections.
+
+### references/11-retro-industrial-patterns.md
+**Sections 27-33.** Retro-Industrial Patterns: 3-Ring Bezel Assembly (27: outer chassis conic gradient + bevel ring + inner CRT well, with full React inline style constants), CRT Display Construction (28: 7-layer stack — base, vignette, backlight, scanlines, specular, accent line, content — plus phosphor glow recipes for amber/green/red), LED Indicator System (29: multi-shadow halo construction with 4 preset colors + pulse animation + silkscreen label), Torx Screw (30: radial gradient head + crosshair slot + mounting shadow), SVG feTurbulence Texture (31: cast iron, fine metal grain, brushed metal overlays as data URI), Glitch/Holographic Input (32: CRT-style input with corner brackets, scanline sweep, data stream glitch animation), Mechanical Counter (33: rolling odometer digits with well vignette + backlight + amber text).
+**Load for:** Vintage aerospace/automotive instrumentation, warm-toned industrial panels, CRT terminal displays, DSP hardware UI, analog instrument emulation.
 
 ### Search across all files
 ```bash
