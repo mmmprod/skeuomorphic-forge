@@ -1,0 +1,649 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Buttons</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background-color: #111111;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            margin: 0;
+
+            color: #888;
+
+            overflow: hidden;
+
+        }
+
+        .textured-bg {
+
+            background-color: #0f0f0f;
+
+            background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+
+            background-blend-mode: overlay;
+
+        }
+
+        .label-text {
+
+            color: #555;
+
+            font-size: 14px;
+
+            font-weight: 400;
+
+            letter-spacing: 0.02em;
+
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 -1px 0 rgba(255,255,255,0.02);
+
+        }
+
+        .label-active {
+
+            color: #ccc;
+
+            text-shadow: 0 0 12px rgba(255,160,40,0.3), 0 0 24px rgba(255,140,0,0.12), 0 1px 2px rgba(0,0,0,0.5);
+
+        }
+
+        .well-shadow {
+
+            box-shadow:
+
+                inset 0 4px 10px rgba(0,0,0,1),
+
+                inset 0 2px 4px rgba(0,0,0,0.9),
+
+                inset 0 1px 2px rgba(0,0,0,0.7),
+
+                inset 0 -1px 0 rgba(255,255,255,0.05),
+
+                inset 0 -1px 3px rgba(255,255,255,0.012),
+
+                inset 2px 0 4px rgba(0,0,0,0.5),
+
+                inset -2px 0 4px rgba(0,0,0,0.5),
+
+                inset 0 0 10px rgba(0,0,0,0.35),
+
+                inset 0 0 18px rgba(0,0,0,0.1),
+
+                0 1px 0 rgba(255,255,255,0.04),
+
+                0 -1px 0 rgba(0,0,0,0.4),
+
+                0 2px 4px rgba(0,0,0,0.25);
+
+            background-color: #050505;
+
+            padding: 3px 3px 12px;
+
+            border-radius: 1.05rem;
+
+            position: relative;
+
+            overflow: visible;
+
+        }
+
+        .well-glow {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 1.05rem;
+
+            pointer-events: none;
+
+            z-index: 0;
+
+            transition: box-shadow 0.6s ease;
+
+        }
+
+        .well-glow-on {
+
+            box-shadow:
+
+                inset 0 -2px 8px rgba(255,140,0,0.035),
+
+                inset 2px 0 6px rgba(255,140,0,0.012),
+
+                inset -2px 0 6px rgba(255,140,0,0.012),
+
+                inset 0 2px 5px rgba(255,140,0,0.008);
+
+        }
+
+        .button-surface {
+
+            background:
+
+                radial-gradient(ellipse 42% 26% at 32% 12%,
+
+                    rgba(255,255,255,0.055) 0%, transparent 50%),
+
+                radial-gradient(ellipse 65% 30% at 50% 18%,
+
+                    rgba(255,255,255,0.02) 0%, transparent 55%),
+
+                linear-gradient(180deg, #2c2c2c 0%, #232323 18%, #1c1c1c 40%, #151515 65%, #121212 100%);
+
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,255,255,0.16),
+
+                inset 0 2px 2px rgba(255,255,255,0.06),
+
+                inset 0 3px 5px rgba(255,255,255,0.018),
+
+                inset 1px 0 0 rgba(255,255,255,0.07),
+
+                inset 0 -1px 0 rgba(0,0,0,0.55),
+
+                inset 0 -3px 5px rgba(0,0,0,0.25),
+
+                inset 0 -5px 10px rgba(0,0,0,0.1),
+
+                inset -1px 0 0 rgba(0,0,0,0.22),
+
+                inset 0 0 10px rgba(0,0,0,0.06),
+
+                0 1px 0 0 #2e2e32,
+
+                0 2px 0 0 #2a2a2e,
+
+                0 3px 0 0 #252528,
+
+                0 4px 0 0 #212124,
+
+                0 5px 0 0 #1c1c20,
+
+                0 6px 0 0 #18181c,
+
+                0 7px 0 0 #141418,
+
+                0 8px 0 0 #101014,
+
+                0 8px 0 1px rgba(0,0,0,0.9),
+
+                0 9px 0 1px rgba(0,0,0,0.6),
+
+                0 9px 0 2px rgba(0,0,0,0.3),
+
+                0 9px 0 0 rgba(255,255,255,0.025),
+
+                0 10px 4px rgba(0,0,0,0.65),
+
+                0 12px 8px rgba(0,0,0,0.5),
+
+                0 14px 16px rgba(0,0,0,0.3),
+
+                0 18px 32px rgba(0,0,0,0.12);
+
+        }
+
+        .button-surface:hover {
+
+            background:
+
+                radial-gradient(ellipse 42% 26% at 32% 12%,
+
+                    rgba(255,255,255,0.07) 0%, transparent 50%),
+
+                radial-gradient(ellipse 65% 30% at 50% 18%,
+
+                    rgba(255,255,255,0.03) 0%, transparent 55%),
+
+                linear-gradient(180deg, #303034 0%, #272728 18%, #1f1f20 40%, #181818 65%, #151515 100%);
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,255,255,0.18),
+
+                inset 0 2px 2px rgba(255,255,255,0.07),
+
+                inset 0 3px 5px rgba(255,255,255,0.02),
+
+                inset 1px 0 0 rgba(255,255,255,0.08),
+
+                inset 0 -1px 0 rgba(0,0,0,0.55),
+
+                inset 0 -3px 5px rgba(0,0,0,0.25),
+
+                inset 0 -5px 10px rgba(0,0,0,0.1),
+
+                inset -1px 0 0 rgba(0,0,0,0.22),
+
+                inset 0 0 10px rgba(0,0,0,0.06),
+
+                0 1px 0 0 #303034,
+
+                0 2px 0 0 #2c2c30,
+
+                0 3px 0 0 #27272a,
+
+                0 4px 0 0 #232326,
+
+                0 5px 0 0 #1e1e22,
+
+                0 6px 0 0 #1a1a1e,
+
+                0 7px 0 0 #161618,
+
+                0 8px 0 0 #121214,
+
+                0 8px 0 1px rgba(0,0,0,0.9),
+
+                0 9px 0 1px rgba(0,0,0,0.6),
+
+                0 9px 0 2px rgba(0,0,0,0.3),
+
+                0 9px 0 0 rgba(255,255,255,0.03),
+
+                0 10px 4px rgba(0,0,0,0.65),
+
+                0 12px 8px rgba(0,0,0,0.5),
+
+                0 14px 16px rgba(0,0,0,0.3),
+
+                0 18px 32px rgba(0,0,0,0.12);
+
+        }
+
+        .button-surface:active {
+
+            transform: translateY(5px);
+
+            background:
+
+                radial-gradient(ellipse 38% 22% at 38% 18%,
+
+                    rgba(255,255,255,0.025) 0%, transparent 45%),
+
+                linear-gradient(180deg, #1a1a1a 0%, #141414 30%, #0e0e0e 60%, #0a0a0a 100%);
+
+            box-shadow:
+
+                inset 0 3px 8px rgba(0,0,0,0.9),
+
+                inset 0 1px 2px rgba(0,0,0,0.7),
+
+                inset 0 -1px 0 rgba(255,255,255,0.035),
+
+                inset 1px 0 2px rgba(0,0,0,0.4),
+
+                inset -1px 0 2px rgba(0,0,0,0.4),
+
+                inset 0 0 12px rgba(0,0,0,0.2),
+
+                0 1px 0 0 #1e1e22,
+
+                0 2px 0 0 #18181c,
+
+                0 3px 0 0 #131316,
+
+                0 3px 0 1px rgba(0,0,0,0.85),
+
+                0 4px 3px rgba(0,0,0,0.5),
+
+                0 5px 6px rgba(0,0,0,0.25);
+
+        }
+
+        .btn-glass {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 0.9rem;
+
+            pointer-events: none;
+
+            z-index: 4;
+
+            background:
+
+                radial-gradient(ellipse 32% 16% at 20% 9%,
+
+                    rgba(255,255,255,0.06) 0%, transparent 48%),
+
+                radial-gradient(ellipse 16% 8% at 78% 88%,
+
+                    rgba(255,255,255,0.012) 0%, transparent 40%),
+
+                linear-gradient(152deg,
+
+                    rgba(255,255,255,0.03) 0%,
+
+                    rgba(255,255,255,0.007) 20%,
+
+                    transparent 40%,
+
+                    rgba(0,0,0,0.012) 65%,
+
+                    rgba(0,0,0,0.035) 100%);
+
+        }
+
+        .btn-rim {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 0.9rem;
+
+            pointer-events: none;
+
+            z-index: 5;
+
+            transition: box-shadow 0.6s ease;
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,255,255,0.07),
+
+                inset 0 2px 3px rgba(255,255,255,0.015),
+
+                inset 1px 0 0 rgba(255,255,255,0.035),
+
+                inset 0 -1px 0 rgba(0,0,0,0.28),
+
+                inset -1px 0 0 rgba(0,0,0,0.1);
+
+        }
+
+        .btn-rim-active {
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,190,100,0.07),
+
+                inset 0 2px 3px rgba(255,170,60,0.02),
+
+                inset 1px 0 0 rgba(255,180,80,0.035),
+
+                inset 0 -1px 0 rgba(0,0,0,0.28),
+
+                inset 0 -2px 6px rgba(255,130,0,0.018),
+
+                inset -1px 0 0 rgba(0,0,0,0.1);
+
+        }
+
+        .btn-noise {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 0.9rem;
+
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+            opacity: 0.022;
+
+            mix-blend-mode: overlay;
+
+            pointer-events: none;
+
+            z-index: 1;
+
+        }
+
+        .slit-well {
+
+            box-shadow:
+
+                inset 0 2px 4px rgba(0,0,0,1),
+
+                inset 0 1px 1px rgba(0,0,0,0.8),
+
+                inset 0 -0.5px 0 rgba(255,255,255,0.035),
+
+                inset 1px 0 2px rgba(0,0,0,0.5),
+
+                inset -1px 0 2px rgba(0,0,0,0.5),
+
+                inset 0 0 5px rgba(0,0,0,0.25);
+
+        }
+
+        .light-on {
+
+            background: radial-gradient(ellipse at 50% 42%,
+
+                #ffcc44 0%, #ff9900 40%, #dd7700 75%, #aa5500 100%);
+
+            box-shadow:
+
+                0 0 2px #ffaa00,
+
+                0 0 5px rgba(255,170,0,0.9),
+
+                0 0 10px rgba(255,140,0,0.6),
+
+                0 0 18px rgba(255,120,0,0.3),
+
+                0 0 28px rgba(255,100,0,0.12),
+
+                0 0 40px rgba(255,80,0,0.04),
+
+                inset 0 -0.5px 1px rgba(0,0,0,0.18);
+
+        }
+
+        .light-off {
+
+            background: #0a0a0a;
+
+            box-shadow: inset 0 0.5px 1px rgba(0,0,0,0.5);
+
+        }
+
+        .surface-glow {
+
+            background:
+
+                radial-gradient(ellipse 65% 55% at 50% 52%,
+
+                    rgba(255,140,0,0.14) 0%,
+
+                    rgba(255,120,0,0.05) 40%,
+
+                    transparent 65%);
+
+        }
+
+        .projected-floor {
+
+            position: absolute;
+
+            bottom: -4px; left: 12%; right: 12%;
+
+            height: 10px;
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            z-index: 0;
+
+            transition: opacity 0.6s ease;
+
+            filter: blur(4px);
+
+            opacity: 0;
+
+        }
+
+        .projected-floor-on {
+
+            opacity: 1;
+
+            background: radial-gradient(ellipse at 50% 0%,
+
+                rgba(255,140,0,0.18) 0%, transparent 70%);
+
+        }
+
+        .desk-glow {
+
+            position: absolute;
+
+            bottom: -14px; left: 50%; transform: translateX(-50%);
+
+            width: 75px; height: 24px;
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            filter: blur(8px);
+
+            transition: opacity 0.6s ease;
+
+            opacity: 0;
+
+        }
+
+        .desk-glow-on {
+
+            opacity: 1;
+
+            background: radial-gradient(ellipse at 50% 0%,
+
+                rgba(255,140,0,0.07) 0%, transparent 70%);
+
+        }
+
+    </style>
+
+</head>
+
+<body class="textured-bg">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState } = React;
+
+        const SkeuomorphicButton = ({ label, initialState = false }) => {
+
+            const [isActive, setIsActive] = useState(initialState);
+
+            return (
+
+                <div className="flex flex-col items-center gap-5">
+
+                    <span className={`label-text transition-all duration-500 ${isActive ? 'label-active' : ''}`}>
+
+                        {label}
+
+                    </span>
+
+                    <div className="well-shadow" style={{ position: 'relative' }}>
+
+                        <div className={`well-glow ${isActive ? 'well-glow-on' : ''}`}></div>
+
+                        <button
+
+                            onClick={() => setIsActive(!isActive)}
+
+                            className="relative w-28 h-16 rounded-[0.9rem] button-surface flex items-center justify-center overflow-hidden border border-black/50"
+
+                        >
+
+                            <div className="btn-noise"></div>
+
+                            <div className="btn-glass"></div>
+
+                            <div className={`btn-rim ${isActive ? 'btn-rim-active' : ''}`}></div>
+
+                            {isActive && <div className="absolute inset-0 surface-glow pointer-events-none transition-opacity duration-500" style={{ zIndex: 2 }} />}
+
+                            <div className="w-10 h-2.5 bg-[#030303] rounded-full flex items-center justify-center slit-well" style={{ position: 'relative', zIndex: 6 }}>
+
+                                <div className={`h-[3px] rounded-full transition-all duration-700 ease-out w-7 ${
+
+                                    isActive ? 'light-on' : 'light-off'
+
+                                }`}></div>
+
+                            </div>
+
+                            <div className={`projected-floor ${isActive ? 'projected-floor-on' : ''}`}></div>
+
+                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/5 pointer-events-none" style={{ zIndex: 7 }}></div>
+
+                        </button>
+
+                        <div className={`desk-glow ${isActive ? 'desk-glow-on' : ''}`}></div>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+        const App = () => {
+
+            return (
+
+                <div className="flex flex-col sm:flex-row gap-16 p-12">
+
+                    <SkeuomorphicButton label="Auto" initialState={false} />
+
+                    <SkeuomorphicButton label="Punish" initialState={true} />
+
+                </div>
+
+            );
+
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

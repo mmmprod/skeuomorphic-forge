@@ -746,6 +746,11 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Glossy capsule button | 49 (Glossy pill button) | Shell casing + glass reflections + LED backlight on press |
 | Plasma/liquid progress | 50 (Plasma progress bar) | SVG `feDisplacementMap` turbulence + delta knob + bubbles |
 | Slit LED latching button | 51 (COMPRIS slit button) | 7-layer slit glow + 6 bloom layers + gap/desk projection |
+| Well button w/ stacked wall | 52 (Stacked height wall) | 8-step `0 Npx 0 0` shadow + amber slit + 12-layer well |
+| Analog needle meter | 53 (VU meter) | SVG arc + needle `transform-origin: bottom center` + hub |
+| Dual toggle w/ cross-light | 54 (Cross-light toggle) | Bevel ring + cross-projected light + color spill gradient |
+| 5-layer bezel button | 55 (FX neon ring button) | Backplate→outer→mid→gorge→button + neon ring 7-layer glow |
+| Mechanical counter display | 56 (Alternator counter) | 4-ring bezel + digit columns + scanlines + separator grooves |
 
 ---
 
@@ -2572,3 +2577,790 @@ Container (neumorphic chassis: #1a1d1a → #0d0f0d)
 ```
 
 **Full working demo**: `assets/codepen-compris-slit-button.html`
+
+---
+
+## 52. Stacked Height Wall Button (Well-Mounted)
+
+A **latching toggle button** recessed in a deep well with a distinctive **stacked height wall** — 8 sequential `0 Npx 0 0` box-shadows creating a visible 3D side/thickness. The wall compresses on `:active` with `translateY(5px)`.
+
+### 12-layer well recess
+
+```css
+.well-shadow {
+  box-shadow:
+    /* TOP attack (3 progressive depths) */
+    inset 0 4px 10px rgba(0,0,0,1),
+    inset 0 2px 4px rgba(0,0,0,0.9),
+    inset 0 1px 2px rgba(0,0,0,0.7),
+    /* BOTTOM rim catch */
+    inset 0 -1px 0 rgba(255,255,255,0.05),
+    inset 0 -1px 3px rgba(255,255,255,0.012),
+    /* LATERAL recess */
+    inset 2px 0 4px rgba(0,0,0,0.5),
+    inset -2px 0 4px rgba(0,0,0,0.5),
+    /* AMBIENT depth */
+    inset 0 0 10px rgba(0,0,0,0.35),
+    inset 0 0 18px rgba(0,0,0,0.1),
+    /* EXTERNAL panel continuity */
+    0 1px 0 rgba(255,255,255,0.04),
+    0 -1px 0 rgba(0,0,0,0.4),
+    0 2px 4px rgba(0,0,0,0.25);
+  background-color: #050505;
+  padding: 3px 3px 12px;  /* asymmetric bottom = wall drop zone */
+}
+```
+
+### 8-step stacked height wall
+
+The illusion of a **physical button side**: 8 sequential `0 Npx 0 0 #color` shadows, each offset 1px further, creating a visible 3D thickness below the button face.
+
+```css
+.button-surface {
+  box-shadow:
+    /* Top highlight + glass */
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 2px 2px rgba(255,255,255,0.06),
+    inset 0 3px 5px rgba(255,255,255,0.018),
+    inset 1px 0 0 rgba(255,255,255,0.07),
+    /* Bottom shadow (internal) */
+    inset 0 -1px 0 rgba(0,0,0,0.55),
+    inset 0 -3px 5px rgba(0,0,0,0.25),
+    inset 0 -5px 10px rgba(0,0,0,0.1),
+    inset -1px 0 0 rgba(0,0,0,0.22),
+    inset 0 0 10px rgba(0,0,0,0.06),
+    /* === STACKED HEIGHT WALL (8 steps) === */
+    0 1px 0 0 #2e2e32,
+    0 2px 0 0 #2a2a2e,
+    0 3px 0 0 #252528,
+    0 4px 0 0 #212124,
+    0 5px 0 0 #1c1c20,
+    0 6px 0 0 #18181c,
+    0 7px 0 0 #141418,
+    0 8px 0 0 #101014,
+    /* Wall terminus + cast shadow */
+    0 8px 0 1px rgba(0,0,0,0.9),
+    0 9px 0 1px rgba(0,0,0,0.6),
+    0 9px 0 2px rgba(0,0,0,0.3),
+    0 9px 0 0 rgba(255,255,255,0.025),
+    /* Distance shadows */
+    0 10px 4px rgba(0,0,0,0.65),
+    0 12px 8px rgba(0,0,0,0.5),
+    0 14px 16px rgba(0,0,0,0.3),
+    0 18px 32px rgba(0,0,0,0.12);
+}
+```
+
+### Active state (wall compression)
+
+```css
+.button-surface:active {
+  transform: translateY(5px);  /* travel distance */
+  box-shadow:
+    /* Pressed-in surface */
+    inset 0 3px 8px rgba(0,0,0,0.9),
+    inset 0 1px 2px rgba(0,0,0,0.7),
+    inset 0 -1px 0 rgba(255,255,255,0.035),
+    /* Compressed wall (3 steps instead of 8) */
+    0 1px 0 0 #1e1e22,
+    0 2px 0 0 #18181c,
+    0 3px 0 0 #131316,
+    0 3px 0 1px rgba(0,0,0,0.85),
+    0 4px 3px rgba(0,0,0,0.5),
+    0 5px 6px rgba(0,0,0,0.25);
+}
+```
+
+### Amber slit indicator (7-layer glow)
+
+```css
+.light-on {
+  background: radial-gradient(ellipse at 50% 42%,
+    #ffcc44 0%, #ff9900 40%, #dd7700 75%, #aa5500 100%);
+  box-shadow:
+    0 0 2px #ffaa00,                    /* 1. hot core */
+    0 0 5px rgba(255,170,0,0.9),        /* 2. bright inner */
+    0 0 10px rgba(255,140,0,0.6),       /* 3. mid ring */
+    0 0 18px rgba(255,120,0,0.3),       /* 4. spread */
+    0 0 28px rgba(255,100,0,0.12),      /* 5. bloom */
+    0 0 40px rgba(255,80,0,0.04),       /* 6. atmosphere */
+    inset 0 -0.5px 1px rgba(0,0,0,0.18); /* 7. slit depth */
+}
+```
+
+### Surface glow contamination
+
+Radial gradient overlay on button surface simulating LED light bleeding upward:
+
+```css
+.surface-glow {
+  background: radial-gradient(ellipse 65% 55% at 50% 52%,
+    rgba(255,140,0,0.14) 0%,
+    rgba(255,120,0,0.05) 40%,
+    transparent 65%);
+}
+```
+
+### Overlay layers (glass + rim light + noise)
+
+- **btn-glass**: Multi-radial reflection (upper-left specular + lower-right rim catch + diagonal gradient)
+- **btn-rim**: 5-layer inset shadow creating edge definition; rim-active adds amber tinted edges
+- **btn-noise**: SVG `feTurbulence` at `opacity: 0.022` with `mix-blend-mode: overlay`
+- **projected-floor**: Elliptical gradient below button (`bottom: -4px`) with `blur(4px)`
+- **desk-glow**: Wider ellipse below well (`bottom: -14px`) with `blur(8px)`
+
+**Full working demo**: `assets/codepen-well-button-stacked-wall.html`
+
+---
+
+## 53. VU Meter (Analog Needle)
+
+A **skeuomorphic analog VU meter** with an arc scale, animated needle, bottom hub, and neumorphic housing. The needle swings between -20dB and +5dB with realistic inertia from `requestAnimationFrame`.
+
+### Neumorphic outer shell
+
+```css
+.vu-meter-outer {
+  background: linear-gradient(135deg, #242933, #161b22);
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow:
+    30px 30px 60px #05070a,         /* cast shadow */
+    -10px -10px 40px #2d333d,       /* light catch */
+    inset 1px 1px 1px rgba(255,255,255,0.05);
+  border: 1px solid #000;
+}
+```
+
+### Black bezel + screen
+
+```css
+.vu-meter-bezel {
+  background: #000;
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow:
+    inset 3px 3px 10px rgba(0,0,0,0.9),
+    inset -1px -1px 3px rgba(255,255,255,0.1);
+}
+.vu-meter-screen {
+  width: 500px; height: 300px;
+  background: radial-gradient(circle at 50% 110%,
+    rgba(100,160,255,0.45) 0%, #000 75%);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+```
+
+### SVG arc scale (gray + red zones)
+
+```html
+<!-- Gray arc (safe zone) -->
+<path d="M 85 210 A 235 235 0 0 1 315 130"
+  fill="none" stroke="#374151" stroke-width="1.5" />
+<!-- Red arc (danger zone) -->
+<path d="M 315 130 A 235 235 0 0 1 435 210"
+  fill="none" stroke="#b91c1c" stroke-width="3" />
+```
+
+Scale marks positioned along the arc using angle-to-cartesian conversion:
+```js
+const x1 = 250 + 220 * Math.sin(rad);
+const y1 = 350 - 220 * Math.cos(rad);
+```
+
+### Needle mechanics
+
+```css
+.needle {
+  position: absolute;
+  bottom: -50px; left: 50%;
+  width: 2px; height: 280px;
+  background: #fff;
+  transform-origin: bottom center;
+  box-shadow: 0 0 15px rgba(255,255,255,1),
+              0 0 5px rgba(255,255,255,0.8);
+  transition: transform 0.05s linear;
+}
+```
+
+Angle mapping: `minAngle=-60°`, `maxAngle=+50°`, `rotation = min + (value × range)`.
+
+### Animation (realistic jitter)
+
+```js
+const animate = (time) => {
+  const slowWave = Math.sin(time / 600) * 0.15;
+  const mediumWave = Math.sin(time / 200) * 0.1;
+  const fastJitter = (Math.random() - 0.5) * 0.04;
+  const target = 0.4 + slowWave + mediumWave + fastJitter;
+  setValue(prev => prev + (target - prev) * 0.2);  // exponential smoothing
+  requestAnimationFrame(animate);
+};
+```
+
+### Bottom hub (pivot + label)
+
+```css
+.hub {
+  position: absolute;
+  bottom: -55px; left: 50%;
+  transform: translateX(-50%);
+  width: 150px; height: 100px;
+  background: linear-gradient(to bottom, #2d333d, #1a1e26);
+  border-radius: 75px 75px 0 0;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.9),
+              inset 0 1px 1px rgba(255,255,255,0.2);
+  border: 1.5px solid #000;
+}
+```
+
+### Blue light source
+
+```css
+.light-source {
+  position: absolute;
+  bottom: -30px; left: 50%;
+  transform: translateX(-50%);
+  width: 260px; height: 160px;
+  background: radial-gradient(circle at center bottom,
+    rgba(147,197,253,0.6) 0%, transparent 65%);
+  filter: blur(35px);
+}
+```
+
+**Full working demo**: `assets/codepen-vu-meter.html`
+
+---
+
+## 54. Cross-Light Toggle (Dual Button with Color Spill)
+
+A **dual-button toggle** (SMOOTH / HEAT) inside a chrome bevel ring and recessed track. The active button's color **spills onto the adjacent inactive button** via cross-projected light and color-spill gradient overlays.
+
+### Layer hierarchy
+
+```
+Outer shell (noise texture + 14-layer shadow)
+├── Chrome bevel ring (7-stop gradient + 10-layer shadow)
+│   └── Recessed track (black, 9-layer inset shadow)
+│       ├── Track glow (color-tinted inset shadows)
+│       ├── Cross-light element (blurred radial gradient)
+│       ├── Button LEFT (SMOOTH — blue when active)
+│       │   ├── btn-noise + mesh-pattern + btn-glass + btn-rim
+│       │   └── color-spill overlay (receives red when inactive)
+│       └── Button RIGHT (HEAT — red when active)
+│           ├── btn-noise + mesh-pattern + btn-glass + btn-rim
+│           └── color-spill overlay (receives blue when inactive)
+├── Ambient glow (blurred bar below shell)
+└── Desk light (radial gradient below container)
+```
+
+### Chrome bevel ring
+
+```css
+.bevel-ring {
+  background: linear-gradient(154deg,
+    #3a3a42 0%, #28282e 18%, #44444c 36%, #222228 52%,
+    #3c3c44 68%, #2a2a30 84%, #343438 100%);
+  border-radius: 52px;
+  padding: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),    /* top chrome catch */
+    inset 0 2px 2px rgba(255,255,255,0.1),
+    inset 0 3px 4px rgba(255,255,255,0.03),
+    inset 1px 0 0 rgba(255,255,255,0.14),     /* left rim */
+    inset 0 -1px 0 rgba(0,0,0,0.7),           /* bottom dark */
+    inset 0 -2px 3px rgba(0,0,0,0.4),
+    inset 0 -3px 6px rgba(0,0,0,0.15),
+    inset -1px 0 0 rgba(0,0,0,0.35),          /* right dark */
+    0 2px 4px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.35),
+    0 0 1px rgba(255,255,255,0.2);             /* ring edge */
+}
+/* Specular highlights (pseudo-element) */
+.bevel-ring::before {
+  background:
+    radial-gradient(ellipse 35% 18% at 20% 8%,
+      rgba(255,255,255,0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 22% 10% at 80% 92%,
+      rgba(255,255,255,0.04) 0%, transparent 45%);
+}
+```
+
+### Cross-projected light
+
+Active button's color projected as a blurred radial gradient positioned behind the opposite button:
+
+```css
+.cross-light {
+  position: absolute;
+  top: 8%; bottom: 8%;
+  width: 80px;
+  pointer-events: none;
+  filter: blur(12px);
+  transition: opacity 0.3s ease;
+}
+/* Blue projects rightward when SMOOTH active */
+.cross-light-blue {
+  right: 46%;
+  background: radial-gradient(ellipse 100% 80% at 0% 50%,
+    rgba(58,117,209,0.28) 0%,
+    rgba(58,117,209,0.08) 40%,
+    transparent 70%);
+}
+/* Red projects leftward when HEAT active */
+.cross-light-red {
+  left: 46%;
+  background: radial-gradient(ellipse 100% 80% at 100% 50%,
+    rgba(209,58,58,0.28) 0%,
+    rgba(209,58,58,0.08) 40%,
+    transparent 70%);
+}
+```
+
+### Color spill on inactive button
+
+A gradient overlay on the inactive button showing the neighbor's color bleeding in:
+
+```css
+/* Blue spilling from left onto inactive HEAT button */
+.spill-blue-left {
+  background: linear-gradient(90deg,
+    rgba(58,117,209,0.45) 0%, rgba(70,140,230,0.3) 6%,
+    rgba(58,117,209,0.18) 15%, rgba(58,117,209,0.08) 28%,
+    rgba(58,117,209,0.02) 42%, transparent 55%);
+}
+/* Red spilling from right onto inactive SMOOTH button */
+.spill-red-right {
+  background: linear-gradient(270deg,
+    rgba(209,58,58,0.45) 0%, rgba(230,80,70,0.3) 6%,
+    rgba(209,58,58,0.18) 15%, rgba(209,58,58,0.08) 28%,
+    rgba(209,58,58,0.02) 42%, transparent 55%);
+}
+```
+
+### Inset shadow cross-light on inactive button
+
+The inactive button receives additional inset shadows from the active neighbor:
+
+```css
+.btn-inactive.receiving-blue {
+  box-shadow:
+    /* ...standard inactive shadows... */
+    inset 6px 0 20px rgba(58,117,209,0.14),   /* color bleed in */
+    inset 3px 0 10px rgba(58,117,209,0.1);
+}
+.btn-inactive.receiving-red {
+  box-shadow:
+    /* ...standard inactive shadows... */
+    inset -6px 0 20px rgba(209,58,58,0.14),
+    inset -3px 0 10px rgba(209,58,58,0.1);
+}
+```
+
+### Mesh dot pattern
+
+```css
+.mesh-pattern {
+  opacity: 0.35;
+  background-image: radial-gradient(circle,
+    rgba(255,255,255,0.15) 0.5px, transparent 0.5px);
+  background-size: 4px 4px;
+  mix-blend-mode: overlay;
+}
+```
+
+### Active button states (blue / red)
+
+Both follow the same pattern: radial specular + tinted body gradient + 4 external color glow layers.
+
+```css
+.btn-active-smooth {
+  background:
+    radial-gradient(ellipse 45% 30% at 35% 18%,
+      rgba(255,255,255,0.22) 0%, transparent 48%),
+    radial-gradient(circle at 50% 50%,
+      #76b4ff 0%, #3a75d1 50%, #152d56 100%);
+  box-shadow:
+    /* inset highlights + shadows... */
+    0 0 12px rgba(58,117,209,0.28),
+    0 4px 20px rgba(58,117,209,0.22),
+    0 8px 36px rgba(58,117,209,0.14),
+    0 14px 56px rgba(58,117,209,0.06);
+}
+```
+
+**Full working demo**: `assets/codepen-toggle-cross-light.html`
+
+---
+
+## 55. FX Button with 5-Layer Bezel + Neon Ring
+
+A **heavy industrial button** enclosed in a 5-layer concentric bezel assembly with a **neon ring** border that glows on interaction. Features Phillips screws, silkscreen label, and projected gorge light.
+
+### 5-layer bezel stack
+
+```
+Backplate (brushed metal + 4 corner screws)
+├── Outer bezel (thick chrome, 7-stop gradient, 9px padding)
+│   ├── Mid bezel (secondary chrome, 4-stop gradient, 6px)
+│   │   ├── Inner gorge (deep black recess, 7px)
+│   │   │   ├── Button surface (148deg gradient + layers)
+│   │   │   │   ├── btn-noise (feTurbulence overlay)
+│   │   │   │   ├── neon-ring (inset 7px, 7-layer glow)
+│   │   │   │   ├── btn-glass (3-radial specular)
+│   │   │   │   ├── btn-rim (4-edge definition)
+│   │   │   │   └── "FX" text (neon color + 8-layer text-shadow)
+│   │   │   └── Projected light (gorge floor glow)
+│   │   └── ← mid bezel
+│   └── ← outer bezel (::before = specular highlights)
+├── Silk label ("Audio Control")
+└── ← backplate
+```
+
+### Backplate (brushed metal)
+
+```css
+.backplate {
+  background:
+    url("data:image/svg+xml,...feTurbulence..."),  /* noise texture */
+    linear-gradient(140deg, #2a2a30 0%, #1e1e24 30%,
+      #161618 55%, #1c1c22 80%, #222228 100%);
+  background-blend-mode: overlay, normal;
+  border-radius: 36px;
+  padding: 24px 28px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    /* ...13 more layers... */
+    0 30px 60px rgba(79,209,217,0.04);  /* color bleed from neon */
+}
+```
+
+### Phillips screws
+
+```css
+.screw {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 33% 27%,
+    #777 0%, #555 18%, #383838 50%, #1c1c1c 80%, #111 100%);
+  /* 10-layer shadow (inset depth + external cast) */
+}
+/* Cross slot via ::before + ::after */
+.screw::before {
+  content: '';
+  position: absolute; top: 50%; left: 15%; right: 15%; height: 1.4px;
+  background: linear-gradient(90deg,
+    rgba(10,10,10,0.5), #080808, rgba(10,10,10,0.5));
+  transform: translateY(-50%) rotate(var(--a, 30deg));
+}
+.screw::after {
+  content: '';
+  position: absolute; top: 15%; bottom: 15%; left: 50%; width: 1.4px;
+  /* same gradient, perpendicular */
+  transform: translateX(-50%) rotate(var(--a, 30deg));
+}
+/* Random angles per screw */
+.s-tl { top: 12px; left: 12px; --a: 20deg; }
+.s-tr { top: 12px; right: 12px; --a: -12deg; }
+.s-bl { bottom: 12px; left: 12px; --a: 50deg; }
+.s-br { bottom: 12px; right: 12px; --a: 8deg; }
+```
+
+### Outer bezel (heavy chrome)
+
+```css
+.outer-bezel {
+  background: linear-gradient(150deg,
+    #606068 0%, #3c3c44 15%, #6e6e76 33%,
+    #2e2e36 50%, #5c5c66 67%, #343438 82%, #4c4c54 100%);
+  border-radius: 28px;
+  padding: 9px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.38),  /* top chrome */
+    inset 0 2px 2px rgba(255,255,255,0.14),
+    inset 0 3px 5px rgba(255,255,255,0.05),
+    inset 0 -1px 0 rgba(0,0,0,0.75),       /* bottom dark */
+    inset 0 -2px 3px rgba(0,0,0,0.45),
+    inset 0 -3px 6px rgba(0,0,0,0.18),
+    inset 1px 0 0 rgba(255,255,255,0.18),
+    inset -1px 0 0 rgba(255,255,255,0.12),
+    0 2px 4px rgba(0,0,0,0.55),
+    0 4px 8px rgba(0,0,0,0.45),
+    0 6px 14px rgba(0,0,0,0.3),
+    0 0 1px rgba(255,255,255,0.28),
+    0 -1px 0 rgba(0,0,0,0.8);
+}
+/* Specular highlights (::before) */
+.outer-bezel::before {
+  background:
+    radial-gradient(ellipse 48% 22% at 26% 9%,
+      rgba(255,255,255,0.3) 0%, transparent 55%),
+    radial-gradient(ellipse 32% 14% at 74% 91%,
+      rgba(255,255,255,0.06) 0%, transparent 50%);
+}
+```
+
+### Inner gorge (deep recess with color bleed)
+
+```css
+.inner-gorge {
+  background: linear-gradient(160deg, #06060a 0%, #0c0c10 30%, #050508 100%);
+  border-radius: 17px;
+  padding: 7px;
+  box-shadow:
+    inset 0 6px 16px rgba(0,0,0,0.98),
+    inset 0 3px 8px rgba(0,0,0,0.95),
+    inset 0 1px 3px rgba(0,0,0,0.9),
+    inset 0 -1px 0 rgba(255,255,255,0.05),
+    inset 4px 0 8px rgba(0,0,0,0.7),
+    inset -4px 0 8px rgba(0,0,0,0.7),
+    inset 0 0 20px rgba(0,0,0,0.5),
+    inset 0 0 12px rgba(79,209,217,0.03),  /* neon color bleed */
+    0 1px 0 rgba(255,255,255,0.06);
+}
+```
+
+### Neon ring
+
+```css
+.neon-ring {
+  position: absolute;
+  inset: 7px;
+  border-radius: 7px;
+  border: 1.5px solid rgba(79,209,217,0.5);
+  box-shadow:
+    0 0 4px rgba(79,209,217,0.5),       /* 1. outer core */
+    0 0 8px rgba(79,209,217,0.3),       /* 2. outer mid */
+    0 0 16px rgba(79,209,217,0.15),     /* 3. outer spread */
+    0 0 28px rgba(79,209,217,0.06),     /* 4. outer bloom */
+    inset 0 0 4px rgba(79,209,217,0.35),  /* 5. inner core */
+    inset 0 0 10px rgba(79,209,217,0.15), /* 6. inner mid */
+    inset 0 0 20px rgba(79,209,217,0.06); /* 7. inner bloom */
+}
+/* Intensified on :active */
+.btn:active .neon-ring {
+  border-color: rgba(79,209,217,0.7);
+  box-shadow:
+    0 0 6px rgba(79,209,217,0.7),
+    0 0 12px rgba(79,209,217,0.45),
+    0 0 22px rgba(79,209,217,0.25),
+    0 0 36px rgba(79,209,217,0.1),
+    inset 0 0 6px rgba(79,209,217,0.5),
+    inset 0 0 14px rgba(79,209,217,0.25),
+    inset 0 0 28px rgba(79,209,217,0.1);
+}
+```
+
+### Neon text (FX label)
+
+```css
+.fx-text {
+  font-weight: 900;
+  font-size: 42px;
+  letter-spacing: 3px;
+  color: #4fd1d9;
+  text-shadow:
+    0 0 4px rgba(79,209,217,0.95),     /* core glow */
+    0 0 10px rgba(79,209,217,0.7),
+    0 0 22px rgba(79,209,217,0.4),
+    0 0 40px rgba(79,209,217,0.15),
+    0 0 60px rgba(79,209,217,0.06),
+    0 -1px 0 rgba(0,0,0,0.4),          /* engrave top */
+    0 2px 3px rgba(0,0,0,0.6),         /* engrave bottom */
+    0 4px 6px rgba(0,0,0,0.3);
+}
+```
+
+### Silkscreen label
+
+```css
+.silk-label {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.11);
+  text-shadow:
+    0 -1px 0 rgba(0,0,0,0.5),     /* top engrave */
+    0 1px 0 rgba(255,255,255,0.03); /* bottom catch */
+}
+```
+
+**Full working demo**: `assets/codepen-fx-button-neon-ring.html`
+
+---
+
+## 56. Mechanical Counter Display (ALTERNATOR 175A)
+
+A **heavy-chassis instrument** displaying a fixed value ("175A") in mechanical digit columns with scanlines, separator grooves, glass overlay, and warm backlight bleed. Features 6 Phillips screws, a label bar with red neon lines, a 4-ring bezel, and an info bar with status LEDs.
+
+### Heavy chassis (14-layer shadow)
+
+```css
+.chassis {
+  background:
+    url("data:image/svg+xml,...feTurbulence..."),
+    linear-gradient(142deg, #2e2e34 0%, #222228 25%,
+      #1a1a20 50%, #20202a 75%, #26262c 100%);
+  background-blend-mode: overlay, normal;
+  border-radius: 28px;
+  padding: 48px 52px 44px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    inset 0 2px 3px rgba(255,255,255,0.05),
+    inset 1px 0 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.7),
+    inset -1px 0 0 rgba(0,0,0,0.35),
+    inset 0 0 30px rgba(0,0,0,0.1),
+    0 2px 4px rgba(0,0,0,0.5),
+    0 4px 8px rgba(0,0,0,0.45),
+    0 8px 16px rgba(0,0,0,0.4),
+    0 16px 32px rgba(0,0,0,0.35),
+    0 24px 48px rgba(0,0,0,0.25),
+    0 32px 64px rgba(0,0,0,0.2),
+    0 48px 96px rgba(0,0,0,0.15),
+    0 0 120px rgba(0,0,0,0.5);
+}
+```
+
+### 6-screw layout (4 corners + 2 mid-sides)
+
+```css
+.s-tl { top: 14px; left: 14px; --a: 22deg; }
+.s-tr { top: 14px; right: 14px; --a: -15deg; }
+.s-ml { top: 50%; left: 14px; transform: translateY(-50%); --a: 42deg; }
+.s-mr { top: 50%; right: 14px; transform: translateY(-50%); --a: -8deg; }
+.s-bl { bottom: 14px; left: 14px; --a: 55deg; }
+.s-br { bottom: 14px; right: 14px; --a: 10deg; }
+```
+
+### Label bar with red neon lines
+
+```css
+.label-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.label-text {
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 8px;
+  color: rgba(255,255,255,0.22);
+  text-shadow:
+    0 -1px 0 rgba(0,0,0,0.6),
+    0 1px 0 rgba(255,255,255,0.06),
+    0 0 12px rgba(255,60,40,0.15);  /* red neon bleed */
+}
+.label-line-left {
+  flex: 1; height: 3px;
+  background: linear-gradient(90deg, transparent, #ff2a1a 70%, #ff4030);
+  box-shadow: 0 0 8px rgba(255,40,20,0.4), 0 0 20px rgba(255,40,20,0.15);
+}
+```
+
+### 4-ring bezel assembly
+
+```
+Outer bezel (8-stop chrome gradient, 10px padding)
+├── Mid bezel (4-stop, 6px)
+│   ├── Inner bezel (deep black gorge, 8px, 6-layer inset)
+│   │   └── Display well (9-layer shadow + warm backlight bleed)
+│   │       ├── Noise overlay + Glass overlay
+│   │       ├── Digit columns ("1", "7", "5", "A")
+│   │       └── Separator grooves between columns
+│   └── ← mid
+└── ← outer (::before = specular highlights)
+```
+
+### Digit column with scanlines
+
+```css
+.digit-col {
+  flex: 1;
+  background: linear-gradient(180deg,
+    #0a0a0c 0%, #111114 8%, #161618 20%,
+    #1a1a1e 50%,
+    #161618 80%, #111114 92%, #0a0a0c 100%);
+  min-height: 220px;
+  overflow: hidden;
+}
+/* Scanline overlay (::before) */
+.digit-col::before {
+  background: repeating-linear-gradient(0deg,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.35) 3px, rgba(0,0,0,0.35) 4px);
+}
+/* Vignette + warm backlight (::after) */
+.digit-col::after {
+  background:
+    linear-gradient(180deg,
+      rgba(0,0,0,0.7) 0%, transparent 30%,
+      transparent 70%, rgba(0,0,0,0.7) 100%),
+    radial-gradient(ellipse 80% 50% at 50% 50%,
+      rgba(255,220,140,0.04) 0%, transparent 70%);
+}
+```
+
+### Separator grooves
+
+```css
+.sep {
+  width: 3px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #000 0%, #0a0a0a 50%, #000 100%);
+  box-shadow:
+    -1px 0 3px rgba(0,0,0,0.8),
+    1px 0 3px rgba(0,0,0,0.8),
+    inset 0 0 4px rgba(0,0,0,0.9);
+}
+```
+
+### Glass + noise overlays
+
+```css
+.glass {
+  background:
+    radial-gradient(ellipse 50% 28% at 20% 10%,
+      rgba(255,255,255,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 90% 35% at 40% 18%,
+      rgba(200,210,255,0.04) 0%, transparent 55%),
+    linear-gradient(150deg,
+      rgba(255,255,255,0.07) 0%, transparent 42%,
+      rgba(0,0,0,0.1) 100%);
+}
+.noise {
+  background: url("data:image/svg+xml,...feTurbulence baseFrequency='1.4'...");
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+}
+```
+
+### Red indicator line + status LEDs
+
+```css
+.red-line {
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%, #ff2a1a 15%, #ff4030 50%, #ff2a1a 85%, transparent 100%);
+  box-shadow:
+    0 0 6px rgba(255,40,20,0.5),
+    0 0 14px rgba(255,40,20,0.25),
+    0 0 28px rgba(255,20,10,0.1);
+}
+.led-green {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%,
+    #80ffa0 0%, #30cc55 55%, #1a8833 100%);
+  box-shadow: 0 0 3px #50ff70,
+    0 0 8px rgba(80,255,120,0.6),
+    0 0 16px rgba(40,200,70,0.25);
+  animation: led-p 2.4s ease-in-out infinite;
+}
+@keyframes led-p { 0%,100% { opacity: 0.75; } 50% { opacity: 1; } }
+```
+
+**Full working demo**: `assets/codepen-alternator-counter.html`
