@@ -763,6 +763,7 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Deep 3D LCD display | 66 (LCD Deep 3D) | Cyan radial backlight + inverted block + 3px pixel grid z-above text + glass overlay |
 | Glass power button | 67 (Power button forge) | Conic bezel + glass btn + LED ring + SVG power icon neon/engrave + color-dodge glow |
 | Hardware gauge dashboard | 68 (Gauge dashboard) | Asymmetric ballistic needle (attack/release) + VFD display + glass dome + red zone arc |
+| HPF crossover screen | 69 (HPF tweeter) | Butterworth 24dB/oct curve + animated FFT + cutoff dot pulse + DSP info panel + zone labels |
 
 ---
 
@@ -5157,3 +5158,235 @@ if (i >= 100) color = "#f43f5e"; // Red (danger)
 ```
 
 **Full working demo**: `assets/codepen-hardware-dashboard.html`
+
+---
+
+## 69. HPF Crossover Screen — Tweeter Channel
+
+A **DSP crossover analyzer** displaying a Butterworth 4th-order (24 dB/oct) high-pass filter curve with animated FFT spectrum, pulsing cutoff indicator, and a DSP-style info panel. Companion to pattern 46 (LPF crossover) — this shows the HPF variant for tweeter channel protection.
+
+### Chassis + screen bezel
+
+```css
+.chassis {
+  background: linear-gradient(180deg, #2a2c31 0%, #15171a 100%);
+  padding: 2px;
+  border-radius: 16px;
+  box-shadow:
+    0 60px 100px -20px rgba(0,0,0,1),
+    0 20px 40px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(255,255,255,0.05);
+}
+.chassis-inner {
+  background: linear-gradient(135deg, #121316 0%, #08090a 100%);
+  padding: 36px;
+  border-radius: 15px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(0,0,0,1);
+  box-shadow: inset 0 6px 15px rgba(0,0,0,0.8);
+}
+.screen-bezel {
+  width: 750px; height: 400px;
+  background-color: #020304;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 35px 60px -10px rgba(0,0,0,1),
+    inset 0 0 30px 10px rgba(0,0,0,1),
+    0 1px 0 rgba(255,255,255,0.12);
+  border-top: 3px solid #000;
+  border-bottom: 1px solid #22252a;
+  overflow: hidden;
+}
+```
+
+### Log-frequency axis (20 Hz – 20 kHz)
+
+```js
+const LOG_MIN = Math.log10(20);
+const LOG_MAX = Math.log10(20000);
+const LOG_RANGE = LOG_MAX - LOG_MIN;
+
+const freqToX = (hz) =>
+  ((Math.log10(hz) - LOG_MIN) / LOG_RANGE) * PLOT_W + MARGIN_L;
+const xToFreq = (x) =>
+  Math.pow(10, ((x - MARGIN_L) / PLOT_W) * LOG_RANGE + LOG_MIN);
+```
+
+### Butterworth HPF curve (Linkwitz-Riley 4th order)
+
+```js
+// LR4: squared Butterworth 2nd order — 24 dB/oct rolloff
+const buildHPF = () => {
+  const pts = [];
+  for (let i = 0; i <= 250; i++) {
+    const x = MARGIN_L + (i / 250) * PLOT_W;
+    const freq = xToFreq(x);
+    const ratio = freq / cutoffHz;
+    const r4 = Math.pow(ratio, 4);
+    const magLin = r4 / (1 + r4);           // HPF transfer function
+    const magDb = 10 * Math.log10(Math.max(magLin, 1e-10));
+    const y = Math.min(dbToY(magDb), 455);
+    pts.push(`${x.toFixed(1)} ${y.toFixed(1)}`);
+  }
+  return pts;
+};
+```
+
+### dB scale mapping
+
+```js
+const zeroDbY = 150;
+const dbToY = (db) => zeroDbY - db * (50 / 6);  // 6 dB per 50px
+const minus3Y = dbToY(-3);  // -3 dB point at cutoff
+```
+
+### Animated FFT spectrum (3 zones)
+
+```js
+fftRef.current.forEach(pt => {
+  if (pt.x > cutoffX + 60) {
+    // Passband (above cutoff): active signal
+    pt.target = 100 + Math.random() * 220;
+  } else if (pt.x > cutoffX - 40) {
+    // Transition band: interpolated attenuation
+    const r = (cutoffX + 60 - pt.x) / 100;
+    pt.target = active * (1 - r) + attenuated * r;
+  } else {
+    // Stopband (below cutoff): heavily attenuated
+    pt.target = 405 + Math.random() * 25;
+  }
+});
+// Ease toward target
+pt.y += (pt.target - pt.y) * 0.06;
+```
+
+### Cutoff indicator (pulsing dot + vertical line)
+
+```css
+@keyframes cutoff-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+```
+
+```jsx
+{/* Cutoff vertical dashed line */}
+<line x1={cx} y1="45" x2={cx} y2="450"
+      stroke="#ff4400" strokeWidth="2" strokeDasharray="6 4"
+      opacity="0.5" filter="url(#softGlow)" />
+
+{/* Pulsing dot at -3dB intersection */}
+<circle cx={cx} cy={minus3Y} r="7" fill="#ff4400"
+        filter="url(#cutoffGlow)"
+        style={{ animation: "cutoff-pulse 2s ease-in-out infinite" }} />
+
+{/* "fc" label above */}
+<text x={cx} y="42" fill="#ff4400" fontSize="12" fontWeight="700"
+      style={{ filter: 'drop-shadow(0 0 6px rgba(255,68,0,0.5))' }}>
+  fc
+</text>
+```
+
+### SVG filter stack (3 glow variants)
+
+```jsx
+{/* Neon glow for main curve */}
+<filter id="neonGlow">
+  <feGaussianBlur stdDeviation="5" result="blur" />
+  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+</filter>
+
+{/* Intense glow for cutoff dot */}
+<filter id="cutoffGlow">
+  <feGaussianBlur stdDeviation="8" result="b1" />
+  <feGaussianBlur stdDeviation="22" result="b2" />
+  <feMerge><feMergeNode in="b2" /><feMergeNode in="b1" /><feMergeNode in="SourceGraphic" /></feMerge>
+</filter>
+
+{/* Subtle glow for labels */}
+<filter id="softGlow">
+  <feGaussianBlur stdDeviation="3" result="blur" />
+  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+</filter>
+```
+
+### HPF passband fill (gradient under curve)
+
+```jsx
+<linearGradient id="passFill" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.3" />
+  <stop offset="50%" stopColor="#0369a1" stopOpacity="0.06" />
+  <stop offset="100%" stopColor="#020617" stopOpacity="0" />
+</linearGradient>
+
+<path d={hpfFill} fill="url(#passFill)" style={{ mixBlendMode: 'screen' }} />
+```
+
+### DSP info panel (rounded rect overlay)
+
+```jsx
+<rect x="62" y="48" width="135" height="105" rx="4"
+      fill="rgba(0,0,0,0.5)" stroke="rgba(56,189,248,0.15)" strokeWidth="1" />
+{/* Content: HPF title, type, slope, order */}
+<text fill="#38bdf8" fontSize="22" fontWeight="700">HPF</text>
+<text fill="#8898b8" fontSize="10">Butterworth</text>
+<text fill="#8898b8" fontSize="10">24 dB/oct</text>
+<text fill="#8898b8" fontSize="10">4th</text>
+```
+
+### Slope annotation (dashed line along rolloff)
+
+```jsx
+<line x1={cx - 30} y1={minus3Y + 25} x2={cx - 140} y2={minus3Y + 140}
+      stroke="#ff6644" strokeWidth="1.5" strokeDasharray="4 2" opacity="0.4" />
+<text fill="#ff6644" fontSize="11" fontWeight="600">24 dB/oct</text>
+```
+
+### Zone labels (REJECTED / PASSBAND)
+
+```jsx
+<text x={(MARGIN_L + cx) / 2} y="430"
+      fill="#4a2020" fontSize="12" fontWeight="700" opacity="0.5">
+  REJECTED
+</text>
+<text x={cx + (MARGIN_R - cx) / 2} y="430"
+      fill="#1a4a6a" fontSize="12" fontWeight="700" opacity="0.5">
+  PASSBAND
+</text>
+```
+
+### Stopband tint (subtle red zone)
+
+```jsx
+<rect x={MARGIN_L} y="40"
+      width={Math.max(cx - MARGIN_L, 0)} height="415"
+      fill="rgba(255,20,0,0.03)" />
+```
+
+### Screen layers (ambient + scanlines + glass)
+
+```css
+.screen-ambient-glow {
+  background: radial-gradient(circle at 50% 50%, #061020 0%, #010203 100%);
+  z-index: 0;
+}
+.scanlines {
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0) 0%, rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+  background-size: 100% 4px;
+  z-index: 40;
+}
+.glass-reflection {
+  background:
+    linear-gradient(110deg,
+      rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.06) 30%,
+      rgba(255,255,255,0) 31%),
+    radial-gradient(150% 100% at 50% -25%,
+      rgba(255,255,255,0.05) 0%, transparent 45%);
+  mix-blend-mode: screen;
+  z-index: 50;
+}
+```
+
+**Full working demo**: `assets/codepen-hpf-crossover-tweeter.html`
