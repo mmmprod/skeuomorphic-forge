@@ -1,0 +1,557 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Plasma Progress Bar</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            background-color: black;
+
+        }
+
+        .animate-pulse-electric {
+
+            animation: pulseElectric 3s infinite ease-in-out alternate;
+
+        }
+
+        .delay-150 {
+
+            animation-delay: 1.5s;
+
+        }
+
+        .animate-bubble-1 {
+
+            animation: floatBubble 4s linear infinite;
+
+        }
+
+        .animate-bubble-2 {
+
+            animation: floatBubble 3s linear infinite 1s;
+
+        }
+
+        .animate-bubble-3 {
+
+            animation: floatBubble 5s linear infinite 2s;
+
+        }
+
+        @keyframes pulseElectric {
+
+            0% { opacity: 0.15; transform: scaleX(1); }
+
+            100% { opacity: 0.35; transform: scaleX(1.05); }
+
+        }
+
+        @keyframes floatBubble {
+
+            0% { transform: translateX(0) scale(0.8); opacity: 0; }
+
+            20% { opacity: 0.6; }
+
+            80% { opacity: 0.6; }
+
+            100% { transform: translateX(100px) scale(1.2); opacity: 0; }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+const { useEffect, useState, useRef } = React;
+
+
+
+const CONFIG = {
+
+  minVal: 0,
+
+  maxVal: 100,
+
+  gradientColors: ["#ff0044", "#ff8800", "#ffdd00", "#00ff73"],
+
+  gradientStops: [0, 0.33, 0.66, 1]
+
+};
+
+
+
+const lerp = (a, b, t) => a + (b - a) * t;
+
+
+
+function splitColor(color) {
+
+  const hex = color.replace('#', '');
+
+  const r = parseInt(hex.substring(0, 2), 16);
+
+  const g = parseInt(hex.substring(2, 4), 16);
+
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return [r, g, b];
+
+}
+
+
+
+function createColorMap() {
+
+  const stops = CONFIG.gradientStops;
+
+  const colors = CONFIG.gradientColors.map(c => splitColor(c));
+
+  return (t) => {
+
+    t = Math.max(0, Math.min(1, t));
+
+    for (let i = 0; i < stops.length - 1; i++) {
+
+      const s0 = stops[i], s1 = stops[i + 1];
+
+      if (t >= s0 && t <= s1) {
+
+        const n = (t - s0) / (s1 - s0);
+
+        const c0 = colors[i], c1 = colors[i + 1];
+
+        return `rgb(${Math.round(lerp(c0[0], c1[0], n))},${Math.round(lerp(c0[1], c1[1], n))},${Math.round(lerp(c0[2], c1[2], n))})`;
+
+      }
+
+    }
+
+    return `rgb(${colors[colors.length-1].join(',')})`;
+
+  };
+
+}
+
+
+
+const colorMap = createColorMap();
+
+
+
+function ProgressBar() {
+
+  const [progress, setProgress] = useState(CONFIG.minVal);
+
+  const trackRef = useRef(null);
+
+
+
+  useEffect(() => {
+
+    let time = -Math.PI / 2;
+
+    const interval = setInterval(() => {
+
+      time += 0.015;
+
+      const range = CONFIG.maxVal - CONFIG.minVal;
+
+      const mid = CONFIG.minVal + range / 2;
+
+      const val = mid + Math.sin(time) * (range / 2);
+
+      setProgress(val);
+
+    }, 16);
+
+    return () => clearInterval(interval);
+
+  }, []);
+
+
+
+  const norm = (progress - CONFIG.minVal) / (CONFIG.maxVal - CONFIG.minVal);
+
+  const color = colorMap(norm);
+
+  const pct = norm * 100;
+
+
+
+  const scaleMarks = [];
+
+  const min = CONFIG.minVal, max = CONFIG.maxVal, range = max - min;
+
+  for (let t = min; t <= max; t += 2) {
+
+    const xPct = ((t - min) / range) * 100;
+
+    const isMajor = t % 10 === 0;
+
+    const isMedium = t % 5 === 0;
+
+    const height = isMajor ? 18 : isMedium ? 12 : 6;
+
+
+
+    const dist = Math.abs(progress - t);
+
+    const maxDist = 8;
+
+    const p = dist < maxDist ? Math.pow(1 - dist / maxDist, 2) : 0;
+
+    const isPassed = t <= progress;
+
+
+
+    const tickNorm = (t - min) / range;
+
+    const tickColor = colorMap(tickNorm);
+
+
+
+    scaleMarks.push(
+
+      <div
+
+        key={t}
+
+        className="absolute bottom-0 flex flex-col items-center origin-bottom"
+
+        style={{
+
+          left: `${xPct}%`,
+
+          transform: `translateX(-50%) scale(${1 + p * 0.6})`,
+
+          opacity: isPassed ? 1 : 0.3 + p * 0.7,
+
+          color: (isPassed || p > 0) ? tickColor : 'rgba(255,255,255,0.35)',
+
+          textShadow: p > 0
+
+            ? `0 0 ${p * 12}px ${tickColor}, 0 0 ${p * 24}px ${tickColor}`
+
+            : isPassed
+
+              ? `0 0 8px ${tickColor}`
+
+              : 'none',
+
+          zIndex: (isPassed || p > 0) ? 10 : 1
+
+        }}
+
+      >
+
+        {isMajor && <span className="text-xs font-medium mb-1">{t}</span>}
+
+        <div
+
+          className="rounded-full flex-shrink-0"
+
+          style={{
+
+            width: '2px',
+
+            height: `${height}px`,
+
+            backgroundColor: (isPassed || p > 0) ? tickColor : 'rgba(255,255,255,0.4)',
+
+            boxShadow: p > 0
+
+              ? `0 0 ${p * 10}px ${tickColor}`
+
+              : isPassed
+
+                ? `0 0 6px ${tickColor}`
+
+                : 'none'
+
+          }}
+
+        />
+
+      </div>
+
+    );
+
+  }
+
+
+
+  return (
+
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center overflow-hidden font-sans relative">
+
+
+
+      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+
+        <defs>
+
+          <filter id="turbulent-displace" colorInterpolationFilters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise1" seed="1" />
+
+            <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1">
+
+              <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
+
+            </feOffset>
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
+
+            <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2">
+
+              <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear" />
+
+            </feOffset>
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
+
+            <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3">
+
+              <animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
+
+            </feOffset>
+
+            <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
+
+            <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4">
+
+              <animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear" />
+
+            </feOffset>
+
+            <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
+
+            <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
+
+            <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
+
+            <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B" />
+
+          </filter>
+
+        </defs>
+
+      </svg>
+
+
+
+      <div className="relative z-10 flex flex-col items-center gap-12 w-full max-w-5xl px-8">
+
+
+
+        <div className="relative w-full h-[140px] md:h-[160px]">
+
+          <div className="absolute left-[46px] right-[46px] bottom-[84px] md:bottom-[94px] h-[40px] pointer-events-none">
+
+            {scaleMarks}
+
+          </div>
+
+
+
+          <div className="absolute left-[46px] right-[46px] bottom-[34px] md:bottom-[44px] h-[36px] md:h-[42px]">
+
+            <div
+
+              ref={trackRef}
+
+              className="absolute inset-0 rounded-full overflow-hidden"
+
+              style={{
+
+                background: `
+
+                  radial-gradient(circle at 0% 50%, rgba(255,255,255,0.35) 0, transparent 55%),
+
+                  radial-gradient(circle at 100% 50%, rgba(0,0,0,1) 0, rgba(0,0,0,0.9) 70%),
+
+                  linear-gradient(90deg, rgba(255,255,255,0.04), rgba(0,0,0,0.8))
+
+                `,
+
+                backgroundBlendMode: 'screen, normal, soft-light',
+
+                boxShadow: 'inset 0 0 18px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.8)'
+
+              }}
+
+            >
+
+              <div
+
+                className="absolute left-0 top-[-45%] h-[190%] transition-all duration-100 ease-linear"
+
+                style={{
+
+                  width: `${pct}%`,
+
+                  background: color,
+
+                  filter: 'url(#turbulent-displace)',
+
+                  mixBlendMode: 'screen',
+
+                  boxShadow: `0 0 45px ${color}, 0 0 90px ${color}`
+
+                }}
+
+              >
+
+                {/* Subtle Floating Bubbles */}
+
+                <div className="absolute inset-0 overflow-hidden mix-blend-overlay opacity-50">
+
+                  <div className="absolute top-[30%] left-[10%] w-2 h-2 rounded-full bg-white animate-bubble-1 blur-[1px]" />
+
+                  <div className="absolute top-[60%] left-[30%] w-3 h-3 rounded-full bg-white animate-bubble-2 blur-[1px]" />
+
+                  <div className="absolute top-[40%] left-[50%] w-1.5 h-1.5 rounded-full bg-white animate-bubble-3 blur-[1px]" />
+
+                  <div className="absolute top-[70%] left-[70%] w-2.5 h-2.5 rounded-full bg-white animate-bubble-1 blur-[1px]" style={{ animationDelay: '2.5s' }} />
+
+                  <div className="absolute top-[20%] left-[85%] w-2 h-2 rounded-full bg-white animate-bubble-2 blur-[1px]" style={{ animationDelay: '0.5s' }} />
+
+                </div>
+
+
+
+                <div className="absolute inset-0 rounded-full blur-[6px] opacity-25 mix-blend-color-dodge animate-pulse-electric"
+
+                     style={{ background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3), transparent 90%)' }} />
+
+                <div className="absolute inset-0 rounded-full blur-[16px] opacity-[0.18] mix-blend-color-dodge animate-pulse-electric delay-150"
+
+                     style={{ background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3), transparent 90%)' }} />
+
+              </div>
+
+            </div>
+
+
+
+            {/* Glass Knob with 3D Delta Arrow Shape */}
+
+            <div
+
+              className="absolute top-1/2 -translate-y-[60%] -translate-x-1/2 transition-all duration-100 ease-linear"
+
+              style={{
+
+                left: `${pct}%`,
+
+                width: '48px',
+
+                height: '64px',
+
+                zIndex: 20,
+
+                filter: `drop-shadow(0 0 10px ${color})`
+
+              }}
+
+            >
+
+              <div
+
+                className="absolute inset-0"
+
+                style={{
+
+                  clipPath: 'polygon(50% 0%, 100% 100%, 50% 75%, 0% 100%)',
+
+                  background: 'rgba(10,10,10,0.7)',
+
+                  backdropFilter: 'blur(12px) saturate(260%) brightness(1.25)',
+
+                  WebkitBackdropFilter: 'blur(12px) saturate(260%) brightness(1.25)',
+
+                }}
+
+              >
+
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 64">
+
+                  <polygon points="24,0 48,64 24,48 0,64" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
+
+                  <line x1="24" y1="0" x2="24" y2="48" stroke="rgba(255,255,255,0.15)" strokeWidth="2" opacity="0.5" />
+
+                  <polygon points="24,0 48,64 24,48" fill="#ffffff" opacity="0.15" />
+
+                  <polygon points="24,0 0,64 24,48" fill="#000000" opacity="0.2" />
+
+                </svg>
+
+
+
+                <div
+
+                  className="absolute inset-0 opacity-50 pointer-events-none"
+
+                  style={{
+
+                    background: `linear-gradient(to bottom, ${color} 0%, transparent 100%)`
+
+                  }}
+
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(<ProgressBar />);
+
+    </script>
+
+</body>
+
+</html>

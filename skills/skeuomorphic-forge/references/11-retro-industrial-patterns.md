@@ -740,6 +740,12 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Mechanical key | 43 (Keyboard key) | 14-layer shadow + 4px→1px border travel + spring bezier |
 | OEM EQ / parametric curve | 44 (OEM EQ curve) | SVG bell/shelf filters + annotated callouts + neon glow |
 | Flat response display | 45 (Full-range display) | `<rect>` bands + log-frequency axis + bandwidth arrows |
+| LPF/HPF crossover screen | 46 (LPF crossover) | Butterworth curve + animated FFT + cutoff dot + info panel |
+| Toggle with glass knob | 47 (Glass sphere toggle) | 5-layer glass sphere + guide rails + electrical contacts |
+| Frosted glass CTA | 48 (Red glassmorphism) | `backdrop-blur-2xl` + directional borders + spring bezier |
+| Glossy capsule button | 49 (Glossy pill button) | Shell casing + glass reflections + LED backlight on press |
+| Plasma/liquid progress | 50 (Plasma progress bar) | SVG `feDisplacementMap` turbulence + delta knob + bubbles |
+| Slit LED latching button | 51 (COMPRIS slit button) | 7-layer slit glow + 6 bloom layers + gap/desk projection |
 
 ---
 
@@ -2013,3 +2019,556 @@ Unlike Butterworth curves, the full-range display uses a simple horizontal rect 
 ```
 
 **Full working demo**: `assets/codepen-fullrange-no-crossover.html`
+
+---
+
+## 46. LPF Crossover Display (Subwoofer Channel)
+
+A complete DSP crossover screen showing a **low-pass filter** curve with animated FFT bars, cutoff frequency indicator, and DSP info panel. Extends pattern 37 (analyzer screen) with filter-specific annotations.
+
+### Key differences from pattern 37
+
+| Feature | Pattern 37 (general analyzer) | Pattern 46 (LPF crossover) |
+|---|---|---|
+| Curve type | Generic Butterworth bandpass | Specific LPF: `1 / (1 + (f/fc)^4)` |
+| FFT behavior | Uniform random | Passband active / stopband attenuated |
+| Cutoff indicator | Static | Animated drifting fc (60-120Hz) + pulsing dot |
+| Zone labeling | — | PASSBAND (left) / REJECTED (right, red tint) |
+| Info panel | — | Filter type, slope, order + channel assignment |
+
+### Butterworth LPF magnitude (4th order, 24dB/oct)
+
+```js
+const ratio = freq / cutoffHz;
+const r4 = Math.pow(ratio, 4);
+const magLin = 1 / (1 + r4);
+const magDb = 10 * Math.log10(Math.max(magLin, 1e-10));
+const y = Math.min(dbToY(magDb), 455);
+```
+
+### Cutoff frequency indicator construction
+
+```xml
+<!-- Pulsing dot at -3dB intersection -->
+<circle cx={cx} cy={minus3Y} r="7" fill="#ff4400"
+  filter="url(#cutoffGlow)"
+  style="animation: cutoff-pulse 2s ease-in-out infinite" />
+
+<!-- "fc" label above -->
+<text x={cx} y="42" fill="#ff4400" font-size="12" font-weight="700"
+  text-anchor="middle"
+  style="filter: drop-shadow(0 0 6px rgba(255,68,0,0.5))">fc</text>
+
+<!-- Frequency badge below -->
+<rect x={cx - 40} y="448" width="80" height="22" rx="3"
+  fill="rgba(0,0,0,0.6)" stroke="rgba(255,68,0,0.2)" />
+<text x={cx} y="464" fill="#ff6633" font-size="13" font-weight="700"
+  text-anchor="middle">{cutoffLabel}</text>
+```
+
+### DSP info panel (SVG overlay)
+
+```xml
+<rect x="820" y="48" width="135" height="105" rx="4"
+  fill="rgba(0,0,0,0.5)" stroke="rgba(56,189,248,0.15)" />
+<text x="887" y="68" fill="#38bdf8" font-size="22" font-weight="700"
+  text-anchor="middle">LPF</text>
+<text x="887" y="84" fill="#2a4a65" font-size="10">LOW-PASS FILTER</text>
+<!-- Key/value rows -->
+<text fill="#4a5a78" font-size="9">TYPE</text>
+<text fill="#8898b8" font-size="10" text-anchor="end">Butterworth</text>
+<text fill="#4a5a78" font-size="9">SLOPE</text>
+<text fill="#8898b8" font-size="10" text-anchor="end">24 dB/oct</text>
+```
+
+### Stopband red tint zone
+
+```xml
+<!-- Semi-transparent red zone right of cutoff -->
+<rect x={cx} y="40" width={MARGIN_R - cx} height="415"
+  fill="rgba(255,20,0,0.03)" />
+```
+
+### Animated FFT with passband/stopband behavior
+
+```js
+fftRef.current.forEach(pt => {
+  if (pt.x < cxSvg - 30) {
+    // Passband: active bass energy
+    pt.target = 100 + Math.random() * 220;
+  } else if (pt.x < cxSvg + 80) {
+    // Transition: blend
+    const r = (pt.x - (cxSvg - 30)) / 110;
+    pt.target = (100 + Math.random() * 220) * (1 - r) + (400 + Math.random() * 25) * r;
+  } else {
+    // Stopband: attenuated
+    pt.target = 405 + Math.random() * 25;
+  }
+});
+```
+
+### Color coding
+
+| Element | Color | Purpose |
+|---|---|---|
+| LPF curve | `#38bdf8` | Main filter shape |
+| Passband fill | `#0ea5e9` → transparent | Signal passing through |
+| Cutoff dot / line | `#ff4400` | Critical frequency marker |
+| -3dB reference | `#ff8800` | Half-power point |
+| Slope annotation | `#ff6644` | Rolloff steepness |
+| Channel badge | `#cc8822` | SUBWOOFER assignment |
+
+**Full working demo**: `assets/codepen-lpf-crossover.html`
+
+---
+
+## 47. Glass Sphere Toggle (Electrical Switch)
+
+A large toggle switch with a **glass sphere knob** that slides between two electrical contacts inside a recessed track. Features guide rails, tick marks, bus bars, arc glow, and contact LEDs.
+
+### Track construction (5 internal mechanism layers)
+
+```
+Track (pill-shaped recess)
+├── Central guide rail (6px height, metal gradient)
+├── Twin guide rails (±22px offset, 2px each)
+├── Tick marks (11 marks, major/minor)
+├── Bus bars (±34px, gradient showing current flow direction)
+└── Arc glow (radial gradient near active contact)
+```
+
+### Track container
+
+```tsx
+const TRACK: React.CSSProperties = {
+  position: "relative",
+  width: 380, height: 210, borderRadius: 105,
+  cursor: "pointer",
+  background: "#131523",
+  border: `5px solid rgba(${activeColor},${isOn ? 0.7 : 0.12})`,
+  boxShadow: [
+    "inset 0 30px 45px rgba(0,0,0,0.8)",
+    "inset 0 6px 12px rgba(0,0,0,0.5)",
+    "inset 4px 0 8px rgba(0,0,0,0.2)",
+    "inset -4px 0 8px rgba(0,0,0,0.2)",
+    "inset 0 -2px 4px rgba(255,255,255,0.01)",
+    "inset 0 0 20px rgba(0,0,0,0.3)",
+    // Dynamic color glow (ON state)
+    `inset 0 0 25px rgba(${ac},0.15)`,
+    `0 0 15px rgba(${ac},0.3)`,
+    `0 0 35px rgba(${ac},0.12)`,
+    `0 0 60px rgba(${ac},0.04)`,
+    "0 8px 24px rgba(0,0,0,0.35)",
+  ].join(", "),
+  overflow: "hidden",
+};
+```
+
+### Glass sphere knob (5-layer specular system)
+
+```
+Sphere (165×165 circle)
+├── Base: radial-gradient(circle at 35% 30%, #495273 → #181a29 → #0e0f19)
+├── Primary glass highlight (75%×55% ellipse, top-left, 13% opacity)
+├── Glass sheen (35%×25% spot, 22% opacity)
+├── Rim catch (45%×12% crescent, 10% opacity)
+├── Bottom reflected light (subtle 3% counter-fill)
+├── Neon color bleed (positioned toward active contact)
+├── Edge ring (1px border 3.5% opacity)
+└── Noise overlay (SVG fractalNoise, 1.8% opacity)
+```
+
+### Sphere CSS (React inline style)
+
+```tsx
+const GLASS_SPHERE: React.CSSProperties = {
+  width: 165, height: 165, borderRadius: "50%",
+  background: "radial-gradient(circle at 35% 30%, #495273 0%, #181a29 55%, #0e0f19 100%)",
+  boxShadow: [
+    "18px 18px 35px rgba(0,0,0,0.8)",
+    "8px 8px 16px rgba(0,0,0,0.5)",
+    "-3px -3px 12px rgba(255,255,255,0.02)",
+    "inset 1px 1px 4px rgba(255,255,255,0.06)",
+    "inset 3px 3px 12px rgba(255,255,255,0.03)",
+    "inset 0 -5px 12px rgba(0,0,0,0.5)",
+    "inset -3px 0 10px rgba(0,0,0,0.3)",
+    "inset 0 0 20px rgba(0,0,0,0.15)",
+  ].join(", "),
+};
+```
+
+### Electrical contacts (ON/OFF terminals)
+
+Each contact is a recessed rectangle with a center LED dot:
+
+```tsx
+// Active contact — 4-level halo glow
+{
+  border: `1px solid rgba(${color},0.5)`,
+  boxShadow: `0 0 4px rgba(${color},0.7), 0 0 12px rgba(${color},0.35), 0 0 28px rgba(${color},0.15), 0 0 45px rgba(${color},0.06), inset 0 0 10px rgba(${color},0.25)`,
+}
+// Center LED dot
+{
+  background: `radial-gradient(circle, rgba(200,250,255,0.95) 0%, rgba(${color},0.4) 50%, transparent 100%)`,
+  boxShadow: `0 0 5px rgba(${color},0.9), 0 0 10px rgba(${color},0.5)`,
+  animation: "contact-pulse 2s ease-in-out infinite",
+}
+```
+
+### Dual color system
+
+| State | Primary color | Accent use |
+|---|---|---|
+| ON (right) | `0,230,255` (cyan) | Border, contact glow, bus bar right |
+| OFF (left) | `255,160,40` (warm amber) | Border, contact glow, bus bar left |
+
+### Spring animation
+
+```tsx
+transition: ready ? "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
+transform: `translateY(-50%) translateX(${isOn ? 170 : 0}px)`,
+```
+
+**Full working demo**: `assets/codepen-glass-sphere-toggle.html`
+
+---
+
+## 48. Red Glassmorphism Button (CTA Pill)
+
+A wide **frosted-glass pill button** with red accent circle and glassmorphic hover/active states. Uses `backdrop-blur-2xl` for true frosted glass effect.
+
+### Construction (Tailwind classes)
+
+```
+Button (pill, 90px radius)
+├── Base: bg-white/[0.03] backdrop-blur-2xl
+├── Directional borders: border-t-white/[0.12], border-l-white/[0.08]
+├── Red circle icon: bg-gradient-to-br from-red-500/90 to-red-700/90
+├── Text: text-white/90, 3xl, font-semibold
+└── States: hover (scale 1.02, red border tint), active (scale 0.98, inset shadow)
+```
+
+### Key Tailwind class stack
+
+```html
+<button class="
+  bg-white/[0.03] backdrop-blur-2xl
+  border border-white/[0.03] border-t-white/[0.12] border-l-white/[0.08]
+  shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]
+  hover:bg-white/[0.06] hover:scale-[1.02]
+  hover:border-t-red-500/40 hover:border-l-red-500/20
+  hover:shadow-[0_30px_50px_-10px_rgba(0,0,0,0.6),0_0_30px_rgba(239,68,68,0.15),inset_0_1px_2px_rgba(239,68,68,0.4)]
+  active:scale-[0.98] active:bg-white/[0.02]
+  active:shadow-[inset_4px_4px_15px_rgba(0,0,0,0.4),inset_-4px_-4px_15px_rgba(255,255,255,0.02)]
+  transition-all duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]
+  rounded-[90px] min-w-[380px]
+">
+```
+
+### Red icon circle with inner specular
+
+```html
+<div class="w-20 h-20 rounded-full
+  bg-gradient-to-br from-red-500/90 to-red-700/90
+  shadow-[0_8px_20px_rgba(239,68,68,0.4),inset_2px_2px_4px_rgba(255,255,255,0.4)]
+  group-hover:shadow-[0_12px_25px_rgba(239,68,68,0.6)]
+  group-hover:scale-105
+  transition-all duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+```
+
+### Glassmorphism recipe
+
+| Property | Value | Purpose |
+|---|---|---|
+| `bg-white/[0.03]` | 3% white background | Near-invisible tint |
+| `backdrop-blur-2xl` | 40px blur | Frosted glass |
+| `border-t-white/[0.12]` | Top border 12% | Light source highlight |
+| `border-l-white/[0.08]` | Left border 8% | Secondary highlight |
+| Spring bezier | `cubic-bezier(0.34,1.56,0.64,1)` | Overshoot on hover/press |
+
+**Full working demo**: `assets/codepen-red-glassmorphism-button.html`
+
+---
+
+## 49. Glossy Pill Button with LED Backlight (Accepter)
+
+A large **glossy capsule button** inside a dark shell casing. Features a prominent top-hemisphere glass reflection, bottom bounce light, and a green LED radial glow that activates on press.
+
+### 4-layer construction
+
+```
+Shell casing (rounded-[60px], inset shadows)
+├── Projected light (green glow onto shell, only on :active)
+└── Button capsule (rounded-[60px])
+    ├── Internal LED glow (radial gradient, green, opacity 0 → 1 on active)
+    ├── Glassy top reflection (60% white → transparent, top 46px)
+    ├── Bottom glass reflection (10% white → transparent)
+    ├── Rim light (double ring: 1.5px + 1px borders with mix-blend-overlay)
+    └── Text (uppercase, drop-shadow)
+```
+
+### Shell casing
+
+```html
+<div class="p-[14px] md:p-[18px] rounded-[60px] bg-[#1b1f26]
+  shadow-[inset_0_2px_2px_rgba(255,255,255,0.08),inset_0_-6px_10px_rgba(0,0,0,0.6),0_30px_60px_rgba(0,0,0,0.55)]">
+```
+
+### Button with 3 reflection layers
+
+```html
+<!-- Glassy top reflection: white/60 to transparent -->
+<div class="absolute top-[6px] left-[12px] right-[12px] h-[46px] rounded-[40px]
+  bg-gradient-to-b from-white/60 to-transparent opacity-80
+  group-active:from-green-100/80" />
+
+<!-- Bottom bounce light -->
+<div class="absolute bottom-[6px] left-[15%] right-[15%] h-[20px] rounded-[40px]
+  bg-gradient-to-t from-white/10 to-transparent opacity-50
+  group-active:from-green-200/30" />
+
+<!-- Rim light (double ring) -->
+<div class="absolute inset-0 rounded-[60px]
+  border-[1.5px] border-white/10 border-t-white/50 border-b-black/80
+  mix-blend-overlay group-active:border-t-green-300/70" />
+```
+
+### Active state color switch
+
+| Element | Rest | Active |
+|---|---|---|
+| Top reflection | `from-white/60` | `from-green-100/80` |
+| Bottom reflection | `from-white/10` | `from-green-200/30` |
+| Rim top border | `border-t-white/50` | `border-t-green-300/70` |
+| Inner LED | `opacity-0` | `opacity-100` (green radial) |
+| Shell projection | none | `bg-green-500/20 shadow-[0_0_40px_15px_rgba(34,197,94,0.4)]` |
+
+**Full working demo**: `assets/codepen-glossy-accepter-button.html`
+
+---
+
+## 50. Plasma Progress Bar (Turbulent Displacement)
+
+A horizontal progress bar with **SVG turbulent displacement filter** creating a liquid/plasma effect, a 4-stop color gradient (red → orange → yellow → green), scale marks with proximity glow, and a **3D delta-arrow glass knob**.
+
+### SVG turbulent displacement filter
+
+The key innovation: an `feDisplacementMap` driven by 4 animated `feTurbulence` layers creating flowing plasma.
+
+```xml
+<filter id="turbulent-displace">
+  <!-- 4 noise layers with opposing animation offsets -->
+  <feTurbulence baseFrequency="0.02" numOctaves="10" seed="1" result="noise1" />
+  <feOffset in="noise1" result="off1">
+    <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" />
+  </feOffset>
+  <feTurbulence baseFrequency="0.02" numOctaves="10" seed="1" result="noise2" />
+  <feOffset in="noise2" result="off2">
+    <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" />
+  </feOffset>
+  <!-- Two more with dx offsets (seed 2) -->
+  <!-- Composite + blend + displace -->
+  <feComposite in="off1" in2="off2" result="part1" />
+  <feComposite in="off3" in2="off4" result="part2" />
+  <feBlend in="part1" in2="part2" mode="color-dodge" result="combined" />
+  <feDisplacementMap in="SourceGraphic" in2="combined" scale="30"
+    xChannelSelector="R" yChannelSelector="B" />
+</filter>
+```
+
+### 4-stop color gradient mapping
+
+```js
+const CONFIG = {
+  gradientColors: ["#ff0044", "#ff8800", "#ffdd00", "#00ff73"],
+  gradientStops: [0, 0.33, 0.66, 1]
+};
+// Interpolated per-pixel using lerp between adjacent stops
+```
+
+### Scale marks with proximity illumination
+
+Each tick mark glows when the progress value is near:
+
+```js
+const dist = Math.abs(progress - tickValue);
+const maxDist = 8;
+const p = dist < maxDist ? Math.pow(1 - dist / maxDist, 2) : 0;
+// p controls: scale (1 + p*0.6), opacity, textShadow glow radius
+```
+
+### 3D delta-arrow glass knob
+
+```html
+<div style={{
+  clipPath: 'polygon(50% 0%, 100% 100%, 50% 75%, 0% 100%)',
+  background: 'rgba(10,10,10,0.7)',
+  backdropFilter: 'blur(12px) saturate(260%) brightness(1.25)',
+}}>
+  <svg viewBox="0 0 48 64">
+    <!-- Right half highlight -->
+    <polygon points="24,0 48,64 24,48" fill="#ffffff" opacity="0.15" />
+    <!-- Left half shadow -->
+    <polygon points="24,0 0,64 24,48" fill="#000000" opacity="0.2" />
+    <!-- Center fold line -->
+    <line x1="24" y1="0" x2="24" y2="48" stroke="rgba(255,255,255,0.15)" />
+  </svg>
+</div>
+```
+
+### Track construction (deep recess)
+
+```css
+.track {
+  background:
+    radial-gradient(circle at 0% 50%, rgba(255,255,255,0.35) 0, transparent 55%),
+    radial-gradient(circle at 100% 50%, rgba(0,0,0,1) 0, rgba(0,0,0,0.9) 70%),
+    linear-gradient(90deg, rgba(255,255,255,0.04), rgba(0,0,0,0.8));
+  background-blend-mode: screen, normal, soft-light;
+  box-shadow: inset 0 0 18px rgba(0,0,0,1), 0 0 18px rgba(0,0,0,0.8);
+}
+```
+
+### Floating bubble particles
+
+Subtle white circles inside the fill with `mix-blend-overlay`:
+
+```css
+@keyframes floatBubble {
+  0% { transform: translateX(0) scale(0.8); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: translateX(100px) scale(1.2); opacity: 0; }
+}
+```
+
+**Full working demo**: `assets/codepen-plasma-progress-bar.html`
+
+---
+
+## 51. Slit LED Button with 7-Layer Bloom (COMPRIS)
+
+A **neomorphic latching button** with a narrow LED slit at the bottom that projects light upward through 6 bloom layers + 1 gap projection + desk glow. The most advanced light simulation in the collection.
+
+### 4-tier neomorphic construction
+
+```
+Container (neumorphic chassis: #1a1d1a → #0d0f0d)
+├── Gap (dark ring #1a1a19, visible between container and button)
+└── Center button (#232322)
+    ├── Label (dim → lit with 5-level text-shadow)
+    ├── Slit (3.5px bar, 7-layer glow when ON)
+    ├── 6 bloom layers (projected from slit upward)
+    ├── Gap projection (below button, into gap)
+    └── Desk glow (extends below container)
+```
+
+### Container neumorphism
+
+```css
+.button-container {
+  background: linear-gradient(145deg, #1a1d1a, #0d0f0d);
+  box-shadow:
+    -3px -3px 18px #1e211e,      /* top-left light catch */
+    -2px -2px 4px #1e211e44,
+    4px 4px 4px #05060544,       /* bottom-right shadow */
+    4px 4px 18px #050605;
+}
+```
+
+### Slit LED — 7-layer glow stack
+
+```css
+.slit-on {
+  background: linear-gradient(90deg, #1e40af, #3b82f6, #60a5fa, #3b82f6, #1e40af);
+  box-shadow:
+    0 0 1px #bfdbfe,             /* 1. white-hot core */
+    0 0 2px #93c5fd,             /* 2. bright inner halo */
+    0 0 5px rgba(96,165,250,0.95),  /* 3. saturated ring */
+    0 0 10px rgba(59,130,246,0.8),  /* 4. primary glow */
+    0 0 18px rgba(37,99,235,0.5),   /* 5. mid spread */
+    0 0 32px rgba(37,99,235,0.25),  /* 6. bloom */
+    0 0 52px rgba(37,99,235,0.1);   /* 7. atmosphere */
+  animation: slit-breathe 2.2s ease-in-out infinite;
+}
+```
+
+### 6 bloom layers (bottom → top projection)
+
+| Layer | Class | Size | Blur | Purpose |
+|---|---|---|---|---|
+| L1 | `.bloom-core` | 65×22px | 2px | Tight core right above slit |
+| L2 | `.bloom-mid` | 110×40px | 6px | Wider halo |
+| L3 | `.bloom-atmo` | 160×55px | 12px | Atmospheric spread |
+| L4 | `.light-wash` | full width × 60% height | — | Gradient flooding bottom half |
+| L5 | `.light-column` | 44×48px | 3px | Vertical light beam |
+| L6 | `.rim-catch` | 70% width × 1px | — | Bottom edge specular line |
+
+### Bloom layer example (core)
+
+```css
+.bloom-core {
+  position: absolute;
+  bottom: 4px; left: 50%; transform: translateX(-50%);
+  width: 65px; height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 85%,
+    rgba(147,197,253,0.3) 0%,
+    rgba(96,165,250,0.12) 40%,
+    transparent 65%);
+  filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.bloom-core.on { opacity: 1; }
+```
+
+### Gap + desk projection (light escaping downward)
+
+```css
+/* Light escaping into gap below button */
+.gap-proj {
+  bottom: -7px;
+  width: 90px; height: 14px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(59,130,246,0.22) 0%, transparent 70%);
+  filter: blur(3px);
+}
+
+/* Desk glow (light hitting surface below chassis) */
+.desk-glow {
+  bottom: -18px;
+  width: 130px; height: 36px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(59,130,246,0.14) 0%, transparent 70%);
+  filter: blur(10px);
+  animation: desk-breathe 2.2s ease-in-out infinite;
+}
+```
+
+### Latched ON vs OFF state
+
+| Element | OFF | ON (latched) |
+|---|---|---|
+| Button bg | `#232322 → #282827` | `#161615 → #171716` (deeper) |
+| Button shadow | External cast | Inset 2px 2px 6px (pressed in) |
+| Label color | `rgba(160,165,158,0.35)` (dim ghost) | `rgba(170,210,255,0.92)` (lit blue) |
+| Label text-shadow | 0 (none) | 5-level: 3→6→12→24→40px blue |
+| Slit | `#080908` (dead) | Gradient + 7-layer glow |
+| Bloom layers | `opacity: 0` | `opacity: 1` + animations |
+| Container | Standard neumorphic | +3 subtle blue glow layers |
+
+### Breathing animation
+
+```css
+@keyframes slit-breathe {
+  0%, 100% {
+    box-shadow: /* 7 layers at base intensity */;
+  }
+  50% {
+    box-shadow: /* 7 layers at peak intensity (+30-50%) */;
+  }
+}
+```
+
+**Full working demo**: `assets/codepen-compris-slit-button.html`
