@@ -728,3 +728,719 @@ Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-
 | Metal surface | 31 (feTurbulence) | SVG noise overlay + warm gradient |
 | Panel label | Section 28 phosphor glow | Silkscreen or phosphor text-shadow |
 | Warning/alert screen | 34 (chassis hole, red theme) | Color-themed phosphor + rim bleed |
+| Concave toggle/header | 35 (Concave button) | 15-layer inset shadow + mask-composite rim light |
+| Equipment faceplate | 36 (Faceplate panel) | 6-layer stack (dots, noise, vignette, glass, projection) |
+| Glass dome icon | 36 (icon-dome) | 3-ring well → mid-ring → convex dome specular |
+| Frequency analyzer | 37 (Analyzer screen) | SVG filter neon glow + Butterworth curves + FFT bars |
+| Anomaly warning | 38 (Erratic curve) | 60-seed chaotic sine sum + fog blur + warning overlay |
+| 3D push button | 39 (Glow projection button) | 14px translateY travel + massive glow + rim light bleed |
+
+---
+
+## 35. Concave Button (Folding Header)
+
+An input/trigger button that appears **pressed into** the panel rather than raised above it. Uses 15 inset box-shadow layers attacking from all directions to create a bowl-like concavity.
+
+### Concave shadow construction
+
+```css
+.concave-button {
+  background: #232128;
+  border-radius: 12px;
+  padding: 18px 24px;
+  cursor: pointer;
+  position: relative;
+  box-shadow:
+    /* TOP (3 progressive depths) */
+    inset 0 8px 14px -3px rgba(0,0,0,0.75),
+    inset 0 4px 6px -1px rgba(0,0,0,0.6),
+    inset 0 2px 2px rgba(0,0,0,0.5),
+    /* LEFT (2 depths) */
+    inset 6px 0 10px -4px rgba(0,0,0,0.55),
+    inset 3px 0 4px -1px rgba(0,0,0,0.35),
+    /* RIGHT (2 depths) */
+    inset -6px 0 10px -4px rgba(0,0,0,0.55),
+    inset -3px 0 4px -1px rgba(0,0,0,0.35),
+    /* DIAGONAL CORNERS (4 layers) */
+    inset 5px 5px 8px -3px rgba(0,0,0,0.4),
+    inset -5px 5px 8px -3px rgba(0,0,0,0.4),
+    inset 4px -3px 6px -3px rgba(0,0,0,0.15),
+    inset -4px -3px 6px -3px rgba(0,0,0,0.15),
+    /* BOTTOM (catch light — simulates light bouncing off lip) */
+    inset 0 -3px 6px -2px rgba(255,255,255,0.035),
+    inset 0 -1px 1px rgba(255,255,255,0.05),
+    /* EXTERNAL (panel surface continuity) */
+    0 -1px 0 rgba(255,255,255,0.05),
+    0 1px 0 rgba(0,0,0,0.25);
+  border-top: 1px solid #08070a;
+  border-left: 1px solid #08070a;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid rgba(255,255,255,0.04);
+  transition: box-shadow 0.1s ease;
+}
+```
+
+### Mask-composite rim light
+
+The amber rim light uses the **CSS mask-composite trick** — two layers with `xor`/`exclude` compositing to create a border-only gradient.
+
+```css
+/* Sharp inner glow ring */
+.inner-well::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(circle at 0 0,
+    rgba(255,139,61,0.85) 0%,
+    rgba(255,139,61,0.3) 6%,
+    transparent 15%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+               linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 0 3px rgba(255,139,61,0.6));
+}
+
+/* Blurred outer halo */
+.inner-well::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 2px;
+  background: radial-gradient(circle at 0 0,
+    rgba(255,139,61,0.6) 0%,
+    rgba(255,139,61,0.15) 8%,
+    transparent 20%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+               linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 4;
+  filter: blur(6px) drop-shadow(0 0 8px rgba(255,139,61,0.3));
+  mix-blend-mode: screen;
+}
+```
+
+### Folding content animation
+
+```css
+.folding-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+.folding-content.open {
+  max-height: 500px;
+  opacity: 1;
+  padding-top: 16px;
+}
+```
+
+**Full working demo**: `assets/codepen-folding-header.html`
+
+---
+
+## 36. Faceplate Panel (Equipment Module)
+
+Full industrial module faceplate with 6 decorative layers, machined icon dome, vertical separators, and a bottom status bar.
+
+### 6-layer panel stack
+
+```css
+/* 1. BACKPLATE — outer chassis bevel */
+.backplate {
+  padding: 5px;
+  border-radius: 34px;
+  background: linear-gradient(145deg, #2e3238, #1e2226);
+  box-shadow:
+    6px 6px 22px rgba(0,0,0,0.6),
+    -3px -3px 10px rgba(50,55,65,0.05),
+    0 14px 40px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.4);
+}
+
+/* 2. PANEL — inner faceplate */
+.panel {
+  position: relative;
+  background: linear-gradient(180deg, #1a1d20 0%, #24282c 10%, #16191c 50%, #0d0f11 100%);
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.6);
+}
+
+/* 3. DOT TEXTURE — perforated metal effect */
+.dots {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 1;
+  background-image: radial-gradient(rgba(0,0,0,0.6) 1px, transparent 1px);
+  background-size: 6px 6px;
+  opacity: 0.4;
+}
+
+/* 4. NOISE OVERLAY */
+.noise {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 2;
+  background-image: url("data:image/svg+xml,...feTurbulence...");
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+}
+
+/* 5. EDGE VIGNETTE — all-border darkening */
+.edge-vignette {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 4;
+  box-shadow:
+    /* Top edge (strongest) */
+    inset 0 12px 20px -4px rgba(0,0,0,0.6),
+    inset 0 6px 8px -2px rgba(0,0,0,0.4),
+    /* Bottom edge */
+    inset 0 -10px 18px -4px rgba(0,0,0,0.5),
+    inset 0 -5px 6px -2px rgba(0,0,0,0.3),
+    /* Left + right edges */
+    inset 12px 0 18px -4px rgba(0,0,0,0.45),
+    inset 5px 0 6px -2px rgba(0,0,0,0.25),
+    inset -12px 0 18px -4px rgba(0,0,0,0.45),
+    inset -5px 0 6px -2px rgba(0,0,0,0.25),
+    /* Diagonal corners */
+    inset 8px 8px 14px -4px rgba(0,0,0,0.3),
+    inset -8px 8px 14px -4px rgba(0,0,0,0.3),
+    inset 8px -8px 14px -4px rgba(0,0,0,0.3),
+    inset -8px -8px 14px -4px rgba(0,0,0,0.3);
+}
+
+/* 6. GLASS REFLECTION */
+.glass-reflection {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 3;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.02) 0%, transparent 40%, rgba(0,0,0,0.1) 100%);
+}
+```
+
+### Icon glass dome (3-ring construction)
+
+A convex glass indicator with the display icon inside.
+
+```css
+/* Ring 1 — Icon well (deep recess) */
+.icon-well {
+  background: #020304;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow:
+    inset 0 6px 14px rgba(0,0,0,0.9),
+    inset 0 2px 4px rgba(0,0,0,1),
+    inset 3px 0 8px rgba(0,0,0,0.5),
+    inset -3px 0 8px rgba(0,0,0,0.5),
+    inset 0 -3px 6px rgba(255,255,255,0.015),
+    0 1px 0 rgba(255,255,255,0.06),
+    0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* Ring 2 — Machined step */
+.icon-mid-ring {
+  background: linear-gradient(180deg, #0a0b0d, #141618, #0a0b0d);
+  border-radius: 50%;
+  padding: 2px;
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,0.7),
+    inset 0 -1px 2px rgba(255,255,255,0.02),
+    0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* Ring 3 — Glass dome */
+.icon-dome {
+  position: relative;
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 60%, #1a0808, #0c0305, #050102);
+  box-shadow:
+    inset 0 0 25px rgba(0,0,0,0.7),
+    inset 0 4px 8px rgba(0,0,0,0.6),
+    inset 0 8px 16px rgba(0,0,0,0.3),
+    inset 0 -3px 6px rgba(255,26,26,0.05),
+    inset 4px 0 8px rgba(0,0,0,0.4),
+    inset -4px 0 8px rgba(0,0,0,0.4),
+    0 0 8px rgba(255,26,26,0.06);
+  overflow: hidden;
+}
+
+/* Dome convex specular (5 highlights) */
+.icon-dome::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  pointer-events: none; z-index: 10;
+  background:
+    /* Primary apex */
+    radial-gradient(ellipse 30% 22% at 45% 22%,
+      rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 50%, transparent 100%),
+    /* Wider diffuse */
+    radial-gradient(ellipse 55% 40% at 48% 28%,
+      rgba(255,255,255,0.06) 0%, transparent 100%),
+    /* Secondary catch */
+    radial-gradient(ellipse 25% 18% at 65% 72%,
+      rgba(255,255,255,0.035) 0%, transparent 100%),
+    /* Left rim */
+    radial-gradient(ellipse 12% 50% at 12% 45%,
+      rgba(255,255,255,0.03) 0%, transparent 100%),
+    /* Convex edge vignette */
+    radial-gradient(circle at 50% 50%,
+      transparent 40%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.5) 100%);
+}
+```
+
+### Projected color light on panel surface
+
+```css
+.color-projection {
+  position: absolute; z-index: 4; pointer-events: none;
+  width: 500px; height: 200px;
+  left: 50%; top: 40%; transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse 80% 70% at 50% 50%,
+    rgba(255,26,26,0.04) 0%,
+    rgba(255,26,26,0.015) 40%,
+    transparent 70%);
+  animation: proj-pulse 3s infinite ease-in-out;
+}
+```
+
+### Vertical separator (machined groove)
+
+```css
+.v-separator {
+  width: 2px; align-self: stretch;
+  background: linear-gradient(180deg, transparent, #080a0c 20%, #080a0c 80%, transparent);
+  box-shadow: 1px 0 0 rgba(255,255,255,0.02), -1px 0 0 rgba(0,0,0,0.5);
+  margin: 8px 0;
+}
+```
+
+### Bottom status bar
+
+```css
+.bottom-groove {
+  height: 2px;
+  background: #080a0c;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.03);
+}
+.bottom-bar {
+  background: linear-gradient(180deg, #1e2226, #12151a 40%, #0a0c0e);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+```
+
+**Full working demo**: `assets/codepen-autochord-ui.html`
+
+---
+
+## 37. Frequency Analyzer Screen (Animated SVG)
+
+A CRT-embedded frequency response analyzer with morphing Butterworth curves, FFT bars, neon glow, and log-frequency grid. Designed for DSP crossover visualization.
+
+### Screen construction (chassis + bezel)
+
+```css
+.chassis {
+  background: linear-gradient(180deg, #2a2c31 0%, #15171a 100%);
+  padding: 2px; border-radius: 16px;
+  box-shadow: 0 60px 100px -20px rgba(0,0,0,1),
+              0 20px 40px rgba(0,0,0,0.9),
+              0 0 0 1px rgba(255,255,255,0.05);
+}
+.chassis-inner {
+  background: linear-gradient(135deg, #121316, #08090a);
+  padding: 36px; border-radius: 15px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(0,0,0,1);
+  box-shadow: inset 0 6px 15px rgba(0,0,0,0.8);
+}
+.screen-bezel {
+  position: relative;
+  background-color: #020304; border-radius: 10px;
+  box-shadow:
+    inset 0 35px 60px -10px rgba(0,0,0,1),
+    inset 0 0 30px 10px rgba(0,0,0,1),
+    inset 0 2px 2px rgba(0,0,0,1),
+    0 1px 0 rgba(255,255,255,0.12);
+  border-top: 3px solid #000; border-left: 3px solid #000;
+  border-bottom: 1px solid #22252a; border-right: 1px solid #15181c;
+  overflow: hidden;
+}
+```
+
+### SVG neon glow filters
+
+```xml
+<!-- Blue neon for curves -->
+<filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+  <feGaussianBlur stdDeviation="5" result="blur" />
+  <feMerge>
+    <feMergeNode in="blur" />
+    <feMergeNode in="SourceGraphic" />
+  </feMerge>
+</filter>
+
+<!-- Amber for warnings/indicators -->
+<filter id="amberGlow" x="-30%" y="-30%" width="160%" height="160%">
+  <feGaussianBlur stdDeviation="10" result="g" />
+  <feMerge>
+    <feMergeNode in="g" />
+    <feMergeNode in="g" />
+    <feMergeNode in="SourceGraphic" />
+  </feMerge>
+</filter>
+```
+
+### Butterworth curve math (4th order, 24dB/oct)
+
+```tsx
+const butterworth4 = (fRatio: number) => {
+  const f4 = Math.pow(fRatio, 4);
+  return 1 / Math.sqrt(1 + f4);
+};
+
+// HPF at fc=2000Hz
+const hpfDb = (freq: number) => {
+  const mag = butterworth4(2000 / freq);
+  return 20 * Math.log10(Math.max(mag, 0.0001));
+};
+
+// LPF at fc=500Hz
+const lpfDb = (freq: number) => {
+  const mag = butterworth4(freq / 500);
+  return 20 * Math.log10(Math.max(mag, 0.0001));
+};
+```
+
+### Log-frequency axis helpers
+
+```tsx
+const LOG_MIN = Math.log10(20);
+const LOG_MAX = Math.log10(20000);
+const LOG_RANGE = LOG_MAX - LOG_MIN;
+
+const freqToX = (hz: number, plotWidth: number, marginLeft: number) =>
+  ((Math.log10(hz) - LOG_MIN) / LOG_RANGE) * plotWidth + marginLeft;
+```
+
+### Scanline + glass overlays
+
+```css
+.scanlines {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.1) 50%,
+    rgba(0,0,0,0.1) 100%);
+  background-size: 100% 4px;
+  pointer-events: none; z-index: 40;
+}
+.glass-reflection {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(110deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.06) 30%, transparent 31%),
+    radial-gradient(150% 100% at 50% -25%, rgba(255,255,255,0.05) 0%, transparent 45%);
+  pointer-events: none; z-index: 50;
+  mix-blend-mode: screen;
+}
+```
+
+**Full working demo**: `assets/codepen-curve-search.html`
+
+---
+
+## 38. Erratic/Anomaly Curve (Warning State)
+
+Variant of the analyzer screen (pattern 37) showing a **chaotic, unpredictable curve** for anomaly/error states. Uses sum-of-sines with 60 random seeds for organic randomness.
+
+### Chaotic curve generation
+
+```tsx
+// 60 random seeds for organic chaos
+const seeds = Array.from({ length: 60 }, () => ({
+  amp: (Math.random() - 0.5) * 2,
+  freq: 0.5 + Math.random() * 3,
+  phase: Math.random() * Math.PI * 2,
+  drift: (Math.random() - 0.5) * 0.01,
+}));
+
+// Build erratic curve: sum oscillations + spike regions
+const buildErratic = (time: number) => {
+  const pts = [];
+  for (let i = 0; i <= 300; i++) {
+    const norm = i / 300;
+    let y = zeroDbY;
+    // Sum chaotic oscillations
+    for (const seed of seeds) {
+      y += seed.amp * 18 * Math.sin(
+        norm * seed.freq * 12 + seed.phase + time * 0.3
+      );
+    }
+    // Sharp spikes at specific frequency regions
+    if (norm > 0.15 && norm < 0.25) y -= 45 + Math.sin(time * 0.5) * 10;
+    if (norm > 0.4 && norm < 0.48) y += 55 + Math.sin(time * 0.7) * 8;
+    if (norm > 0.6 && norm < 0.65) y -= 35;
+    if (norm > 0.78 && norm < 0.85) y += 40 + Math.sin(time * 0.4) * 12;
+    if (norm > 0.9) y += (norm - 0.9) * 300;  // High-freq rolloff
+    pts.push(Math.max(60, Math.min(420, y)));
+  }
+  return pts;
+};
+```
+
+### Fog/haze effect (SVG filters)
+
+```xml
+<!-- Heavy atmospheric fog -->
+<filter id="heavyFog" x="-10%" y="-10%" width="120%" height="120%">
+  <feGaussianBlur stdDeviation="12" />
+</filter>
+
+<!-- Medium blur for curve strokes -->
+<filter id="fogBlur" x="-10%" y="-10%" width="120%" height="120%">
+  <feGaussianBlur stdDeviation="6" result="fog" />
+  <feMerge>
+    <feMergeNode in="fog" />
+    <feMergeNode in="SourceGraphic" />
+  </feMerge>
+</filter>
+```
+
+### Warning overlay construction
+
+```xml
+<!-- Semi-transparent backdrop + glowing text -->
+<rect x="200" y="170" width="600" height="90" rx="8"
+  fill="rgba(0,0,0,0.65)" stroke="rgba(255,68,34,0.25)" />
+<text x="500" y="210" fill="#ff6644" font-size="38" font-weight="700"
+  text-anchor="middle" filter="url(#warningGlow)">
+  DIFFERENT CURVE
+</text>
+<text x="500" y="242" fill="#ff4422" font-size="17" font-weight="600"
+  text-anchor="middle" opacity="0.7" filter="url(#softGlow)">
+  VERIFICATION REQUIRED
+</text>
+```
+
+### Color scheme (red/amber fog vs blue/cyan normal)
+
+| State | Curve stroke | Fill gradient | Ambient glow | Badge text |
+|---|---|---|---|---|
+| **Normal** (37) | `#38bdf8` cyan | `#0ea5e9` → `#020617` | `#0a1830` blue | `DSP CROSSOVER — SCANNING` |
+| **Anomaly** (38) | `#ff6644` red-orange | `#ff4422` → `#020617` | `#100808` red | `DSP CROSSOVER — ANOMALY DETECTED` |
+
+**Full working demo**: `assets/codepen-different-curve.html`
+
+---
+
+## 39. Glow Projection Push Button
+
+A 3D push button with **massive** color glow that bleeds onto neighboring elements. Features 14px physical travel depth, per-color specular, and rim light from adjacent button colors.
+
+### Socket well (button housing)
+
+```css
+.socket {
+  background: #050607;
+  padding: 3px;
+  border-radius: 20px;
+  box-shadow: inset 0 8px 16px rgba(0,0,0,0.8);
+  position: relative;
+  z-index: 1;
+}
+```
+
+### Glow projection (bleeds onto neighbors)
+
+The key effect: `::before` with `inset: -15px` + `blur(10px)` on the socket, creating a massive colored glow that extends beyond the button bounds and illuminates adjacent elements.
+
+```css
+/* Orange glow (FX button) */
+.socket-fx.glow::before {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  border-radius: 30px;
+  background: radial-gradient(circle at center,
+    rgba(255,60,0,0.45) 0%,
+    rgba(255,60,0,0.1) 50%,
+    transparent 80%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Blue glow (MIC button) */
+.socket-mic.glow::before {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  border-radius: 30px;
+  background: radial-gradient(circle at center,
+    rgba(0,130,255,0.45) 0%,
+    rgba(0,130,255,0.1) 50%,
+    transparent 80%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: -1;
+}
+```
+
+### Button OFF state (raised dark slab)
+
+```css
+.btn-base {
+  width: 240px; height: 120px;
+  border-radius: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+  /* Raised slab */
+  background: linear-gradient(145deg, #2d2f35 0%, #16171a 100%);
+  border: 1px solid #3a3d45;
+  /* 14px physical travel depth */
+  transform: translateY(-14px);
+  box-shadow:
+    0 4px 0 #0d0e10,
+    0 10px 0 #08090a,
+    0 14px 0 #040506,
+    0 18px 30px rgba(0,0,0,0.8),
+    inset 2px 2px 5px rgba(255,255,255,0.08),
+    inset -2px -2px 8px rgba(0,0,0,0.7);
+}
+
+/* Glass highlight */
+.btn-base::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+  z-index: 1; pointer-events: none;
+}
+
+/* Press action */
+.btn-base:active {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 #08090a,
+    inset 1px 1px 4px rgba(0,0,0,0.9);
+}
+```
+
+### Button ON state (orange / FX)
+
+```css
+.btn-fx.active {
+  background: radial-gradient(circle at center, #ffa05d 0%, #ff4d00 45%, #9b1d00 100%);
+  border: 1px solid rgba(80,30,0,0.5);
+  transform: translateY(-16px);
+  box-shadow:
+    /* Massive glow projection */
+    0 0 50px rgba(255,60,0,0.7),
+    /* Thickness steps (side walls) */
+    0 4px 0 #7a1800,
+    0 8px 0 #5a1100,
+    0 12px 0 #3a0a00,
+    0 16px 20px rgba(0,0,0,0.9),
+    /* Internal lighting */
+    inset 0 18px 22px rgba(255,255,255,0.6),
+    inset 0 -12px 30px rgba(0,0,0,0.8);
+}
+
+/* Specular hotspot (not flat glass) */
+.btn-fx.active::before {
+  background: radial-gradient(ellipse 55% 40% at 38% 20%,
+    rgba(255,255,255,0.2) 0%,
+    rgba(255,200,150,0.05) 60%,
+    transparent 100%);
+}
+```
+
+### Button ON state (blue / MIC)
+
+```css
+.btn-mic.active {
+  background: radial-gradient(circle at center, #5dc8ff 0%, #0084ff 50%, #003d7a 100%);
+  border: 1px solid rgba(0,30,80,0.5);
+  transform: translateY(-16px);
+  box-shadow:
+    0 0 50px rgba(0,130,255,0.7),
+    0 4px 0 #002d5a,
+    0 8px 0 #001a3a,
+    0 12px 0 #000d1e,
+    0 16px 20px rgba(0,0,0,0.9),
+    inset 0 18px 22px rgba(255,255,255,0.5),
+    inset 0 -12px 30px rgba(0,0,0,0.8);
+}
+```
+
+### Rim light from adjacent button
+
+When one button is active, its color bleeds a subtle rim light onto the facing edge of the adjacent button.
+
+```css
+/* Orange rim on MIC's left edge (FX is ON) */
+.btn-mic.rim-orange::after {
+  content: '';
+  position: absolute;
+  top: 18%; bottom: 18%; left: 0;
+  width: 2px;
+  border-radius: 1px;
+  z-index: 15; pointer-events: none;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(255,120,40,0.12) 18%,
+    rgba(255,120,40,0.55) 50%,
+    rgba(255,60,0,0.12) 82%,
+    transparent 100%);
+  box-shadow:
+    0 0 3px rgba(255,60,0,0.2),
+    0 0 8px rgba(255,60,0,0.08);
+}
+
+/* Blue rim on FX's right edge (MIC is ON) */
+.btn-fx.rim-blue::after {
+  content: '';
+  position: absolute;
+  top: 18%; bottom: 18%; right: 0;
+  width: 2px;
+  border-radius: 1px;
+  z-index: 15; pointer-events: none;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(80,180,255,0.12) 18%,
+    rgba(80,180,255,0.55) 50%,
+    rgba(0,130,255,0.12) 82%,
+    transparent 100%);
+  box-shadow:
+    0 0 3px rgba(0,130,255,0.2),
+    0 0 8px rgba(0,130,255,0.08);
+}
+```
+
+### Active text glow
+
+```css
+.active .text-label {
+  color: #ffffff;
+  text-shadow:
+    0 0 15px rgba(255,255,255,0.9),
+    0 0 30px rgba(255,120,0,1);  /* Match button color */
+}
+```
+
+**Full working demo**: `assets/codepen-audio-interface-pro.html`

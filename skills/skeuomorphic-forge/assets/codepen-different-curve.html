@@ -1,0 +1,591 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Different Curve - Verification Required</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+
+            background-color: #070809;
+
+            display: flex; justify-content: center; align-items: center;
+
+            min-height: 100vh;
+
+            font-family: 'Inter', sans-serif;
+
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+
+        }
+
+        .chassis {
+
+            background: linear-gradient(180deg, #2a2c31 0%, #15171a 100%);
+
+            padding: 2px; border-radius: 16px;
+
+            box-shadow: 0 60px 100px -20px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05);
+
+        }
+
+        .chassis-inner {
+
+            background: linear-gradient(135deg, #121316 0%, #08090a 100%);
+
+            padding: 36px; border-radius: 15px;
+
+            border-top: 1px solid rgba(255,255,255,0.08);
+
+            border-bottom: 1px solid rgba(0,0,0,1);
+
+            box-shadow: inset 0 6px 15px rgba(0,0,0,0.8);
+
+        }
+
+        .screen-bezel {
+
+            position: relative; width: 750px; height: 400px;
+
+            background-color: #020304; border-radius: 10px;
+
+            box-shadow: inset 0 35px 60px -10px rgba(0,0,0,1), inset 0 0 30px 10px rgba(0,0,0,1), inset 0 2px 2px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.12);
+
+            border-top: 3px solid #000; border-left: 3px solid #000;
+
+            border-bottom: 1px solid #22252a; border-right: 1px solid #15181c;
+
+            overflow: hidden;
+
+        }
+
+        .glass-reflection {
+
+            position: absolute; inset: 0;
+
+            background: linear-gradient(110deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0) 31%), radial-gradient(150% 100% at 50% -25%, rgba(255,255,255,0.05) 0%, transparent 45%);
+
+            pointer-events: none; z-index: 50; mix-blend-mode: screen;
+
+        }
+
+        .scanlines {
+
+            position: absolute; inset: 0;
+
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+
+            background-size: 100% 4px; pointer-events: none; z-index: 40;
+
+        }
+
+        .screen-ambient-glow {
+
+            position: absolute; inset: 0;
+
+            background: radial-gradient(circle at 50% 50%, #100808 0%, #010203 100%); z-index: 0;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState, useEffect, useRef } = React;
+
+
+
+        const LOG_MIN = Math.log10(20);
+
+        const LOG_MAX = Math.log10(20000);
+
+        const LOG_RANGE = LOG_MAX - LOG_MIN;
+
+        const MARGIN_L = 55;
+
+        const MARGIN_R = 960;
+
+        const PLOT_W = MARGIN_R - MARGIN_L;
+
+
+
+        const freqToX = (hz) => ((Math.log10(hz) - LOG_MIN) / LOG_RANGE) * PLOT_W + MARGIN_L;
+
+
+
+        const Analyzer = () => {
+
+            const requestRef = useRef();
+
+            const [, setTick] = useState(0);
+
+            const timeRef = useRef(0);
+
+
+
+            // Erratic curve: random seeds for chaotic shape
+
+            const seedsRef = useRef(Array.from({ length: 60 }, () => ({
+
+                amp: (Math.random() - 0.5) * 2,
+
+                freq: 0.5 + Math.random() * 3,
+
+                phase: Math.random() * Math.PI * 2,
+
+                drift: (Math.random() - 0.5) * 0.01,
+
+            })));
+
+
+
+            // FFT bars
+
+            const fftRef = useRef(Array.from({ length: 64 }, (_, i) => {
+
+                const x = MARGIN_L + (i / 63) * PLOT_W;
+
+                return { x, y: 350, target: 350 };
+
+            }));
+
+
+
+            const animate = () => {
+
+                timeRef.current += 0.016;
+
+
+
+                // Drift seeds slowly
+
+                seedsRef.current.forEach(s => {
+
+                    s.phase += s.drift;
+
+                });
+
+
+
+                // FFT: sporadic, muted
+
+                if (Math.random() > 0.88) {
+
+                    fftRef.current.forEach(pt => {
+
+                        const normX = (pt.x - MARGIN_L) / PLOT_W;
+
+                        const edgeFade = Math.min(normX * 5, 1) * Math.min((1 - normX) * 5, 1);
+
+                        pt.target = 200 + Math.random() * 180 * edgeFade + (1 - edgeFade) * 40;
+
+                    });
+
+                }
+
+                fftRef.current.forEach(pt => { pt.y += (pt.target - pt.y) * 0.04; });
+
+
+
+                setTick(t => t + 1);
+
+                requestRef.current = requestAnimationFrame(animate);
+
+            };
+
+
+
+            useEffect(() => {
+
+                requestRef.current = requestAnimationFrame(animate);
+
+                return () => cancelAnimationFrame(requestRef.current);
+
+            }, []);
+
+
+
+            const zeroDbY = 150;
+
+            const dbToY = (db) => zeroDbY - db * (50 / 6);
+
+
+
+            // Build erratic curve: sum of sine waves at different frequencies
+
+            const buildErratic = () => {
+
+                const pts = [];
+
+                const steps = 300;
+
+                const seeds = seedsRef.current;
+
+                const t = timeRef.current;
+
+                for (let i = 0; i <= steps; i++) {
+
+                    const norm = i / steps;
+
+                    const x = MARGIN_L + norm * PLOT_W;
+
+                    let y = zeroDbY;
+
+
+
+                    // Sum chaotic oscillations
+
+                    for (let s = 0; s < seeds.length; s++) {
+
+                        const seed = seeds[s];
+
+                        y += seed.amp * 18 * Math.sin(norm * seed.freq * 12 + seed.phase + t * 0.3);
+
+                    }
+
+
+
+                    // Add some sharp spikes
+
+                    if (norm > 0.15 && norm < 0.25) y -= 45 + Math.sin(t * 0.5) * 10;
+
+                    if (norm > 0.4 && norm < 0.48) y += 55 + Math.sin(t * 0.7) * 8;
+
+                    if (norm > 0.6 && norm < 0.65) y -= 35;
+
+                    if (norm > 0.78 && norm < 0.85) y += 40 + Math.sin(t * 0.4) * 12;
+
+                    if (norm > 0.9) y += (norm - 0.9) * 300;
+
+
+
+                    // Clamp
+
+                    y = Math.max(60, Math.min(420, y));
+
+                    pts.push(`${x.toFixed(1)} ${y.toFixed(1)}`);
+
+                }
+
+                return pts;
+
+            };
+
+
+
+            const erraticPts = buildErratic();
+
+            const erraticCurve = `M ${erraticPts.join(' L ')}`;
+
+            const erraticFill = `${erraticCurve} L ${MARGIN_R} 460 L ${MARGIN_L} 460 Z`;
+
+
+
+            const fftPath = `M ${MARGIN_L} 440 ${fftRef.current.map(p => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')} L ${MARGIN_R} 440`;
+
+
+
+            const gridFreqs = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+
+            const gridLabels = ["20", "50", "100", "200", "500", "1k", "2k", "5k", "10k", "20k"];
+
+            const dbMarks = [6, 0, -6, -12, -18, -24, -30, -36, -42];
+
+
+
+            return (
+
+                <div className="chassis">
+
+                    <div className="chassis-inner">
+
+                        <div className="screen-bezel">
+
+                            <div className="screen-ambient-glow" />
+
+                            <div className="scanlines" />
+
+                            <div className="glass-reflection" />
+
+
+
+                            {/* Grid */}
+
+                            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 10 }}
+
+                                viewBox="0 0 1000 500" preserveAspectRatio="none">
+
+
+
+                                <g stroke="#1a2233" strokeWidth="1" strokeDasharray="4 4" opacity="0.5">
+
+                                    {dbMarks.map((db, i) => {
+
+                                        const y = dbToY(db);
+
+                                        return y > 40 && y < 455 ? <line key={i} x1={MARGIN_L} y1={y} x2={MARGIN_R} y2={y} /> : null;
+
+                                    })}
+
+                                </g>
+
+
+
+                                <line x1={MARGIN_L} y1={zeroDbY} x2={MARGIN_R} y2={zeroDbY}
+
+                                    stroke="#2a3550" strokeWidth="1.5" opacity="0.6" />
+
+
+
+                                <g stroke="#1a2233" strokeWidth="1" strokeDasharray="4 4" opacity="0.4">
+
+                                    {gridFreqs.map((f, i) => (
+
+                                        <line key={i} x1={freqToX(f)} y1="40" x2={freqToX(f)} y2="450" />
+
+                                    ))}
+
+                                </g>
+
+
+
+                                <g fill="#3a4860" fontSize="11" fontWeight="600" fontFamily="Inter" textAnchor="end">
+
+                                    {dbMarks.map((db, i) => {
+
+                                        const y = dbToY(db);
+
+                                        if (y < 45 || y > 450) return null;
+
+                                        return <text key={i} x={MARGIN_L - 6} y={y + 4}>{db > 0 ? `+${db}` : db}</text>;
+
+                                    })}
+
+                                </g>
+
+
+
+                                <g fill="#3a4860" fontSize="11" fontWeight="600" fontFamily="Inter" textAnchor="middle">
+
+                                    {gridFreqs.map((f, i) => (
+
+                                        <text key={i} x={freqToX(f)} y="470">{gridLabels[i]}</text>
+
+                                    ))}
+
+                                    <text x="500" y="492" fill="#2a3448" fontSize="9">Hz</text>
+
+                                </g>
+
+
+
+                                <text x="18" y="250" fill="#2a3448" fontSize="9" fontFamily="Inter"
+
+                                    transform="rotate(-90, 18, 250)" textAnchor="middle">dB</text>
+
+                            </svg>
+
+
+
+                            {/* Curves */}
+
+                            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 20 }}
+
+                                viewBox="0 0 1000 500" preserveAspectRatio="none">
+
+                                <defs>
+
+                                    {/* Foggy red/amber fill */}
+
+                                    <linearGradient id="erraticFill" x1="0" y1="0" x2="0" y2="1">
+
+                                        <stop offset="0%" stopColor="#ff4422" stopOpacity="0.12" />
+
+                                        <stop offset="40%" stopColor="#cc3311" stopOpacity="0.04" />
+
+                                        <stop offset="100%" stopColor="#020617" stopOpacity="0" />
+
+                                    </linearGradient>
+
+                                    <filter id="fogBlur" x="-10%" y="-10%" width="120%" height="120%">
+
+                                        <feGaussianBlur stdDeviation="6" result="fog" />
+
+                                        <feMerge><feMergeNode in="fog" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                    <filter id="heavyFog" x="-10%" y="-10%" width="120%" height="120%">
+
+                                        <feGaussianBlur stdDeviation="12" />
+
+                                    </filter>
+
+                                    <filter id="warningGlow" x="-20%" y="-20%" width="140%" height="140%">
+
+                                        <feGaussianBlur stdDeviation="4" result="g" />
+
+                                        <feMerge><feMergeNode in="g" /><feMergeNode in="g" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                    <filter id="softGlow">
+
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                </defs>
+
+
+
+                                {/* FFT muted */}
+
+                                <path d={fftPath} fill="none" stroke="#1a1520" strokeWidth="2" strokeLinejoin="round" />
+
+
+
+                                {/* Foggy haze layer (heavy blur, very low opacity) */}
+
+                                <path d={erraticFill} fill="url(#erraticFill)" filter="url(#heavyFog)" opacity="0.7"
+
+                                    style={{ mixBlendMode: 'screen' }} />
+
+
+
+                                {/* Erratic curve fill (misty) */}
+
+                                <path d={erraticFill} fill="url(#erraticFill)" opacity="0.5"
+
+                                    style={{ mixBlendMode: 'screen' }} />
+
+
+
+                                {/* Erratic curve: foggy stroke */}
+
+                                <path d={erraticCurve} fill="none" stroke="#ff4422" strokeWidth="4"
+
+                                    strokeLinejoin="round" filter="url(#fogBlur)" opacity="0.2" />
+
+
+
+                                {/* Erratic curve: sharper visible stroke */}
+
+                                <path d={erraticCurve} fill="none" stroke="#ff6644" strokeWidth="2.5"
+
+                                    strokeLinejoin="round" opacity="0.35" />
+
+
+
+                                {/* 0dB reference line (dimmed) */}
+
+                                <rect x={MARGIN_L} y={zeroDbY - 1} width={PLOT_W} height="2"
+
+                                    rx="1" fill="#38bdf8" opacity="0.08" />
+
+
+
+                                {/* ====== WARNING MESSAGE (centered) ====== */}
+
+                                <g>
+
+                                    <rect x="200" y="170" width="600" height="90" rx="8"
+
+                                        fill="rgba(0,0,0,0.65)" stroke="rgba(255,68,34,0.25)" strokeWidth="1" />
+
+
+
+                                    <text x="500" y="210" fill="#ff6644" fontSize="38" fontWeight="700"
+
+                                        fontFamily="Inter" textAnchor="middle"
+
+                                        filter="url(#warningGlow)">
+
+                                        DIFFERENT CURVE
+
+                                    </text>
+
+                                    <text x="500" y="242" fill="#ff4422" fontSize="17" fontWeight="600"
+
+                                        fontFamily="Inter" textAnchor="middle" opacity="0.7"
+
+                                        filter="url(#softGlow)">
+
+                                        VERIFICATION REQUIRED
+
+                                    </text>
+
+                                </g>
+
+
+
+                                {/* Warning triangle icons */}
+
+                                <g opacity="0.6" filter="url(#softGlow)">
+
+                                    <text x="222" y="220" fill="#ff4422" fontSize="38" fontFamily="Inter" textAnchor="middle">⚠</text>
+
+                                    <text x="778" y="220" fill="#ff4422" fontSize="38" fontFamily="Inter" textAnchor="middle">⚠</text>
+
+                                </g>
+
+
+
+                                {/* DSP badge */}
+
+                                <text x={MARGIN_L + 10} y="448" fill="#ff4422" fontSize="9" fontWeight="600"
+
+                                    fontFamily="Inter" opacity="0.5"
+
+                                    style={{ filter: 'drop-shadow(0 0 5px rgba(255,68,34,0.3))' }}>
+
+                                    DSP CROSSOVER — ANOMALY DETECTED
+
+                                </text>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<Analyzer />);
+
+    </script>
+
+</body>
+
+</html> \
