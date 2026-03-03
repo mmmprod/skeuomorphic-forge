@@ -523,14 +523,208 @@ const rollDigit = (target: number, onComplete: () => void) => {
 
 ---
 
+## 34. Deep Chassis Hole (Ultra-Recess Display Mount)
+
+Advanced variant of the 3-ring bezel that creates an **extreme depth illusion** — the display appears to sit deep inside a machined cavity. Uses 30+ box-shadow layers for omnidirectional darkness.
+
+### Chassis hole construction
+
+The key innovation: shadows attack from **all 8 directions** (top, bottom, left, right, and 4 diagonals) with progressive blur distances, creating a tunnel-like depth.
+
+```css
+.chassis-hole {
+  position: relative;
+  padding: 5px 6px 8px 6px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, #000 0%, #020202 70%, #080808 100%);
+  box-shadow:
+    /* === TOP EDGE (7 layers, progressive depth) === */
+    inset 0 1px 0 #000,
+    inset 0 2px 0 #000,
+    inset 0 3px 1px #000,
+    inset 0 4px 4px rgba(0,0,0,1),
+    inset 0 8px 10px rgba(0,0,0,1),
+    inset 0 14px 18px rgba(0,0,0,0.95),
+    inset 0 22px 30px rgba(0,0,0,0.85),
+    inset 0 32px 50px rgba(0,0,0,0.6),
+    /* === LEFT EDGE (5 layers) === */
+    inset 1px 0 0 #000,
+    inset 2px 0 0 #000,
+    inset 6px 0 8px rgba(0,0,0,1),
+    inset 12px 0 16px rgba(0,0,0,0.9),
+    inset 20px 0 24px rgba(0,0,0,0.6),
+    /* === RIGHT EDGE (5 layers) === */
+    inset -1px 0 0 #000,
+    inset -2px 0 0 #000,
+    inset -6px 0 8px rgba(0,0,0,1),
+    inset -12px 0 16px rgba(0,0,0,0.9),
+    inset -20px 0 24px rgba(0,0,0,0.6),
+    /* === BOTTOM EDGE (5 layers) === */
+    inset 0 -4px 4px rgba(0,0,0,1),
+    inset 0 -8px 10px rgba(0,0,0,1),
+    inset 0 -14px 18px rgba(0,0,0,0.95),
+    inset 0 -22px 30px rgba(0,0,0,0.85),
+    inset 0 -32px 50px rgba(0,0,0,0.6),
+    /* === DIAGONAL CORNERS (4 layers) === */
+    inset 10px 10px 18px rgba(0,0,0,0.9),
+    inset -10px 10px 18px rgba(0,0,0,0.9),
+    inset 10px -10px 18px rgba(0,0,0,0.9),
+    inset -10px -10px 18px rgba(0,0,0,0.9),
+    /* === EXTERNAL (lip highlight + drop shadow) === */
+    0 1px 0 rgba(255,255,255,0.05),
+    0 2px 0 rgba(255,255,255,0.02),
+    0 -1px 0 rgba(0,0,0,0.9),
+    0 -2px 4px rgba(0,0,0,0.6),
+    0 6px 24px rgba(0,0,0,0.6),
+    0 12px 48px rgba(0,0,0,0.4);
+  border-top: 1px solid #000;
+  border-left: 1px solid #010101;
+  border-right: 1px solid #010101;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+```
+
+### Colored rim bleed (::before)
+
+A subtle colored glow at the top edge where the display light "bleeds" through the chassis gap.
+
+```css
+.chassis-hole::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 12%;
+  width: 76%;
+  height: 1px;
+  z-index: 25;
+  pointer-events: none;
+  /* Change rgba(255,65,45,...) to match display color */
+  background: radial-gradient(ellipse 55% 100% at 50% 50%,
+    rgba(255,65,45,0.45) 0%,
+    rgba(255,55,35,0.18) 45%,
+    transparent 100%);
+  box-shadow: 0 0 2px rgba(255,60,40,0.15);
+}
+```
+
+### Directional vignette (::after)
+
+5-layer overlay that darkens all edges independently, creating a tunnel perspective.
+
+```css
+.chassis-hole::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 20%, transparent 45%),
+    linear-gradient(90deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 15%, transparent 35%),
+    linear-gradient(270deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 15%, transparent 35%),
+    linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 20%, transparent 45%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.3) 80%, rgba(0,0,0,0.6) 100%);
+}
+```
+
+### Screen glass (display inside the hole)
+
+Multi-layer glass surface with colored gradient base, deep inset shadows, and 6-layer specular reflection.
+
+```css
+.screen-glass {
+  position: relative;
+  width: 420px;
+  min-height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+  /* Colored gradient base — change rgba(80,8,4) to match theme */
+  background: linear-gradient(270deg,
+    rgba(80,8,4,0.7) 0%,
+    rgba(40,4,2,0.5) 40%,
+    #020101 75%);
+  box-shadow:
+    0 0 0 1px rgba(255,80,50,0.8),      /* color border */
+    0 0 8px 1px rgba(255,60,40,0.25),    /* outer glow */
+    0 4px 12px rgba(255,40,20,0.15),     /* cast glow */
+    inset 0 18px 20px -10px rgba(0,0,0,1),
+    inset 0 -18px 20px -10px rgba(0,0,0,1),
+    inset 24px 0 24px -12px rgba(0,0,0,1),
+    inset 40px 0 35px -15px rgba(0,0,0,1),
+    inset 60px 0 50px -20px rgba(0,0,0,0.95),
+    inset 80px 0 60px -25px rgba(0,0,0,0.85),
+    inset 110px 0 80px -30px rgba(0,0,0,0.6),
+    inset -24px 0 24px -12px rgba(0,0,0,1);
+}
+
+/* 6-layer glass reflection */
+.screen-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 15;
+  background:
+    radial-gradient(ellipse 160% 45% at 50% -8%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 35%, transparent 50%),
+    radial-gradient(ellipse 40% 25% at 30% 8%, rgba(255,255,255,0.1) 0%, transparent 70%),
+    linear-gradient(125deg, transparent 20%, rgba(255,255,255,0.025) 24%, rgba(255,255,255,0.05) 28%, rgba(255,255,255,0.025) 32%, transparent 36%),
+    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,0.012) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 12% at 50% 98%, rgba(255,255,255,0.03) 0%, transparent 80%),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 0%, transparent 2.5%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 2px 4px rgba(255,255,255,0.02),
+    inset 0 -1px 0 rgba(255,255,255,0.02);
+}
+```
+
+### Phosphor text (content inside screen)
+
+```css
+.phosphor-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: #ff6b5a;
+  text-shadow:
+    0 0 1px rgba(255,107,90,1),
+    0 0 6px rgba(255,80,60,0.7),
+    0 0 12px rgba(255,40,20,0.3);
+  animation: text-breathe 4s infinite ease-in-out;
+}
+
+@keyframes text-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.9; }
+}
+```
+
+**Color variants** — replace red values to theme the entire assembly:
+
+| Theme | Phosphor color | Glow base | Rim bleed |
+|---|---|---|---|
+| **Red/Danger** | `#ff6b5a` | `rgba(255,80,60,...)` | `rgba(255,65,45,...)` |
+| **Amber/Warm** | `#ffb060` | `rgba(255,160,60,...)` | `rgba(255,150,45,...)` |
+| **Green/Status** | `#60ff90` | `rgba(60,255,100,...)` | `rgba(45,255,65,...)` |
+| **Blue/Info** | `#60a0ff` | `rgba(60,120,255,...)` | `rgba(45,100,255,...)` |
+
+**Full working demo**: `assets/codepen-deep-screen.html`
+
+---
+
 ## Quick Reference — Retro-Industrial Decision Matrix
 
 | Building... | Use pattern | Key technique |
 |---|---|---|
 | Instrument readout | 27 (3-ring bezel) + 28 (CRT) | Conic gradient chassis + scanline display |
+| Deep-set display | 34 (chassis hole) + 28 (CRT) | 30+ shadow omnidirectional depth + glass |
 | Status indicator | 29 (LED system) | Multi-shadow halo + pulse animation |
 | Mounting panel | 30 (Torx screws) + file 01 raised surface | Cast iron texture + corner screws |
 | Text input field | 32 (Glitch input) | Corner brackets + scanline sweep |
 | Numeric display | 33 (Mechanical counter) | Rolling digits + digit well + vignette |
 | Metal surface | 31 (feTurbulence) | SVG noise overlay + warm gradient |
 | Panel label | Section 28 phosphor glow | Silkscreen or phosphor text-shadow |
+| Warning/alert screen | 34 (chassis hole, red theme) | Color-themed phosphor + rim bleed |
