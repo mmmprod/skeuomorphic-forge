@@ -1,5 +1,12 @@
 # Skeuomorphic Forge
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-skill-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mmmprod/skeuomorphic-forge/pulls)
+[![GitHub issues](https://img.shields.io/github/issues/mmmprod/skeuomorphic-forge)](https://github.com/mmmprod/skeuomorphic-forge/issues)
+[![GitHub stars](https://img.shields.io/github/stars/mmmprod/skeuomorphic-forge?style=social)](https://github.com/mmmprod/skeuomorphic-forge)
+
 A Claude Code skill for creating production-grade skeuomorphic UI with Tailwind CSS.
 
 ## What it does
@@ -52,6 +59,23 @@ skeuomorphic-forge/
 └── README.md
 ```
 
+## Contributing
+
+Contributions are welcome! Feel free to:
+
+- Open an **issue** to report bugs or suggest new material/effect types
+- Submit a **pull request** with improvements, new reference guides, or fixes
+- Fork and adapt for your own projects
+
+### How to contribute
+
+1. Fork this repo
+2. Create a branch (`git checkout -b feature/new-material`)
+3. Make your changes
+4. Commit (`git commit -m "Add ceramic material reference"`)
+5. Push (`git push origin feature/new-material`)
+6. Open a Pull Request
+
 ## License
 
-MIT
+[MIT](LICENSE) — use it, modify it, share it, sell it, do whatever you want.
