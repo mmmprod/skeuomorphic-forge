@@ -13,7 +13,15 @@ A Claude Code skill for creating production-grade skeuomorphic UI with Tailwind 
 
 Generates physically-realistic UI elements: buttons with mechanical depth, gauges, meters, LED/nixie indicators, toggle switches, sliders, progress bars, cards with material textures (metal, glass, leather, wood, paper, fabric, concrete, plastic), industrial panels, CRT/VFD displays, neumorphic components, and particle effects.
 
-Covers both **dark** (industrial, military) and **light** (classic, iOS-era, neumorphic) themes.
+Covers both **dark** (industrial, military, retro-aerospace) and **light** (classic, iOS-era, neumorphic) themes.
+
+### Key features
+
+- **102+ community-proven CSS patterns** with React/Tailwind implementations
+- **Component Lookup Table** — maps every component type to specific pattern numbers and reference files
+- **5 inline quick-reference recipes** — dark card shadows, bevel buttons, rim light, phosphor glow, silkscreen
+- **Mandatory pre-build protocol** — forces consistent quality across LLM-generated components
+- **40+ HTML assets** — production CodePen examples for buttons, gauges, toggles, displays, and more
 
 ## Triggers
 
@@ -43,19 +51,21 @@ skeuomorphic-forge/
 ├── skills/
 │   └── skeuomorphic-forge/
 │       ├── SKILL.md              # Main skill file
-│       ├── references/           # 10 detailed reference guides
+│       ├── references/           # 11 detailed reference guides
 │       │   ├── 01-shadows-materials-textures.md
 │       │   ├── 02-hardware-animation-neumorphism.md
 │       │   ├── 03-blueprints-performance-palettes.md
-│       │   ├── 04-community-techniques.md
+│       │   ├── 04-community-techniques.md    # 102 patterns (14.1–14.102)
 │       │   ├── 05-physics-composition-interaction-typography.md
 │       │   ├── 06-aging-safety-tokens-palettes.md
 │       │   ├── 07-glass-effects.md
 │       │   ├── 08-metal-effects.md
 │       │   ├── 09-rim-light-effects.md
-│       │   └── 10-particle-effects.md
-│       └── assets/
-│           └── agile-tech-skeuomorphic-site.html
+│       │   ├── 10-particle-effects.md
+│       │   └── 11-retro-industrial-patterns.md
+│       └── assets/               # 40+ HTML examples
+│           ├── agile-tech-skeuomorphic-site.html
+│           └── codepen-*.html    # Production CodePen demos
 └── README.md
 ```
 

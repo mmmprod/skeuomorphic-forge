@@ -7261,3 +7261,1411 @@ function syncBelowLabelColors() {
 - **Horizontal axis rotation from 14.93**: All gradients rotate 90°: `circle at 50% 0%` becomes `circle at 0% 50%`, `linear-gradient(180deg)` becomes `linear-gradient(90deg)`. The plasma mercury changes from `height`-driven to `width`-driven, and the knob draggable switches from `type: "y"` to `type: "x"`.
 - **CSS custom property as animation target**: `--tick-base-height` is read from CSS via `getComputedStyle()` in JS, making the expansion multipliers relative. Changing the CSS variable changes all tier heights proportionally without JS modification.
 - **Skeuomorphic application**: The equalizer tick visualization is directly applicable to **DSP frequency band selectors** (each tick = a frequency, active band expands), **audio level meters** (horizontal VU with per-dB tick expansion), **crossover frequency sliders** (ticks represent Hz, expansion shows the active crossover point), and **parametric EQ band width indicators** (neighbor tiers = Q factor visualization). The ambient blur circle technique works for any glowing UI element that should cast environmental light onto its background.
+
+### 14.95 — 3-Layer Bevel Button with Outside Bevel Ring + Glow Halo + Inset Highlight
+
+Classic skeuomorphic push-button with three concentric construction layers that simulate a physical button recessed into a beveled chassis. The outer bevel ring creates the illusion of a machined surround, the glow halo softens the transition, and the inner button face uses an inset white shadow for convex curvature.
+
+**Construction layers (outside → inside):**
+1. **Outside bevel** — gradient ring (`#577597` → `#d7dde1` top-to-bottom) with dark top border + light bottom border = inverse lighting that makes the surround appear concave (recessed into the panel)
+2. **Glow halo** — `box-shadow: 0 0 6px white` soft radial glow between bevel and button, simulating ambient light catch on the inner chamfer
+3. **Button face** — gradient fill (`#b6c4d2` → `#7891ac` top-to-bottom) with `inset 0 2px 0 white` specular line at the top edge + dark 2px border = convex surface catching overhead light
+
+**3 interaction states:**
+- **Hover**: lightened gradient (`#d7e5f5` → `#a5c3e1`) — surface brightens as if a light source moved closer
+- **Active**: flat dark fill (`#6c839a`) + `inset 0 0 8px #263039` cavity shadow + text-shadow removed — button physically depresses into the chassis
+- **Text shadow**: `0 1px 0 white` on default state creates embossed/stamped text; removed on active to simulate the text sinking flush with the surface
+
+```css
+/* Layer 1: Outside bevel ring — concave surround */
+.outside-bevel {
+  padding: 4px;
+  border-radius: 20px;
+  background: linear-gradient(to bottom, #577597 0%, #d7dde1 100%);
+  border-top: 2px solid #405973;    /* dark top = shadow on upper rim */
+  border-bottom: 2px solid white;   /* light bottom = highlight on lower rim */
+}
+
+/* Layer 2: Glow halo — ambient light catch */
+.glow-halo {
+  border-radius: 20px;
+  box-shadow: 0 0 6px white;
+}
+
+/* Layer 3: Button face — convex surface */
+.bevel-button {
+  padding: 10px 70px;
+  border: 2px solid #142136;
+  border-radius: 15px;
+  background: linear-gradient(to bottom, #b6c4d2 0%, #7891ac 100%);
+  box-shadow: inset 0 2px 0 white;  /* specular highlight at top edge */
+}
+
+/* Hover — lightened surface */
+.bevel-button:hover {
+  background: linear-gradient(to bottom, #d7e5f5 1%, #a5c3e1 100%);
+}
+
+/* Active — depressed into chassis */
+.bevel-button:active {
+  background: #6c839a;
+  box-shadow: inset 0 0 8px #263039;  /* cavity shadow replaces specular */
+}
+
+/* Text treatment — embossed label */
+.bevel-button p {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  font-weight: bold;
+  font-style: italic;
+  color: #142136;
+  text-shadow: 0 1px 0 white;  /* stamped/embossed into surface */
+  text-decoration: none;
+}
+.bevel-button:active p {
+  text-shadow: none;  /* flush with depressed surface */
+}
+```
+
+**React/Tailwind implementation:**
+```tsx
+const BEVEL_RING_STYLE: React.CSSProperties = {
+  padding: 4,
+  borderRadius: 20,
+  background: 'linear-gradient(to bottom, #577597 0%, #d7dde1 100%)',
+  borderTop: '2px solid #405973',
+  borderBottom: '2px solid white',
+};
+
+const GLOW_HALO_STYLE: React.CSSProperties = {
+  borderRadius: 20,
+  boxShadow: '0 0 6px white',
+};
+
+const BUTTON_FACE_STYLE: React.CSSProperties = {
+  padding: '10px 70px',
+  border: '2px solid #142136',
+  borderRadius: 15,
+  background: 'linear-gradient(to bottom, #b6c4d2 0%, #7891ac 100%)',
+  boxShadow: 'inset 0 2px 0 white',
+};
+
+const BUTTON_ACTIVE_STYLE: React.CSSProperties = {
+  background: '#6c839a',
+  boxShadow: 'inset 0 0 8px #263039',
+};
+
+function BevelButton({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  return (
+    <div style={BEVEL_RING_STYLE}>
+      <div style={GLOW_HALO_STYLE}>
+        <button
+          onClick={onClick}
+          className="bevel-btn font-serif text-[15px] font-bold italic text-[#142136]"
+          style={BUTTON_FACE_STYLE}
+        >
+          {children}
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+**Design notes:**
+- **Inverse gradient on bevel ring**: The outer bevel uses a dark-to-light gradient (dark top, light bottom) which is the OPPOSITE of the button face gradient (light top, dark bottom). This inversion is deliberate — the surround is a concave channel (shadow at top where light can't reach) while the button is a convex dome (highlight at top where light hits first). This contrast sells the depth relationship.
+- **Border asymmetry = single light source**: The bevel ring has `border-top: dark` + `border-bottom: light`. The button face has `inset 0 2px 0 white` at top only. Both are consistent with overhead lighting (top-left default). Moving the light source requires flipping BOTH the border asymmetry and the inset shadow offset.
+- **Glow halo as chamfer simulation**: The `0 0 6px white` unpositioned glow between layers simulates the soft light catch on a 45° chamfered edge between the recessed surround and the raised button. Without this layer, the transition looks like a flat border; with it, there's an implied physical bevel.
+- **Active state mechanics**: On press, three things change simultaneously: (1) gradient becomes flat dark fill (surface no longer catches directional light because it's recessed), (2) box-shadow switches from specular highlight to cavity shadow (concave not convex), (3) text-shadow removed (text no longer raised above surface). This triple change is what makes the press feel physical.
+- **Typography as physical process**: The Georgia italic + bold + white text-shadow combination emulates text that has been physically stamped or embossed into the button surface — the white shadow below each letter is the light catching the lower edge of the impression. Removing it on active means the impression fills flush when depressed.
+- **Skeuomorphic application**: This 3-layer bevel construction is directly applicable to **DSP panel action buttons** (bypass, mute, solo), **calibration step confirm buttons**, **modal dialog actions** (save/cancel on equipment panels), and **toolbar controls** on industrial UI. The concave-surround + convex-button relationship maps to real hardware push-buttons found on mixing consoles and test equipment. For dark industrial themes, substitute the palette: bevel ring `#2a2a2a` → `#4a4a4a`, button face `#3a3a3a` → `#1a1a1a`, glow halo amber `0 0 6px rgba(255,180,0,0.3)`.
+
+### 14.96 — Bevelled Effect Icons with Dual Text-Shadow Engraving
+
+Icon/text treatment that simulates **physically engraved or stamped lettering** on a dark textured surface. Uses a minimal dual text-shadow system — one light pixel below-right (edge catch) and one dark pixel above-left (shadow inside the groove) — to create a convincing incised/bevelled appearance on any text or icon glyph. No gradients, no box-shadows — pure text-shadow illusion.
+
+**Physical model:**
+The technique emulates **CNC-engraved text on anodized aluminum** or **laser-etched markings on dark polymer panels**. When a character is cut into a dark surface:
+- The **lower-right edge** of each stroke catches overhead light → bright pixel (`#555`)
+- The **upper-left edge** is in shadow inside the groove → dark pixel (`#000`)
+- The **face of the groove** is slightly lighter than the surrounding surface → muted fill color (`#202020` on a `#1a1a1a`-ish background)
+
+This is the inverse of embossed text (where light is top-left and shadow is bottom-right). Engraved = recessed into surface = light catches the far edge of the cut.
+
+**Core technique:**
+```css
+.bevel-icon {
+  color: #202020;                                    /* groove face — slightly lighter than background */
+  text-shadow:
+    1px 1px 1px #555,                                /* lower-right edge catch (light hitting far wall) */
+    -1px -1px 1px #000;                              /* upper-left shadow (inside the groove) */
+}
+```
+
+**Full implementation with dark textured background:**
+```css
+/* Container — dark canvas/metal texture background */
+.icon-bar {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 48px;
+  background: #1a1a1a;  /* or textured: url('canvas-dark.png') */
+}
+
+/* Icon — bevelled/engraved appearance */
+.bevel-icon {
+  font-size: 48px;         /* works at any size — text-shadow scales visually */
+  color: #202020;
+  text-shadow:
+    1px 1px 1px #555,
+    -1px -1px 1px #000;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+/* Hover — icon "lights up" as if backlit */
+.bevel-icon:hover {
+  color: #808080;
+  text-shadow:
+    1px 1px 1px #999,
+    -1px -1px 1px #222,
+    0 0 8px rgba(255, 255, 255, 0.15);   /* subtle ambient glow */
+}
+
+/* Label beneath icon — same engraved treatment at smaller scale */
+.icon-label {
+  display: block;
+  color: #656565;
+  font-size: 14px;
+  padding-top: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+```
+
+**React/Tailwind implementation:**
+```tsx
+const BEVEL_ICON_STYLE: React.CSSProperties = {
+  color: '#202020',
+  textShadow: '1px 1px 1px #555, -1px -1px 1px #000',
+  transition: 'color 0.2s, text-shadow 0.2s',
+};
+
+const BEVEL_ICON_HOVER_STYLE: React.CSSProperties = {
+  color: '#808080',
+  textShadow: '1px 1px 1px #999, -1px -1px 1px #222, 0 0 8px rgba(255,255,255,0.15)',
+};
+
+function BevelledIcon({
+  src,
+  alt,
+  label,
+  href,
+}: {
+  src: string;
+  alt: string;
+  label: string;
+  href?: string;
+}) {
+  const [hovered, setHovered] = React.useState(false);
+  const style = hovered ? BEVEL_ICON_HOVER_STYLE : BEVEL_ICON_STYLE;
+
+  /* For image-based icons (Next.js <Image> or <img>), apply the bevel
+     via a CSS filter + mix-blend-mode wrapper instead of text-shadow */
+  return (
+    <a
+      href={href}
+      className="flex flex-col items-center no-underline"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span className="text-5xl" style={style} aria-label={alt}>
+        {/* For font icons: render glyph directly */}
+        {/* For image icons: use filter approach below */}
+      </span>
+      <span className="block text-[#656565] text-sm pt-3 uppercase tracking-wider">
+        {label}
+      </span>
+    </a>
+  );
+}
+
+/* Image-icon variant — bevel effect via CSS filter on <img>/<Image> */
+const BEVEL_IMAGE_ICON_STYLE: React.CSSProperties = {
+  filter: 'brightness(0.15) drop-shadow(1px 1px 1px #555) drop-shadow(-1px -1px 1px #000)',
+  transition: 'filter 0.2s',
+};
+
+const BEVEL_IMAGE_ICON_HOVER_STYLE: React.CSSProperties = {
+  filter: 'brightness(0.5) drop-shadow(1px 1px 1px #999) drop-shadow(-1px -1px 1px #222) drop-shadow(0 0 8px rgba(255,255,255,0.15))',
+};
+```
+
+**Variations by aesthetic family:**
+
+| Family | Groove color | Light catch | Shadow | Background |
+|---|---|---|---|---|
+| **Industrial/Dark** | `#202020` | `#555` | `#000` | `#0a0a0a`–`#1a1a1a` |
+| **Retro-Industrial** | `hsl(30 10% 14%)` | `hsl(35 12% 38%)` | `hsl(30 14% 4%)` | `hsl(30 12% 8%)` |
+| **Brushed aluminum** | `#b0b0b0` | `#fff` | `#666` | `#c8c8c8` |
+| **Anodized black** | `#181818` | `#444` | `#000` | `#111` |
+
+**Warm industrial variant (Retro-Industrial family):**
+```css
+.bevel-icon-warm {
+  color: hsl(30 10% 14%);
+  text-shadow:
+    1px 1px 1px hsl(35 12% 38%),
+    -1px -1px 1px hsl(30 14% 4%);
+}
+.bevel-icon-warm:hover {
+  color: hsl(35 60% 40%);
+  text-shadow:
+    1px 1px 1px hsl(40 12% 50%),
+    -1px -1px 1px hsl(30 14% 10%),
+    0 0 10px rgba(255, 180, 0, 0.2);
+}
+```
+
+**Design notes:**
+- **Why only 2 shadow layers work**: Unlike box-shadow bevel effects that need 5-15 layers (per skill depth standard), text-shadow engraving works at 2 layers because the human eye reads text strokes differently than solid surfaces. A 1px offset on a thin stroke is proportionally much larger than 1px on a 200px panel — the relative depth-to-width ratio is higher, so fewer layers suffice.
+- **The `#202020` vs background delta**: The groove face color must be only 5-15% lighter than the background to maintain the illusion. Too much contrast (`#404040` on `#0a0a0a`) and it reads as colored text, not engraved. Too little contrast (`#1c1c1c` on `#1a1a1a`) and the engraving disappears. The sweet spot is 10-20 luminance units of difference.
+- **Scaling behavior**: Unlike box-shadow which must be manually scaled for responsive breakpoints, text-shadow at 1px remains visually effective from 14px to 96px font-size because the shadow-to-glyph ratio changes automatically. At large sizes (>64px), consider bumping to `2px 2px 1px` for the light catch.
+- **Image icons adaptation**: For `<img>` or Next.js `<Image>` icons (which can't use text-shadow), the equivalent effect uses chained `drop-shadow()` CSS filters. The `brightness(0.15)` darkens the icon to match the groove color, then dual drop-shadows create the same light-catch/groove-shadow pair. Performance note: `drop-shadow` is more expensive than `text-shadow` — limit to ≤6 image icons simultaneously.
+- **Skeuomorphic application**: Directly applicable to **DSP panel silkscreen labels** (channel names, parameter labels), **status bar icons** (signal indicators, connectivity), **footer navigation icons**, **sidebar tool icons** on dark industrial panels, and **equipment selector category icons**. The warm industrial variant matches the Retro-Industrial aesthetic family for aged aerospace instrument markings. Combine with pattern 14.95 (bevel button) for a complete panel with both engraved labels and raised push-buttons.
+
+### 14.97 — Shape-Shifted Bevel Button with Cast Shadow Lift + Inset Depression
+
+Single-element bevel button that relies on a **high-contrast cast shadow + translateY animation** to create the illusion of a physical button that lifts off the surface on hover and depresses into a well on active. The key innovation is the **shape-shifting border-radius** — 7 variants from a single CSS class by overriding `border-radius` inline, proving that the bevel+shadow system works on any silhouette (pill, leaf, shield, square, rounded-rect, asymmetric).
+
+**Physical model:**
+A thick plastic or rubber button mounted on springs above a light-colored chassis. At rest, the button floats slightly above the surface (small cast shadow). On hover, the springs extend and the button lifts higher (larger, more diffuse shadow + translateY up). On active/press, the button compresses past its resting point into a recessed well (shadow collapses to contact, inset shadow appears as the cavity walls become visible).
+
+**Core technique — 3-state shadow animation:**
+```css
+/* Rest — button floats above surface */
+.bevel-shape-btn {
+  background: grey;
+  border: 2px solid rgba(255, 255, 255, 0.8);  /* specular rim highlight */
+  border-radius: 150px;                         /* default: pill shape */
+  color: white;
+  font: normal 3em sans-serif;
+  padding: 20px;
+  width: 250px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 5px 3px #000;                   /* cast shadow — close to surface */
+  transition: 300ms ease-in-out;
+}
+
+/* Hover — button lifts off surface */
+.bevel-shape-btn:hover {
+  box-shadow: 0 10px 4px #000;                  /* shadow grows + diffuses = more distance */
+  transform: translateY(-5px);                   /* button rises */
+}
+
+/* Active — button depresses into well */
+.bevel-shape-btn:active {
+  box-shadow:
+    0 0 2px #000,                                /* cast shadow collapses to contact */
+    inset 0 10px 5px #000;                       /* cavity shadow appears inside */
+  transform: translateY(10px);                   /* button sinks past rest position */
+}
+```
+
+**7 border-radius shape variants (same class, inline override):**
+
+| Variant | `border-radius` | Physical analog |
+|---|---|---|
+| **Pill** (default) | `150px` | Capsule/lozenge button, pharmacy dispenser |
+| **Left leaf** | `150px 0` | Organic/biomorphic, leaf-shaped rocker |
+| **Right leaf** | `0 150px` | Mirror of left leaf, asymmetric pair |
+| **Square** | `0` | Industrial square pushbutton, membrane key |
+| **Rounded rect** | `10px` | Standard hardware button, calculator key |
+| **Asymmetric A** | `30px 70px` | Ergonomic contour, custom-molded |
+| **Asymmetric B** | `70px 30px` | Mirror contour, matching pair |
+
+**React/Tailwind implementation:**
+```tsx
+type BevelShape = 'pill' | 'left-leaf' | 'right-leaf' | 'square' | 'rounded' | 'asymmetric-a' | 'asymmetric-b';
+
+const SHAPE_RADIUS: Record<BevelShape, string> = {
+  'pill':          '150px',
+  'left-leaf':     '150px 0',
+  'right-leaf':    '0 150px',
+  'square':        '0',
+  'rounded':       '10px',
+  'asymmetric-a':  '30px 70px',
+  'asymmetric-b':  '70px 30px',
+};
+
+const BASE_STYLE: React.CSSProperties = {
+  background: 'grey',
+  border: '2px solid rgba(255,255,255,0.8)',
+  color: 'white',
+  font: 'normal 3em sans-serif',
+  padding: 20,
+  width: 250,
+  textAlign: 'center',
+  cursor: 'pointer',
+  boxShadow: '0 5px 3px #000',
+  transition: '300ms ease-in-out',
+};
+
+function ShapeBevelButton({
+  children,
+  shape = 'pill',
+  onClick,
+}: {
+  children: React.ReactNode;
+  shape?: BevelShape;
+  onClick?: () => void;
+}) {
+  const [state, setState] = React.useState<'rest' | 'hover' | 'active'>('rest');
+
+  const style: React.CSSProperties = {
+    ...BASE_STYLE,
+    borderRadius: SHAPE_RADIUS[shape],
+    ...(state === 'hover' && {
+      boxShadow: '0 10px 4px #000',
+      transform: 'translateY(-5px)',
+    }),
+    ...(state === 'active' && {
+      boxShadow: '0 0 2px #000, inset 0 10px 5px #000',
+      transform: 'translateY(10px)',
+    }),
+  };
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      style={style}
+      onClick={onClick}
+      onMouseEnter={() => setState('hover')}
+      onMouseLeave={() => setState('rest')}
+      onMouseDown={() => setState('active')}
+      onMouseUp={() => setState('hover')}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+**Dark industrial variant:**
+```css
+.bevel-shape-btn-dark {
+  background: #2a2a2a;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  color: #ccc;
+  box-shadow: 0 5px 3px rgba(0, 0, 0, 0.8);
+}
+.bevel-shape-btn-dark:hover {
+  box-shadow: 0 10px 6px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px);
+}
+.bevel-shape-btn-dark:active {
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.9), inset 0 10px 5px rgba(0, 0, 0, 0.7);
+  transform: translateY(10px);
+}
+```
+
+**Warm industrial variant (Retro-Industrial):**
+```css
+.bevel-shape-btn-warm {
+  background: hsl(30 12% 22%);
+  border: 2px solid hsl(40 12% 38% / 0.5);
+  color: hsl(40 60% 72%);
+  box-shadow: 0 5px 3px hsl(30 14% 3%);
+}
+.bevel-shape-btn-warm:hover {
+  box-shadow: 0 10px 6px hsl(30 14% 3% / 0.6);
+}
+.bevel-shape-btn-warm:active {
+  box-shadow: 0 0 2px hsl(30 14% 3%), inset 0 10px 5px hsl(30 14% 3% / 0.7);
+}
+```
+
+**Design notes:**
+- **Cast shadow as depth proxy**: The entire depth illusion rests on the cast shadow changing size. At rest `0 5px 3px` (button close to surface), on hover `0 10px 4px` (button farther from surface, shadow more diffuse), on active `0 0 2px` (button touching surface, shadow almost gone). This follows the real physics of shadow projection: distance from surface ∝ shadow offset and blur.
+- **translateY reinforces shadow**: The `translateY(-5px)` on hover and `translateY(10px)` on active work WITH the shadow change, not independently. If you change the shadow without translateY, the depth illusion breaks — the shadow says "farther" but the button hasn't moved. Both must change together.
+- **Inset shadow on active = cavity**: The `inset 0 10px 5px #000` that appears ONLY on active simulates the walls of a recessed well becoming visible as the button sinks below the surface plane. This is absent from rest and hover because the button is above the surface — no cavity is visible.
+- **White border as specular rim**: The `2px solid rgba(255,255,255,0.8)` border is not decorative — it simulates the specular highlight along the button's top and side edges where a glossy surface catches overhead light. On a matte variant, reduce to `rgba(255,255,255,0.3)`.
+- **Shape-agnostic shadow system**: The shadow + translateY system works identically regardless of border-radius because `box-shadow` follows the element's border-radius automatically. This means the same 3-state system (rest/hover/active) can be applied to ANY shape without modifying the shadow values — only `border-radius` changes.
+- **Transition timing**: The `300ms ease-in-out` applies to all animated properties (box-shadow, transform) simultaneously. This slower timing (vs. 100-150ms for snappy UI buttons) is intentional — it simulates the mechanical inertia of a spring-mounted physical button, not a digital click.
+- **Skeuomorphic application**: The shape variants map to specific hardware contexts: **pill** for audio transport controls (play/pause/stop), **square** for membrane keypad buttons (numpad, DSP preset selectors), **rounded** for calculator-style keys (parameter entry), **leaf** for ergonomic rocker switches (asymmetric pairs), **asymmetric** for custom-molded control surfaces. The 3-state shadow system is applicable to any button in the DSP Tuner Pro UI where physical depth feedback enhances usability — especially **phase step navigation buttons**, **equipment selector cards**, and **calibration action buttons** where the user needs clear visual feedback that a press registered.
+
+### 14.98 — Rim Light Card with 4-Layer Box-Shadow + Dual Radial Gradient Edge Glow
+
+Dark card with a physically-accurate **rim light** effect — the card appears illuminated from above by a soft overhead light source, creating a bright specular line along the top edge and a dimmer reflected glow along the bottom edge. Uses a 4-layer `box-shadow` stack for ambient depth + a `::before` top highlight and `::after` bottom highlight using centered `radial-gradient` pseudo-elements at 1px height.
+
+**Physical model:**
+A dark matte panel (anodized aluminum or painted steel) under a diffuse overhead light. The light catches the top edge at a glancing angle → sharp bright specular line. A fraction of light bounces off the surface below the card and catches the bottom edge → dimmer secondary glow. The card body stays dark because the matte surface absorbs most light at direct angles. The `box-shadow` layers simulate the ambient light scattered around the card's edges.
+
+**4-layer box-shadow stack (MANDATORY — each layer serves a distinct physical role):**
+```
+box-shadow:
+  0 -4px 8px 6px rgba(255,255,255, 0.05),   /* 1. Top ambient scatter — overhead light leaking past the top edge */
+  inset 0 -4px 8px -8px rgba(255,255,255, 0.15), /* 2. Bottom inner rim catch — reflected light inside the card well */
+  inset 0 8px 8px 2px rgba(0,0,0, 0.03),     /* 3. Top inner darkening — subtle vignette from overhead angle */
+  0 4px 8px 6px rgba(0,0,0, 0.6);            /* 4. Bottom cast shadow — card floating above dark background */
+```
+
+**Core technique:**
+```css
+/* Card body — dark matte surface */
+.rim-card {
+  position: relative;
+  background-image: linear-gradient(0deg, rgba(19,19,19,1), rgba(17,17,17,1));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow:
+    0 -4px 8px 6px rgba(255,255,255, 0.05),
+    inset 0 -4px 8px -8px rgba(255,255,255, 0.15),
+    inset 0 8px 8px 2px rgba(0,0,0, 0.03),
+    0 4px 8px 6px rgba(0,0,0, 0.6);
+}
+
+/* Top edge specular line — ::before */
+.rim-card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  z-index: 1;
+  width: 40%;
+  height: 1px;
+  background:
+    radial-gradient(circle at center top, rgba(255,255,255,0.2), rgba(255,255,255,0)),
+    radial-gradient(circle at center top, rgba(255,255,255,0.05) 10%, rgba(255,255,255,0) 50%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Bottom edge reflected glow — ::after */
+.rim-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  z-index: 1;
+  width: 70%;
+  height: 1px;
+  background:
+    radial-gradient(circle at center bottom, rgba(255,255,255,0.2), rgba(255,255,255,0)),
+    radial-gradient(circle at center bottom, rgba(255,255,255,0.05) 10%, rgba(255,255,255,0) 50%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Typography — muted to not compete with rim light */
+.rim-card h2 { color: #888; margin-top: 0; }
+.rim-card p { color: #666; }
+```
+
+**Width-responsive glow — the pattern scales with card width:**
+
+| Card width | Visual behavior | Reason |
+|---|---|---|
+| `200px` | Tight, concentrated glow | 40% top line = 80px, looks like a focused point light |
+| `400px` | Balanced, natural | Sweet spot — glow width matches a desk lamp |
+| `600px` | Wide, even | Simulates a broad overhead strip light |
+| `700px+` | Panel-like | Glow may need to widen (set `::before` width to 50-60%) |
+
+**React/Tailwind implementation:**
+```tsx
+const RIM_CARD_STYLE: React.CSSProperties = {
+  position: 'relative',
+  backgroundImage: 'linear-gradient(0deg, rgba(19,19,19,1), rgba(17,17,17,1))',
+  borderRadius: 12,
+  padding: 20,
+  boxShadow: [
+    '0 -4px 8px 6px rgba(255,255,255,0.05)',
+    'inset 0 -4px 8px -8px rgba(255,255,255,0.15)',
+    'inset 0 8px 8px 2px rgba(0,0,0,0.03)',
+    '0 4px 8px 6px rgba(0,0,0,0.6)',
+  ].join(', '),
+};
+
+const RIM_TOP_STYLE: React.CSSProperties = {
+  content: '""',
+  position: 'absolute',
+  top: -1,
+  left: '50%',
+  zIndex: 1,
+  width: '40%',
+  height: 1,
+  background: [
+    'radial-gradient(circle at center top, rgba(255,255,255,0.2), rgba(255,255,255,0))',
+    'radial-gradient(circle at center top, rgba(255,255,255,0.05) 10%, rgba(255,255,255,0) 50%)',
+  ].join(', '),
+  mixBlendMode: 'screen',
+  pointerEvents: 'none',
+};
+
+const RIM_BOTTOM_STYLE: React.CSSProperties = {
+  content: '""',
+  position: 'absolute',
+  bottom: 0,
+  left: '20%',
+  zIndex: 1,
+  width: '70%',
+  height: 1,
+  background: [
+    'radial-gradient(circle at center bottom, rgba(255,255,255,0.2), rgba(255,255,255,0))',
+    'radial-gradient(circle at center bottom, rgba(255,255,255,0.05) 10%, rgba(255,255,255,0) 50%)',
+  ].join(', '),
+  mixBlendMode: 'screen',
+  pointerEvents: 'none',
+};
+
+function RimLightCard({
+  children,
+  className,
+  style,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div className={className} style={{ ...RIM_CARD_STYLE, ...style }}>
+      <span style={RIM_TOP_STYLE} aria-hidden />
+      <span style={RIM_BOTTOM_STYLE} aria-hidden />
+      {children}
+    </div>
+  );
+}
+```
+
+**Warm industrial variant (Retro-Industrial):**
+```css
+.rim-card-warm {
+  background-image: linear-gradient(0deg, hsl(30 12% 7%), hsl(30 12% 8%));
+  box-shadow:
+    0 -4px 8px 6px rgba(255,180,0, 0.03),
+    inset 0 -4px 8px -8px rgba(255,180,0, 0.1),
+    inset 0 8px 8px 2px rgba(0,0,0, 0.05),
+    0 4px 8px 6px rgba(0,0,0, 0.6);
+}
+.rim-card-warm::before {
+  background:
+    radial-gradient(circle at center top, rgba(255,180,0,0.15), rgba(255,180,0,0)),
+    radial-gradient(circle at center top, rgba(255,180,0,0.04) 10%, rgba(255,180,0,0) 50%);
+}
+.rim-card-warm::after {
+  background:
+    radial-gradient(circle at center bottom, rgba(255,180,0,0.1), rgba(255,180,0,0)),
+    radial-gradient(circle at center bottom, rgba(255,180,0,0.03) 10%, rgba(255,180,0,0) 50%);
+}
+```
+
+**Colored rim variants:**
+```css
+/* Blue accent */
+.rim-card-blue::before {
+  background: radial-gradient(circle at center top, rgba(59,130,246,0.25), transparent);
+}
+/* Green accent */
+.rim-card-green::before {
+  background: radial-gradient(circle at center top, rgba(34,197,94,0.25), transparent);
+}
+/* Red/warning accent */
+.rim-card-red::before {
+  background: radial-gradient(circle at center top, rgba(239,68,68,0.25), transparent);
+}
+```
+
+**Design notes:**
+- **Why `left: 50%` on top but `left: 20%` on bottom**: The top specular line is centered because overhead light hits the center of the top edge symmetrically. The bottom glow is offset to `left: 20%` with `width: 70%` because reflected light from below is more diffuse and asymmetric — it wraps further around the card due to the wider angle of incidence. This asymmetry between top and bottom pseudo-elements is what makes the rim light look natural vs. artificial.
+- **1px height pseudo-elements**: Both `::before` and `::after` are exactly 1px tall. This is critical — a rim light on a real object is infinitely thin (it's the edge itself catching light). Making these 2-3px or using `height: auto` would turn the sharp specular line into a soft glow bar, destroying the edge-catch illusion. The `radial-gradient` handles the width falloff, the 1px height handles the sharpness.
+- **Dual radial-gradient stacking**: Each pseudo-element uses TWO overlapping radial gradients — a brighter inner one (`0.2` opacity) for the specular core and a wider dimmer one (`0.05` at 10%, fading to 50%) for the ambient diffusion. This dual-layer approach mimics how real specular highlights have a bright center that rapidly falls off into a soft halo.
+- **`mix-blend-mode: screen` is essential**: Without `screen` blending, the white pseudo-elements on a dark background would just overlay as flat white strips. `screen` mode makes them behave like additive light — they brighten the underlying surface without covering it, exactly how real light accumulates on a surface.
+- **Box-shadow layer 2 (`inset -4px 8px -8px`)**: The negative spread (`-8px`) is key — it clips the inset shadow tightly so it only appears near the bottom inner edge. This creates the subtle "light bouncing inside the card well" effect. Without the negative spread, the inset shadow would fill the entire card interior and look like a vignette, not a rim catch.
+- **Relationship to reference file 09 (rim light effects)**: This pattern complements Section 25.2 (box-shadow-only rim) by adding the `::before`/`::after` radial gradient pseudo-elements for sharper specular lines. The box-shadow system from 25.2 provides ambient depth, while these 1px pseudo-elements provide the fine-detail edge catch. Combine both for maximum physical accuracy.
+- **Skeuomorphic application**: Directly applicable to **equipment selector cards** (dark panels showing DSP/amplifier/speaker selections), **phase step cards** (guide step containers), **modal overlays** (equipment detail panels), **sidebar drawers** (tools panel), and **settings panels** on dark backgrounds. The warm industrial variant matches DSP Tuner Pro's Retro-Industrial aesthetic. The colored rim variants are useful for **status cards** (green = complete, amber = in progress, red = warning).
+
+### 14.99 — CSS Area Light with Dual Conic Gradient + Radial Mask
+
+Full-viewport **soft area light effect** using two mirrored `conic-gradient` halves masked by a `radial-gradient` elliptical vignette. Produces a smooth, physically-plausible overhead light wash — the kind of diffuse illumination seen from a rectangular fluorescent fixture or LED strip above a panel. Zero DOM elements beyond the container, pure CSS.
+
+**Physical model:**
+A rectangular **area light source** (studio softbox, fluorescent ceiling panel, LED strip) centered above the viewport. Area lights produce smooth gradients from center to edge because light arrives from many points across the source surface (vs. a point light which has sharp falloff). The dual conic gradients model the left and right halves of the source, and the radial mask feathers the edges to simulate the natural intensity falloff at the periphery.
+
+**Core technique — SCSS (original):**
+```scss
+$area-color: #2753F5;
+
+.arealight {
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+  background-image:
+    conic-gradient(from 90deg at 70% 50%, white, $area-color),
+    conic-gradient(from 270deg at 30% 50%, $area-color, white);
+  -webkit-mask-image: radial-gradient(100% 50% at center center, black, transparent);
+  background-position-x: 0%, 100%;
+  background-position-y: 0%, 0%;
+  background-size: 50% 100%, 50% 100%;
+  transform: rotate(180deg) translate3d(0, 0, 0);
+  transform-origin: center center;
+  background-repeat: no-repeat;
+}
+```
+
+**CSS equivalent (no preprocessor):**
+```css
+.arealight {
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+
+  /* Two mirrored conic gradients — left half and right half */
+  background-image:
+    conic-gradient(from 90deg at 70% 50%, white, #2753F5),
+    conic-gradient(from 270deg at 30% 50%, #2753F5, white);
+
+  /* Elliptical radial mask — feathers edges to simulate area light falloff */
+  -webkit-mask-image: radial-gradient(100% 50% at center center, black, transparent);
+  mask-image: radial-gradient(100% 50% at center center, black, transparent);
+
+  /* Position each half side-by-side */
+  background-position: 0% 0%, 100% 0%;
+  background-size: 50% 100%, 50% 100%;
+  background-repeat: no-repeat;
+
+  /* Flip vertically — light comes from above */
+  transform: rotate(180deg) translate3d(0, 0, 0);
+  transform-origin: center center;
+}
+```
+
+**How the dual conic gradient works:**
+
+```
+Left half (50% width):                Right half (50% width):
+conic-gradient(                       conic-gradient(
+  from 90deg at 70% 50%,               from 270deg at 30% 50%,
+  white → $area-color                   $area-color → white
+)                                     )
+
+   70%                                    30%
+    ↓                                      ↓
+┌───────────┐                        ┌───────────┐
+│     white→ │                        │ ←white    │
+│    ↗       │                        │       ↖   │
+│ $color     │                        │     $color│
+└───────────┘                        └───────────┘
+
+When placed side-by-side, the white peaks at 70% of left half
+and 30% of right half create a smooth bright center band.
+```
+
+**React/Tailwind implementation:**
+```tsx
+const AREA_LIGHT_COLORS = {
+  blue: '#2753F5',
+  amber: 'hsl(35 100% 60%)',
+  green: 'hsl(120 80% 55%)',
+  red: 'hsl(0 80% 55%)',
+  white: 'rgba(255,255,255,0.9)',
+} as const;
+
+type AreaLightColor = keyof typeof AREA_LIGHT_COLORS;
+
+function areaLightStyle(color: AreaLightColor = 'blue', opacity = 0.5): React.CSSProperties {
+  const c = AREA_LIGHT_COLORS[color];
+  return {
+    position: 'absolute',
+    inset: 0,
+    pointerEvents: 'none',
+    userSelect: 'none',
+    opacity,
+    backgroundImage: [
+      `conic-gradient(from 90deg at 70% 50%, white, ${c})`,
+      `conic-gradient(from 270deg at 30% 50%, ${c}, white)`,
+    ].join(', '),
+    WebkitMaskImage: 'radial-gradient(100% 50% at center center, black, transparent)',
+    maskImage: 'radial-gradient(100% 50% at center center, black, transparent)',
+    backgroundPosition: '0% 0%, 100% 0%',
+    backgroundSize: '50% 100%, 50% 100%',
+    backgroundRepeat: 'no-repeat',
+    transform: 'rotate(180deg) translate3d(0,0,0)',
+    transformOrigin: 'center center',
+  };
+}
+
+/** Overlay area light on any container */
+function AreaLight({
+  color = 'blue',
+  opacity = 0.5,
+}: {
+  color?: AreaLightColor;
+  opacity?: number;
+}) {
+  return <div style={areaLightStyle(color, opacity)} aria-hidden />;
+}
+
+/** Usage: wrap a panel or card */
+function LitPanel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <AreaLight color="amber" opacity={0.3} />
+      {children}
+    </div>
+  );
+}
+```
+
+**Directional variants:**
+
+| Direction | Transform | Use case |
+|---|---|---|
+| **Top-down** (default) | `rotate(180deg)` | Overhead ceiling light, standard panel illumination |
+| **Bottom-up** | `rotate(0deg)` | Under-cabinet light, backlit shelf, footer glow |
+| **Left-to-right** | `rotate(90deg)` | Side window light, asymmetric panel |
+| **Right-to-left** | `rotate(270deg)` | Opposite side window |
+
+**Mask shape variants:**
+
+| Mask | Effect | Application |
+|---|---|---|
+| `100% 50%` (default) | Wide horizontal ellipse | Full-width panel, viewport overlay |
+| `50% 50%` | Circle | Spot light, focused center glow |
+| `100% 30%` | Narrow horizontal band | Strip light, header/footer accent |
+| `60% 100%` | Tall vertical ellipse | Side panel, narrow column light |
+
+**Color palette for skeuomorphic themes:**
+
+| Theme | `$area-color` | Background | Effect |
+|---|---|---|---|
+| **Industrial/Dark** | `#2753F5` (blue) | `#111` | Cool overhead fluorescent |
+| **Retro-Industrial** | `hsl(35 100% 60%)` (amber) | `hsl(30 12% 6%)` | Warm tungsten work lamp |
+| **Classic Light** | `rgba(255,255,255,0.9)` | `#e6e6e6` | Soft daylight from above |
+| **Military** | `hsl(120 80% 30%)` (dim green) | `#0a0a0a` | Night-vision compatible overhead |
+| **Warning** | `hsl(0 80% 55%)` (red) | `#111` | Alert state ambient |
+
+**Design notes:**
+- **Why dual conic instead of a single radial gradient**: A single `radial-gradient` produces a circular falloff (point source). Two mirrored `conic-gradient` halves produce a horizontally-elongated falloff (area source). Real overhead lights are rectangular/linear, not circular — the dual conic models this correctly. The `from 90deg at 70%` and `from 270deg at 30%` offsets create the smooth center-peak that a `radial-gradient` cannot achieve with the same angular smoothness.
+- **The radial mask is the key**: Without `-webkit-mask-image: radial-gradient(100% 50%, black, transparent)`, the conic gradients would extend to the full viewport corners with hard edges. The mask feathers the light to zero at the periphery, simulating the natural inverse-square falloff of real light. The `100% 50%` ellipse is wider than tall because overhead lights illuminate more width than depth.
+- **`translate3d(0,0,0)` for GPU compositing**: The `translate3d` forces the element onto its own GPU layer, preventing repaints when this overlay sits above animated content. This is critical for performance when using the area light as a persistent overlay.
+- **`pointer-events: none` is mandatory**: The light overlay covers the entire viewport. Without `pointer-events: none`, it would block all clicks on content beneath it. Combined with `user-select: none`, the overlay is completely interaction-transparent.
+- **Opacity as intensity control**: Rather than modifying the gradient colors to dim the light, wrap the entire element in `opacity: 0.3-0.7`. This preserves the gradient's color accuracy while linearly scaling perceived brightness — exactly how real dimmers work (reduce amplitude, not color temperature). For color-accurate dimming, use `filter: brightness(0.5)` instead.
+- **Combining with pattern 14.98 (rim light card)**: Layer this area light behind a grid of rim light cards for a complete studio-lit panel environment. The area light provides the global illumination, the cards' rim lights provide local edge highlights. Set the area light to `opacity: 0.2-0.3` so it doesn't overpower the cards' own rim effects.
+- **Skeuomorphic application**: Directly applicable as a **background ambient layer** behind DSP panel assemblies, **hero section illumination** on landing/pricing pages, **modal backdrop enhancement** (soft colored glow behind dark modals), **section divider accents** (narrow band variant between content blocks), and **status-based ambient lighting** (red area light during calibration warnings, amber during processing, green on completion). The warm amber variant matches DSP Tuner Pro's Retro-Industrial aesthetic for simulating a warm work-lamp above the instrument panel.
+
+### 14.100 — Layered Depth Shadows with Progressive Blur + Hover Lift (Abduzeedo)
+
+6-layer `box-shadow` stack that simulates an object floating at a specific height above a surface, with each shadow layer representing a different distance in the light cone. On hover, the object lifts higher (scale + translateY) and the shadows correspondingly grow. On active/press, the farthest shadows collapse inward, simulating the object descending closer to the surface. Inspired by the Abduzeedo layered shadow technique.
+
+**Physical model:**
+A flat card or button floating above a colored surface under a single overhead light. Real shadows are not a single blur — they are a **stack of penumbra layers** at different distances from the object. Close to the object: small, sharp, dark. Far from the object: large, diffuse, lighter. This 6-layer approach models the continuous penumbra gradient that a single CSS shadow cannot achieve.
+
+**The 6-layer shadow formula:**
+```
+Layer 1:  0    4px   4px   rgba(0,0,0, 0.10)  — Contact shadow (sharp, close)
+Layer 2:  0    1px   6px   rgba(0,0,0, 0.05)  — Ambient occlusion (very soft, close)
+Layer 3:  0    8px   8px   rgba(0,0,0, 0.10)  — Near penumbra
+Layer 4:  0   16px  16px   rgba(0,0,0, 0.10)  — Mid penumbra
+Layer 5:  8px 32px  32px   rgba(0,0,0, 0.15)  — Far penumbra (offset = light angle)
+Layer 6:  8px 64px  64px   rgba(0,0,0, 0.15)  — Ambient ground scatter
+```
+
+**Rule of thumb:** Each layer doubles the previous blur radius. The farthest layers get a horizontal offset (8px) to indicate light direction. Opacity stays low (0.05-0.15) so layers accumulate naturally.
+
+**Core technique:**
+```css
+/* Static element — floating at rest height */
+.depth-shadow {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  color: #fff;
+  background-color: #377FBF;
+  padding: 2rem 4rem;
+  border-radius: 8rem;
+  box-shadow:
+    0 4px 4px rgba(0,0,0, 0.1),
+    0 1px 6px rgba(0,0,0, 0.05),
+    0 8px 8px rgba(0,0,0, 0.1),
+    0 16px 16px rgba(0,0,0, 0.1),
+    8px 32px 32px rgba(0,0,0, 0.15),
+    8px 64px 64px rgba(0,0,0, 0.15);
+}
+
+/* Hover — object lifts higher, shadows grow */
+.depth-shadow-hover {
+  cursor: pointer;
+  transition:
+    box-shadow 600ms cubic-bezier(0.33, 0.11, 0.02, 0.99),
+    transform 600ms cubic-bezier(0.33, 0.11, 0.02, 0.99);
+}
+.depth-shadow-hover:hover {
+  box-shadow:
+    0 4px 4px rgba(0,0,0, 0.1),
+    0 1px 6px rgba(0,0,0, 0.05),
+    0 8px 8px rgba(0,0,0, 0.1),
+    0 16px 16px rgba(0,0,0, 0.1),
+    8px 32px 32px rgba(0,0,0, 0.15),
+    8px 64px 64px rgba(0,0,0, 0.15);
+  transform: scale(1.05) translateY(-0.5rem);
+}
+
+/* Active — object descends, far shadows collapse */
+.depth-shadow-hover:active {
+  box-shadow:
+    0 4px 4px rgba(0,0,0, 0.1),
+    0 1px 6px rgba(0,0,0, 0.05),
+    0 8px 8px rgba(0,0,0, 0.1),
+    0 16px 16px rgba(0,0,0, 0.1),
+    8px 16px 16px rgba(0,0,0, 0.15),   /* was 32px → 16px */
+    8px 32px 32px rgba(0,0,0, 0.15);   /* was 64px → 32px */
+}
+```
+
+**React/Tailwind implementation:**
+```tsx
+const DEPTH_SHADOW_LAYERS = [
+  '0 4px 4px rgba(0,0,0,0.1)',
+  '0 1px 6px rgba(0,0,0,0.05)',
+  '0 8px 8px rgba(0,0,0,0.1)',
+  '0 16px 16px rgba(0,0,0,0.1)',
+  '8px 32px 32px rgba(0,0,0,0.15)',
+  '8px 64px 64px rgba(0,0,0,0.15)',
+];
+
+const DEPTH_SHADOW_ACTIVE_LAYERS = [
+  '0 4px 4px rgba(0,0,0,0.1)',
+  '0 1px 6px rgba(0,0,0,0.05)',
+  '0 8px 8px rgba(0,0,0,0.1)',
+  '0 16px 16px rgba(0,0,0,0.1)',
+  '8px 16px 16px rgba(0,0,0,0.15)',
+  '8px 32px 32px rgba(0,0,0,0.15)',
+];
+
+const TRANSITION = 'box-shadow 600ms cubic-bezier(0.33,0.11,0.02,0.99), transform 600ms cubic-bezier(0.33,0.11,0.02,0.99)';
+
+function DepthShadowButton({
+  children,
+  onClick,
+  color = '#377FBF',
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  color?: string;
+}) {
+  const [state, setState] = React.useState<'rest' | 'hover' | 'active'>('rest');
+
+  const style: React.CSSProperties = {
+    fontFamily: "'Josefin Sans', sans-serif",
+    fontSize: '1.25rem',
+    textTransform: 'uppercase',
+    color: '#fff',
+    backgroundColor: color,
+    padding: '2rem 4rem',
+    borderRadius: '8rem',
+    cursor: 'pointer',
+    transition: TRANSITION,
+    boxShadow: (state === 'active' ? DEPTH_SHADOW_ACTIVE_LAYERS : DEPTH_SHADOW_LAYERS).join(', '),
+    transform: state === 'hover' ? 'scale(1.05) translateY(-0.5rem)' : 'none',
+  };
+
+  return (
+    <button
+      style={style}
+      onClick={onClick}
+      onMouseEnter={() => setState('hover')}
+      onMouseLeave={() => setState('rest')}
+      onMouseDown={() => setState('active')}
+      onMouseUp={() => setState('hover')}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+**Dark industrial variant:**
+```css
+.depth-shadow-dark {
+  background-color: #1a1a1a;
+  color: #ccc;
+  box-shadow:
+    0 4px 4px rgba(0,0,0, 0.2),
+    0 1px 6px rgba(0,0,0, 0.1),
+    0 8px 8px rgba(0,0,0, 0.2),
+    0 16px 16px rgba(0,0,0, 0.2),
+    8px 32px 32px rgba(0,0,0, 0.25),
+    8px 64px 64px rgba(0,0,0, 0.25);
+}
+```
+
+**Design notes:**
+- **Why 6 layers instead of 1-2**: A single `0 16px 32px rgba(0,0,0,0.3)` creates a uniformly blurred disc — physically impossible because real shadows have a contact region (sharp) and a penumbra (diffuse). The 6-layer stack builds the contact-to-penumbra gradient that makes the object look genuinely 3D. Each layer is barely visible alone; combined, they create depth.
+- **The doubling progression**: 4→8→16→32→64px blur follows a geometric progression. This is not arbitrary — it models how penumbra width grows linearly with distance from the occluding object. Doubling the blur approximates this linear growth in discrete steps.
+- **Horizontal offset on far layers only**: Layers 5-6 have `8px` horizontal offset while layers 1-4 have `0`. This is because close shadows are nearly concentric (object blocks light in all directions equally), but far shadows are displaced by the light angle. The 8px shift on the far layers communicates "the light is slightly left of center."
+- **`cubic-bezier(0.33, 0.11, 0.02, 0.99)` transition**: This custom easing has a fast start and very slow end — the object lifts quickly but settles slowly, mimicking the deceleration of a real object floating upward against gravity.
+- **Active state collapses far shadows**: On press, layers 5-6 halve their blur (32→16, 64→32). This simulates the object moving closer to the surface — the shadow cone shrinks because the gap between object and surface decreases. Combined with removing the hover transform, the press feels physically grounded.
+- **Skeuomorphic application**: Applicable to **floating action buttons** on DSP panels, **modal cards** that hover above the background, **selected equipment cards** (hover state showing the card "lifting off" the panel), **pricing tier cards** on the checkout page, and any element that needs to communicate "I am elevated and interactive." The 600ms timing matches slow mechanical movement — for snappier UI, reduce to 300ms.
+
+### 14.101 — Skeuomorphic Power Button with Concentric Ring Construction + Glow-On State
+
+3-ring concentric push-button with full light/dark themes, SVG power icon, and an illuminated "ON" state with colored inset glow. Simulates a physical momentary-action power switch with machined bezel, spring-loaded inner cap, and backlit indicator — the kind found on amplifiers, studio monitors, and test equipment. Uses `aria-pressed` for accessibility and `cubic-bezier` overshoot timing for mechanical spring feel.
+
+**Physical model:**
+A circular power button with three concentric physical rings:
+1. **Outer ring** (10em) — the machined bezel/surround, slightly raised from the panel
+2. **Inner ring** (7em, `::before`) — the spring-loaded button cap that depresses on press, casts its own shadow
+3. **Indicator ring** (4em, `::after`) — the center indicator well that glows when powered on
+
+On press (`aria-pressed="true"`), the inner ring and indicator both `scale(0.98)` — a subtle depression. The indicator well lights up with an inset colored glow, and the SVG icon gains a `drop-shadow` halo.
+
+**Construction — CSS custom properties for theming:**
+```css
+:root {
+  --hue: 223;          /* surface hue (neutral blue-gray) */
+  --sat: 10%;          /* surface saturation */
+  --hue2: 223;         /* accent hue (glow color) */
+  --sat2: 90%;         /* accent saturation */
+  --light2: 60%;       /* accent lightness */
+  --primary: hsl(var(--hue2), var(--sat2), var(--light2));
+  --trans-dur: 0.3s;
+}
+```
+
+**Light theme button:**
+```css
+/* Outer ring — machined bezel */
+.power-btn {
+  background-image: linear-gradient(
+    hsl(var(--hue), var(--sat), 80%),
+    hsl(var(--hue), var(--sat), 85%)
+  );
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+  position: relative;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 0.125em hsla(var(--hue2), var(--sat2), 50%, 0),  /* focus ring (hidden) */
+    0 0 0.25em hsl(var(--hue), var(--sat), 55%) inset,      /* inner bevel shadow */
+    0 0.125em 0.125em hsl(var(--hue), var(--sat), 90%);     /* bottom specular */
+  transition: box-shadow var(--trans-dur) ease-in-out;
+}
+
+/* Inner ring — spring-loaded cap */
+.power-btn::before {
+  content: '';
+  position: absolute;
+  border-radius: inherit;
+  top: 1.5em; left: 1.5em;
+  width: 7em; height: 7em;
+  background-image: linear-gradient(
+    hsl(var(--hue), var(--sat), 90%),
+    hsl(var(--hue), var(--sat), 80%)
+  );
+  box-shadow: 0 0.75em 0.75em 0.25em hsla(var(--hue), 0%, 0%, 0.3);
+  transition:
+    box-shadow var(--trans-dur) cubic-bezier(0.42, -1.84, 0.42, 1.84),
+    transform var(--trans-dur) cubic-bezier(0.42, -1.84, 0.42, 1.84);
+}
+
+/* Indicator ring — center well */
+.power-btn::after {
+  content: '';
+  position: absolute;
+  border-radius: inherit;
+  top: 3em; left: 3em;
+  width: 4em; height: 4em;
+  background-color: hsl(var(--hue), var(--sat), 75%);
+  background-image: linear-gradient(
+    hsla(var(--hue), var(--sat), 90%, 0),
+    hsl(var(--hue), var(--sat), 90%)
+  );
+  box-shadow:
+    0 0.0625em 0 hsl(var(--hue), var(--sat), 90%) inset,   /* top rim catch */
+    0 -0.0625em 0 hsl(var(--hue), var(--sat), 90%) inset,  /* bottom rim catch */
+    0 0 0 0 hsla(var(--hue2), var(--sat2), var(--light2), 0.1) inset;  /* glow (off) */
+  transition:
+    background-color var(--trans-dur) ease-in-out,
+    box-shadow var(--trans-dur) ease-in-out,
+    transform var(--trans-dur) cubic-bezier(0.42, -1.84, 0.42, 1.84);
+}
+
+/* SVG power icon */
+.power-btn__icon {
+  position: absolute;
+  top: calc(50% - 0.75em);
+  left: calc(50% - 0.75em);
+  width: 1.5em; height: 1.5em;
+  z-index: 1;
+  transition: filter var(--trans-dur) ease-in-out;
+}
+.power-btn__icon g {
+  stroke: hsl(var(--hue), var(--sat), 70%);
+  transition: stroke var(--trans-dur) ease-in-out;
+}
+
+/* ON state — pressed */
+.power-btn[aria-pressed="true"]::before,
+.power-btn[aria-pressed="true"]::after,
+.power-btn[aria-pressed="true"] .power-btn__icon {
+  transform: scale(0.98);  /* subtle depression */
+}
+.power-btn[aria-pressed="true"]::before {
+  box-shadow: 0 0.375em 0.375em 0 hsla(var(--hue), 0%, 0%, 0.3);  /* shadow shrinks */
+}
+.power-btn[aria-pressed="true"]::after {
+  background-color: hsl(var(--hue), var(--sat), 90%);  /* well brightens */
+  box-shadow:
+    0 0.0625em 0 hsla(var(--hue2), var(--sat2), var(--light2), 0.5) inset,
+    0 -0.0625em 0 hsla(var(--hue2), var(--sat2), var(--light2), 0.5) inset,
+    0 0 0.75em 0.25em hsla(var(--hue2), var(--sat2), var(--light2), 0.1) inset;  /* colored glow */
+}
+.power-btn[aria-pressed="true"] .power-btn__icon {
+  filter: drop-shadow(0 0 0.25em var(--primary));  /* icon halo */
+}
+.power-btn[aria-pressed="true"] .power-btn__icon g {
+  stroke: var(--primary);  /* icon lights up */
+}
+
+/* Focus visible — accessibility ring */
+.power-btn:focus-visible {
+  box-shadow:
+    0 0 0 0.125em hsla(var(--hue2), var(--sat2), 50%, 1),
+    0 0 0.25em hsl(var(--hue), var(--sat), 55%) inset,
+    0 0.125em 0.125em hsl(var(--hue), var(--sat), 90%);
+}
+```
+
+**Dark theme variant:**
+```css
+.power-btn-dark {
+  background-image: linear-gradient(
+    hsl(var(--hue), var(--sat), 10%),
+    hsl(var(--hue), var(--sat), 15%)
+  );
+  box-shadow:
+    0 0 0 0.125em hsla(var(--hue2), var(--sat2), 50%, 0),
+    0 0 0.25em hsl(var(--hue), var(--sat), 5%) inset,
+    0 0.125em 0.125em hsl(var(--hue), var(--sat), 25%);
+}
+.power-btn-dark::before {
+  background-image: linear-gradient(
+    hsl(var(--hue), var(--sat), 20%),
+    hsl(var(--hue), var(--sat), 10%)
+  );
+  box-shadow: 0 0.75em 0.75em 0.25em hsla(var(--hue), 0%, 0%, 0.7);
+}
+.power-btn-dark::after {
+  background-color: hsl(var(--hue), var(--sat), 10%);
+  background-image: linear-gradient(
+    hsla(var(--hue), var(--sat), 20%, 0),
+    hsl(var(--hue), var(--sat), 20%)
+  );
+}
+.power-btn-dark .power-btn__icon g {
+  stroke: hsl(var(--hue), var(--sat), 5%);
+}
+```
+
+**React implementation:**
+```tsx
+function PowerButton({
+  dark = false,
+  hue = 223,
+  accentHue = 223,
+  onToggle,
+}: {
+  dark?: boolean;
+  hue?: number;
+  accentHue?: number;
+  onToggle?: (pressed: boolean) => void;
+}) {
+  const [pressed, setPressed] = React.useState(false);
+
+  const toggle = () => {
+    setPressed(p => {
+      onToggle?.(!p);
+      return !p;
+    });
+  };
+
+  return (
+    <button
+      className={`power-btn ${dark ? 'power-btn-dark' : ''}`}
+      style={{
+        '--hue': hue,
+        '--hue2': accentHue,
+      } as React.CSSProperties}
+      aria-pressed={pressed}
+      onClick={toggle}
+    >
+      <svg className="power-btn__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden>
+        <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <polyline points="12,1 12,10" />
+          <circle fill="none" cx="12" cy="13" r="9"
+            strokeDasharray="49.48 7.07" strokeDashoffset="10.6" />
+        </g>
+      </svg>
+      <span className="sr-only">Power</span>
+    </button>
+  );
+}
+```
+
+**Accent color variants (via `--hue2`):**
+
+| Application | `--hue2` | `--sat2` | `--light2` | Color |
+|---|---|---|---|---|
+| **Standard blue** | `223` | `90%` | `60%` | Default — studio equipment |
+| **Amber (DSP)** | `35` | `100%` | `60%` | Retro-Industrial — warm power indicator |
+| **Green (active)** | `120` | `80%` | `55%` | Signal OK, channel active |
+| **Red (standby)** | `0` | `80%` | `55%` | Standby/warning, mute indicator |
+
+**Design notes:**
+- **3-ring concentric construction**: The outer ring (button element), inner ring (`::before`), and indicator (`::after`) each have independent gradients and shadows. This models three physically separate parts: the bezel (fixed to panel), the cap (spring-loaded, moves on press), and the indicator window (embedded in cap, lights up). Real power buttons have exactly these three layers.
+- **`cubic-bezier(0.42, -1.84, 0.42, 1.84)` spring overshoot**: The negative and >1 values in this bezier create an overshoot-and-settle animation — the inner cap bounces past its depression point and springs back, exactly like a real momentary switch. The `::before` shadow and `::after` glow use this timing while the outer ring uses linear timing (the bezel doesn't move).
+- **`scale(0.98)` not `translateY`**: The press uses scale instead of Y-translation because a round button depresses concentrically (equally from all edges toward center), not vertically. A 2% scale reduction on a 10em button = 0.2em depression — subtle but physically correct.
+- **Shadow collapse on press**: The `::before` shadow changes from `0.75em` to `0.375em` blur on press — the cap is closer to the surface, so its shadow shrinks. This is the same principle as pattern 14.97 (shape-shifted bevel) applied to a circular form.
+- **Inset glow on ON state**: The indicator `::after` gains `0 0 0.75em 0.25em` inset glow ONLY when pressed. This models a physical LED behind a translucent window — when powered on, the LED illuminates the window from inside. The `0.0625em` top/bottom rim catches change from surface-colored to accent-colored, simulating light leaking around the indicator rim.
+- **`aria-pressed` as state driver**: Using `aria-pressed` instead of a CSS class for the ON state is both accessible and semantically correct — a power button IS a toggle. Screen readers announce "Power, pressed" or "Power, not pressed." The CSS `[aria-pressed="true"]` selector keeps styling tied to semantic state.
+- **`strokeDasharray` gap in SVG**: The power icon circle has `stroke-dasharray="49.48 7.07"` which creates the characteristic gap at the top of the circle where the vertical line enters. This is a standard IEC 5009 power symbol detail.
+- **Skeuomorphic application**: Directly applicable to **DSP bypass/power buttons**, **channel mute toggles** (red accent), **phantom power indicators** (green), **system status buttons** (amber for standby, green for active), and **master output enable** buttons. The dark variant matches DSP Tuner Pro's industrial aesthetic. Combine with pattern 14.95 (bevel button) for a panel with both round power buttons and rectangular action buttons.
+
+### 14.102 — Neon Sign Flicker with Per-Letter Opacity Choreography + Ambient Light Spill
+
+Multi-letter flicker animation system where each letter has its own independent flicker pattern at different opacity ranges, simulating a **degraded neon sign** where individual tube segments fire at different voltages. The brightest letter casts an ambient light spill (blurred pseudo-element glow) onto the surrounding surface. Pure CSS, no JS.
+
+**Physical model:**
+A neon sign where the gas tubes have degraded unevenly over time. Each letter is powered by a separate transformer:
+- **Brightest letter** (e.g., "I"): tube is healthy, flickers between 40-100% opacity with occasional bright flashes. Casts visible ambient light onto the wall.
+- **Mid-brightness letters** (e.g., "L", "G"): transformers are weak, tube never fully ignites — flickers between 10-40% opacity with occasional sparks to 40%.
+- **Dim letters** (e.g., "H", "T"): nearly dead tubes, barely visible 5-30% opacity range, occasionally spark brighter.
+- **Dead letters**: static at 15% opacity (no animation) — tube is completely dead, visible only by ambient light from neighboring letters.
+
+**Core technique — 4-tier flicker choreography:**
+```css
+/* Base state — all letters dim (dead tube default) */
+.neon-sign span {
+  opacity: 0.15;
+}
+
+/* Tier 1: Bright flicker — healthy tube (range 0.1–1.0) */
+@keyframes flickerBright {
+  0%   { opacity: 0.4; }
+  5%   { opacity: 0.5; }
+  10%  { opacity: 0.6; }
+  15%  { opacity: 0.85; }
+  25%  { opacity: 0.5; }
+  30%  { opacity: 1; }     /* full ignition flash */
+  35%  { opacity: 0.1; }   /* sudden dropout */
+  40%  { opacity: 0.25; }
+  45%  { opacity: 0.5; }
+  60%  { opacity: 1; }
+  70%  { opacity: 0.85; }
+  80%  { opacity: 0.4; }
+  90%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Tier 2: Mid flicker — weak transformer (range 0.1–0.4) */
+@keyframes flickerMid {
+  0%   { opacity: 0.19; }
+  5%   { opacity: 0.2; }
+  10%  { opacity: 0.25; }
+  15%  { opacity: 0.35; }
+  25%  { opacity: 0.2; }
+  30%  { opacity: 0.4; }   /* max brightness spark */
+  35%  { opacity: 0.1; }
+  40%  { opacity: 0.25; }
+  45%  { opacity: 0.2; }
+  60%  { opacity: 0.4; }
+  70%  { opacity: 0.35; }
+  80%  { opacity: 0.4; }
+  90%  { opacity: 0.2; }
+  100% { opacity: 0.4; }
+}
+
+/* Tier 3: Dim flicker — nearly dead tube (range 0.05–0.3) */
+@keyframes flickerDim {
+  0%   { opacity: 0.15; }
+  5%   { opacity: 0.2; }
+  10%  { opacity: 0.12; }
+  15%  { opacity: 0.2; }
+  25%  { opacity: 0.15; }
+  30%  { opacity: 0.4; }   /* rare bright spark */
+  35%  { opacity: 0.05; }
+  40%  { opacity: 0.12; }
+  45%  { opacity: 0.15; }
+  60%  { opacity: 0.3; }
+  70%  { opacity: 0.2; }
+  80%  { opacity: 0.3; }
+  90%  { opacity: 0.18; }
+  100% { opacity: 0.3; }
+}
+
+/* Tier 4: Dying flicker — almost dead (range 0.0–0.1) */
+@keyframes flickerDying {
+  0%   { opacity: 0.01; }
+  5%   { opacity: 0.05; }
+  10%  { opacity: 0.03; }
+  15%  { opacity: 0.1; }
+  25%  { opacity: 0.07; }
+  30%  { opacity: 0.1; }   /* brief spark */
+  35%  { opacity: 0.05; }
+  40%  { opacity: 0.06; }
+  45%  { opacity: 0.1; }
+  60%  { opacity: 0; }     /* complete blackout */
+  70%  { opacity: 0.1; }
+  80%  { opacity: 0; }
+  90%  { opacity: 0; }
+  100% { opacity: 0.1; }
+}
+```
+
+**Ambient light spill — the bright letter illuminates the wall:**
+```css
+/* Applied to the brightest letter */
+.neon-bright {
+  animation: flickerBright 2s linear reverse infinite;
+  position: relative;
+}
+.neon-bright::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -5%;
+  width: 200px;
+  height: 200px;
+  background: var(--neon-color, #f1f1f1);
+  border-radius: 100%;
+  opacity: 0.1;
+  filter: blur(10px);
+  pointer-events: none;
+}
+/* Secondary spill — smaller, offset */
+.neon-bright::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 100%;
+  width: 100px;
+  height: 100px;
+  background: var(--neon-color, #f1f1f1);
+  border-radius: 100%;
+  opacity: 0.05;
+  filter: blur(10px);
+  pointer-events: none;
+}
+```
+
+**Full implementation with text-shadow glow:**
+```css
+.neon-sign {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 40px;
+  color: #f1f1f1;
+  letter-spacing: 0.7em;
+}
+
+/* Combine flicker animation with neon text-shadow glow */
+.neon-bright {
+  animation: flickerBright 2s linear reverse infinite;
+  text-shadow:
+    0 0 4px currentColor,
+    0 0 10px currentColor,
+    0 0 20px rgba(255,255,255,0.3);
+}
+.neon-mid {
+  animation: flickerMid 2s linear reverse infinite;
+}
+.neon-dim {
+  animation: flickerDim 2s linear reverse infinite;
+}
+.neon-dying {
+  animation: flickerDying 2s linear reverse infinite;
+}
+/* .neon-dead — no animation, stays at base opacity 0.15 */
+```
+
+**React/Tailwind implementation:**
+```tsx
+type FlickerTier = 'bright' | 'mid' | 'dim' | 'dying' | 'dead';
+
+const FLICKER_CLASS: Record<FlickerTier, string> = {
+  bright: 'neon-bright',
+  mid:    'neon-mid',
+  dim:    'neon-dim',
+  dying:  'neon-dying',
+  dead:   '',  /* no animation class */
+};
+
+interface NeonLetterConfig {
+  char: string;
+  tier: FlickerTier;
+}
+
+function NeonSign({
+  letters,
+  color = '#f1f1f1',
+  fontSize = 40,
+}: {
+  letters: NeonLetterConfig[];
+  color?: string;
+  fontSize?: number;
+}) {
+  return (
+    <div
+      className="font-mono uppercase"
+      style={{
+        fontSize,
+        color,
+        letterSpacing: '0.7em',
+        ['--neon-color' as string]: color,
+      }}
+    >
+      {letters.map((l, i) => (
+        <span
+          key={i}
+          className={FLICKER_CLASS[l.tier]}
+          style={l.tier === 'dead' ? { opacity: 0.15 } : undefined}
+        >
+          {l.char}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* Usage example: "LIGHT" with degraded tubes */
+<NeonSign letters={[
+  { char: 'L', tier: 'mid' },
+  { char: 'I', tier: 'bright' },
+  { char: 'G', tier: 'mid' },
+  { char: 'H', tier: 'dim' },
+  { char: 'T', tier: 'dim' },
+]} />
+```
+
+**Color variants for themed neon signs:**
+
+| Theme | `--neon-color` | `text-shadow` hue | Application |
+|---|---|---|---|
+| **White (classic)** | `#f1f1f1` | white | Generic neon, industrial label |
+| **Amber (warm)** | `hsl(35 100% 65%)` | amber | Retro-Industrial panel indicator |
+| **Green (terminal)** | `hsl(120 80% 55%)` | green | Status labels, "ONLINE" indicator |
+| **Red (warning)** | `hsl(0 80% 60%)` | red | "WARNING", "DANGER", alarm text |
+| **Blue (cool)** | `hsl(220 90% 65%)` | blue | Modern neon accent, "LOADING" |
+
+**Design notes:**
+- **Why `animation: reverse`**: All keyframes are written with increasing values but played in `reverse`. This is a clever technique — it means the animation starts at the keyframe's 100% value (which is the "rest" state) and plays backward. This avoids a jarring initial flash and ensures the animation begins in a natural state.
+- **The 12-step keyframe pattern**: Each flicker animation uses ~12 keyframe stops at irregular intervals (0%, 5%, 10%, 15%, 25%, 30%, 35%, 40%, 45%, 60%, 70%, 80%, 90%, 100%). The irregular spacing is critical — evenly-spaced keyframes produce rhythmic, predictable flicker that looks artificial. Real neon flicker is caused by random electrical discharge, so the timing must be asymmetric.
+- **Opacity ranges define tube health**: Each tier stays within a strict opacity band: bright (0.1-1.0), mid (0.1-0.4), dim (0.05-0.3), dying (0.0-0.1). The KEY insight is that a weak tube doesn't just flicker less — it has a lower CEILING. A dying tube physically cannot reach full brightness because the gas pressure is too low for complete ionization.
+- **Ambient light spill physics**: The bright letter's `::before` and `::after` pseudo-elements create blurred white circles (100px and 200px) at low opacity (0.05-0.1). This simulates the light from the brightest tube spilling onto the wall behind the sign. The two circles at different sizes model the dual-falloff of real light: a tight bright core and a wide dim ambient zone.
+- **`filter: blur(10px)` on pseudo-elements only**: The blur is applied to the ambient spill circles, NOT to the text itself. This is important — real neon tubes have sharp edges (the glass is clear), but their light casts a soft glow on surrounding surfaces. Blurring the text would model a frosted tube, which is a different physical phenomenon.
+- **`linear` timing with keyframe-driven easing**: The animation uses `linear` timing function because ALL easing is baked into the keyframe values themselves. Using `ease-in-out` would add an additional smoothing curve on top of the keyframe values, dampening the sharp opacity jumps (like the 30%→35% dropout) that make the flicker look electrical rather than smooth.
+- **Skeuomorphic application**: Directly applicable to **loading/status text** on dark industrial panels, **panel section labels** (e.g., "INPUT", "OUTPUT", "VIRTUAL" in the DSP routing view), **hero text on landing pages**, **error/warning messages** with red neon flicker, and **decorative header text** in the Retro-Industrial aesthetic. The 4-tier system allows creating complex sign compositions where some letters are "healthier" than others — e.g., "CALIBRATION" where the first few letters are bright but the last ones are dying, suggesting the panel has been running for years. Combine with pattern 14.99 (area light) for the sign to cast ambient illumination on the panel below it.
