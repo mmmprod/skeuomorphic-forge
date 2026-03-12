@@ -1,0 +1,41 @@
+# CodeRabbit configuration for skeuomorphic-forge skill
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+language: en
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  path_instructions:
+    - path: "SKILL.md"
+      instructions: |
+        This is the main skill file loaded by Claude Code.
+        Check for:
+        - Stale counts (file counts, pattern counts, shadow layer counts)
+        - Broken references to files in assets/ or references/
+        - Search keys in tables must match HTML_MAP keys in scripts/search.py
+        - YAML frontmatter must have name and description fields
+    - path: "references/**"
+      instructions: |
+        Reference documentation for skeuomorphic patterns.
+        Check for:
+        - Section numbering consistency (e.g., 12.1, 12.2, ...)
+        - Physical analog descriptions must exist for each component
+        - Code blocks should contain valid CSS
+    - path: "scripts/**"
+      instructions: |
+        Search engine and utility scripts.
+        Check for:
+        - FILE_MAP entries must have corresponding files in references/
+        - HTML_MAP entries must have corresponding files in assets/
+        - Python type hints and error handling
+    - path: "assets/**"
+      instructions: |
+        HTML production component examples.
+        Check for valid HTML structure and that CSS uses multi-layer shadow stacks.
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true
