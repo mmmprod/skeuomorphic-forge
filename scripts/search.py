@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Skeuomorphic Forge Search — Find patterns across 13 reference files + 13 HTML assets.
 
@@ -15,10 +14,9 @@ Designed for Claude to call instead of reading 8671-line files manually.
 
 import argparse
 import re
-import sys
-from pathlib import Path
-from math import log
 from collections import defaultdict
+from math import log
+from pathlib import Path
 
 REFS_DIR = Path(__file__).parent.parent / "references"
 ASSETS_DIR = Path(__file__).parent.parent / "assets"
@@ -73,21 +71,23 @@ def load_file_sections(filepath: Path) -> list[dict]:
     for i, line in enumerate(lines, 1):
         # Detect headings (markdown ## or HTML comments <!-- SECTION -->)
         is_heading = False
-        if line.startswith("#"):
-            is_heading = True
-        elif re.match(r"^/\*\s*=+", line):  # CSS section comments
-            is_heading = True
-        elif re.match(r"^\.\w+.*\{", line):  # CSS class definition
+        if (
+            line.startswith("#")
+            or re.match(r"^/\*\s*=+", line)
+            or re.match(r"^\.\w+.*\{", line)
+        ):
             is_heading = True
 
         if is_heading and current_lines:
-            sections.append({
-                "heading": current_heading,
-                "body": "\n".join(current_lines),
-                "start_line": current_start,
-                "end_line": i - 1,
-                "file": filepath.name,
-            })
+            sections.append(
+                {
+                    "heading": current_heading,
+                    "body": "\n".join(current_lines),
+                    "start_line": current_start,
+                    "end_line": i - 1,
+                    "file": filepath.name,
+                }
+            )
             current_heading = line.strip().lstrip("#").strip()
             current_lines = [line]
             current_start = i
@@ -96,13 +96,15 @@ def load_file_sections(filepath: Path) -> list[dict]:
 
     # Last section
     if current_lines:
-        sections.append({
-            "heading": current_heading,
-            "body": "\n".join(current_lines),
-            "start_line": current_start,
-            "end_line": len(lines),
-            "file": filepath.name,
-        })
+        sections.append(
+            {
+                "heading": current_heading,
+                "body": "\n".join(current_lines),
+                "start_line": current_start,
+                "end_line": len(lines),
+                "file": filepath.name,
+            }
+        )
 
     return sections
 
@@ -211,7 +213,7 @@ def search(
 
     # Format output
     output = []
-    output.append(f"## Skeuomorphic Forge Search: \"{query}\"")
+    output.append(f'## Skeuomorphic Forge Search: "{query}"')
     if file_filter:
         output.append(f"**Filtered to:** {file_filter}")
 
@@ -255,20 +257,45 @@ def search(
 
     if count == 0:
         output.append("\nNo results found. Try different keywords.")
-        output.append("Common searches: button, shadow, CRT, knob, glass, metal, rim light, LED, bezel, screw")
+        output.append(
+            "Common searches: button, shadow, CRT, knob, glass, metal, rim light, LED, bezel, screw"
+        )
 
-    output.append(f"\n**Total sections scanned:** {len(all_sections)} across {len(keys)} files")
+    output.append(
+        f"\n**Total sections scanned:** {len(all_sections)} across {len(keys)} files"
+    )
     return "\n".join(output)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Skeuomorphic Forge Pattern Search")
-    parser.add_argument("query", help="Search query (e.g., 'button shadow', 'CRT display', 'knob gradient')")
-    parser.add_argument("--file", "-f", help="Filter to specific file (e.g., '04', '11', 'gauge', 'phosphor')")
-    parser.add_argument("--max-results", "-n", type=int, default=3, help="Max results (default: 3)")
-    parser.add_argument("--code-only", "-c", action="store_true", help="Only show code blocks from matching sections")
-    parser.add_argument("--context", type=int, default=0, help="Lines of context to show (0 = full section, capped at 40)")
+    parser.add_argument(
+        "query",
+        help="Search query (e.g., 'button shadow', 'CRT display', 'knob gradient')",
+    )
+    parser.add_argument(
+        "--file",
+        "-f",
+        help="Filter to specific file (e.g., '04', '11', 'gauge', 'phosphor')",
+    )
+    parser.add_argument(
+        "--max-results", "-n", type=int, default=3, help="Max results (default: 3)"
+    )
+    parser.add_argument(
+        "--code-only",
+        "-c",
+        action="store_true",
+        help="Only show code blocks from matching sections",
+    )
+    parser.add_argument(
+        "--context",
+        type=int,
+        default=0,
+        help="Lines of context to show (0 = full section, capped at 40)",
+    )
 
     args = parser.parse_args()
-    result = search(args.query, args.file, args.max_results, args.code_only, args.context)
+    result = search(
+        args.query, args.file, args.max_results, args.code_only, args.context
+    )
     print(result)

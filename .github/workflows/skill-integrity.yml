@@ -105,6 +105,87 @@ jobs:
             echo "Filter '$key' OK"
           done
 
+  prettier:
+    name: Prettier Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Prettier
+        run: npm install --no-save prettier
+
+      - name: Check formatting
+        run: npx prettier --check "SKILL.md" "README.md" "*.yaml" "*.yml" ".github/**/*.yml" ".coderabbit.yaml" "scripts/*.py"
+
+  ruff:
+    name: Python Lint (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Lint Python
+        run: ruff check scripts/
+
+      - name: Check formatting
+        run: ruff format --check scripts/
+
+  guards:
+    name: Size & Safety Guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SKILL.md size cap (40KB max)
+        run: |
+          size=$(wc -c < SKILL.md)
+          if [ "$size" -gt 40960 ]; then
+            echo "::error::SKILL.md is ${size}B — exceeds 40KB context window budget. Split content to references/."
+            exit 1
+          fi
+          echo "SKILL.md size OK: ${size}B (limit: 40960B)"
+
+      - name: No nested skill directories
+        run: |
+          if [ -d "skills/" ]; then
+            echo "::error::Nested skills/ directory detected — likely a packaging artifact. Remove it."
+            exit 1
+          fi
+          echo "No nested directories"
+
+      - name: No files over 500KB
+        run: |
+          errors=0
+          while IFS= read -r f; do
+            size=$(wc -c < "$f")
+            if [ "$size" -gt 512000 ]; then
+              echo "::error::$f is ${size}B — exceeds 500KB limit"
+              errors=$((errors + 1))
+            fi
+          done < <(find . -type f -not -path './.git/*')
+          if [ $errors -gt 0 ]; then exit 1; fi
+          echo "All files under 500KB"
+
+      - name: No zip archives committed
+        run: |
+          zips=$(find . -name "*.zip" -not -path './.git/*' | head -5)
+          if [ -n "$zips" ]; then
+            echo "::error::Zip files found in repo — remove before merge:"
+            echo "$zips"
+            exit 1
+          fi
+          echo "No zip files"
+
   asset-validation:
     name: Asset HTML Validation
     runs-on: ubuntu-latest
