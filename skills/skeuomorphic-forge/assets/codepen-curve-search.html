@@ -1,0 +1,641 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Curve Search</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+
+            background-color: #070809;
+
+            display: flex; justify-content: center; align-items: center;
+
+            min-height: 100vh;
+
+            font-family: 'Inter', sans-serif;
+
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+
+        }
+
+        .chassis {
+
+            background: linear-gradient(180deg, #2a2c31 0%, #15171a 100%);
+
+            padding: 2px; border-radius: 16px;
+
+            box-shadow: 0 60px 100px -20px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.05);
+
+        }
+
+        .chassis-inner {
+
+            background: linear-gradient(135deg, #121316 0%, #08090a 100%);
+
+            padding: 36px; border-radius: 15px;
+
+            border-top: 1px solid rgba(255,255,255,0.08);
+
+            border-bottom: 1px solid rgba(0,0,0,1);
+
+            box-shadow: inset 0 6px 15px rgba(0,0,0,0.8);
+
+        }
+
+        .screen-bezel {
+
+            position: relative; width: 750px; height: 400px;
+
+            background-color: #020304; border-radius: 10px;
+
+            box-shadow: inset 0 35px 60px -10px rgba(0,0,0,1), inset 0 0 30px 10px rgba(0,0,0,1), inset 0 2px 2px rgba(0,0,0,1), 0 1px 0 rgba(255,255,255,0.12);
+
+            border-top: 3px solid #000; border-left: 3px solid #000;
+
+            border-bottom: 1px solid #22252a; border-right: 1px solid #15181c;
+
+            overflow: hidden;
+
+        }
+
+        .glass-reflection {
+
+            position: absolute; inset: 0;
+
+            background: linear-gradient(110deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0) 31%), radial-gradient(150% 100% at 50% -25%, rgba(255,255,255,0.05) 0%, transparent 45%);
+
+            pointer-events: none; z-index: 50; mix-blend-mode: screen;
+
+        }
+
+        .scanlines {
+
+            position: absolute; inset: 0;
+
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+
+            background-size: 100% 4px; pointer-events: none; z-index: 40;
+
+        }
+
+        .screen-ambient-glow {
+
+            position: absolute; inset: 0;
+
+            background: radial-gradient(circle at 50% 50%, #0a1830 0%, #040810 60%, #010203 100%); z-index: 0;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState, useEffect, useRef } = React;
+
+
+
+        const LOG_MIN = Math.log10(20);
+
+        const LOG_MAX = Math.log10(20000);
+
+        const LOG_RANGE = LOG_MAX - LOG_MIN;
+
+        const MARGIN_L = 55;
+
+        const MARGIN_R = 960;
+
+        const PLOT_W = MARGIN_R - MARGIN_L;
+
+
+
+        const freqToX = (hz) => ((Math.log10(hz) - LOG_MIN) / LOG_RANGE) * PLOT_W + MARGIN_L;
+
+
+
+        const Analyzer = () => {
+
+            const requestRef = useRef();
+
+            const [, setTick] = useState(0);
+
+            const timeRef = useRef(0);
+
+
+
+            // Morphing curve state
+
+            const curveRef = useRef(Array.from({ length: 200 }, () => 150));
+
+            const targetRef = useRef(Array.from({ length: 200 }, () => 150));
+
+            const modeRef = useRef(0); // 0=HPF, 1=LPF, 2=FLAT, cycles
+
+
+
+            // FFT
+
+            const fftRef = useRef(Array.from({ length: 64 }, (_, i) => ({
+
+                x: MARGIN_L + (i / 63) * PLOT_W, y: 350, target: 350
+
+            })));
+
+
+
+            const zeroDbY = 150;
+
+
+
+            // Butterworth 4th order (24dB/oct)
+
+            const butterworth4 = (fRatio) => {
+
+                const f2 = fRatio * fRatio;
+
+                const f4 = f2 * f2;
+
+                return 1 / Math.sqrt(1 + f4);
+
+            };
+
+
+
+            const generateTarget = (mode) => {
+
+                const pts = [];
+
+                for (let i = 0; i < 200; i++) {
+
+                    const norm = i / 199;
+
+                    const freq = Math.pow(10, LOG_MIN + norm * LOG_RANGE);
+
+                    let db = 0;
+
+
+
+                    if (mode === 0) {
+
+                        // HPF at ~2kHz
+
+                        const ratio = 2000 / freq;
+
+                        const mag = butterworth4(ratio);
+
+                        db = 20 * Math.log10(Math.max(mag, 0.0001));
+
+                    } else if (mode === 1) {
+
+                        // LPF at ~500Hz
+
+                        const ratio = freq / 500;
+
+                        const mag = butterworth4(ratio);
+
+                        db = 20 * Math.log10(Math.max(mag, 0.0001));
+
+                    } else {
+
+                        // Flat
+
+                        db = 0;
+
+                    }
+
+
+
+                    db = Math.max(-36, Math.min(6, db));
+
+                    const y = zeroDbY - db * (50 / 6);
+
+                    pts.push(Math.max(50, Math.min(440, y)));
+
+                }
+
+                return pts;
+
+            };
+
+
+
+            const switchTimerRef = useRef(0);
+
+
+
+            const animate = () => {
+
+                timeRef.current += 0.016;
+
+                switchTimerRef.current += 0.016;
+
+
+
+                // Switch mode every 2.5s
+
+                if (switchTimerRef.current > 2.5) {
+
+                    switchTimerRef.current = 0;
+
+                    modeRef.current = (modeRef.current + 1) % 3;
+
+                    targetRef.current = generateTarget(modeRef.current);
+
+                }
+
+
+
+                // Lerp curve toward target
+
+                for (let i = 0; i < 200; i++) {
+
+                    curveRef.current[i] += (targetRef.current[i] - curveRef.current[i]) * 0.04;
+
+                }
+
+
+
+                // FFT
+
+                if (Math.random() > 0.87) {
+
+                    fftRef.current.forEach(pt => {
+
+                        const normX = (pt.x - MARGIN_L) / PLOT_W;
+
+                        const edgeFade = Math.min(normX * 5, 1) * Math.min((1 - normX) * 5, 1);
+
+                        pt.target = 180 + Math.random() * 200 * edgeFade;
+
+                    });
+
+                }
+
+                fftRef.current.forEach(pt => { pt.y += (pt.target - pt.y) * 0.05; });
+
+
+
+                setTick(t => t + 1);
+
+                requestRef.current = requestAnimationFrame(animate);
+
+            };
+
+
+
+            useEffect(() => {
+
+                targetRef.current = generateTarget(0);
+
+                requestRef.current = requestAnimationFrame(animate);
+
+                return () => cancelAnimationFrame(requestRef.current);
+
+            }, []);
+
+
+
+            // Build curve path
+
+            const buildCurve = () => {
+
+                const pts = curveRef.current.map((y, i) => {
+
+                    const x = MARGIN_L + (i / 199) * PLOT_W;
+
+                    return `${x.toFixed(1)} ${y.toFixed(1)}`;
+
+                });
+
+                return pts;
+
+            };
+
+
+
+            const curvePts = buildCurve();
+
+            const curvePath = `M ${curvePts.join(' L ')}`;
+
+            const curveFill = `${curvePath} L ${MARGIN_R} 460 L ${MARGIN_L} 460 Z`;
+
+
+
+            const fftPath = `M ${MARGIN_L} 440 ${fftRef.current.map(p => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')} L ${MARGIN_R} 440`;
+
+
+
+            const gridFreqs = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+
+            const gridLabels = ["20", "50", "100", "200", "500", "1k", "2k", "5k", "10k", "20k"];
+
+            const dbMarks = [6, 0, -6, -12, -18, -24, -30, -36, -42];
+
+
+
+            const modeLabels = ['HPF', 'LPF', 'FULL RANGE'];
+
+            const currentMode = modeLabels[modeRef.current];
+
+
+
+            // Pulsing opacity for ?
+
+            const pulseOp = 0.5 + Math.sin(timeRef.current * 2.5) * 0.35;
+
+
+
+            return (
+
+                <div className="chassis">
+
+                    <div className="chassis-inner">
+
+                        <div className="screen-bezel">
+
+                            <div className="screen-ambient-glow" />
+
+                            <div className="scanlines" />
+
+                            <div className="glass-reflection" />
+
+
+
+                            {/* Grid */}
+
+                            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 10 }}
+
+                                viewBox="0 0 1000 500" preserveAspectRatio="none">
+
+
+
+                                <g stroke="#1a2233" strokeWidth="1" strokeDasharray="4 4" opacity="0.5">
+
+                                    {dbMarks.map((db, i) => {
+
+                                        const y = zeroDbY - db * (50 / 6);
+
+                                        return y > 40 && y < 455 ? <line key={i} x1={MARGIN_L} y1={y} x2={MARGIN_R} y2={y} /> : null;
+
+                                    })}
+
+                                </g>
+
+
+
+                                <line x1={MARGIN_L} y1={zeroDbY} x2={MARGIN_R} y2={zeroDbY}
+
+                                    stroke="#2a3550" strokeWidth="1.5" opacity="0.6" />
+
+
+
+                                <g stroke="#1a2233" strokeWidth="1" strokeDasharray="4 4" opacity="0.4">
+
+                                    {gridFreqs.map((f, i) => (
+
+                                        <line key={i} x1={freqToX(f)} y1="40" x2={freqToX(f)} y2="450" />
+
+                                    ))}
+
+                                </g>
+
+
+
+                                <g fill="#3a4860" fontSize="11" fontWeight="600" fontFamily="Inter" textAnchor="end">
+
+                                    {dbMarks.map((db, i) => {
+
+                                        const y = zeroDbY - db * (50 / 6);
+
+                                        if (y < 45 || y > 450) return null;
+
+                                        return <text key={i} x={MARGIN_L - 6} y={y + 4}>{db > 0 ? `+${db}` : db}</text>;
+
+                                    })}
+
+                                </g>
+
+
+
+                                <g fill="#3a4860" fontSize="11" fontWeight="600" fontFamily="Inter" textAnchor="middle">
+
+                                    {gridFreqs.map((f, i) => (
+
+                                        <text key={i} x={freqToX(f)} y="470">{gridLabels[i]}</text>
+
+                                    ))}
+
+                                    <text x="500" y="492" fill="#2a3448" fontSize="9">Hz</text>
+
+                                </g>
+
+
+
+                                <text x="18" y="250" fill="#2a3448" fontSize="9" fontFamily="Inter"
+
+                                    transform="rotate(-90, 18, 250)" textAnchor="middle">dB</text>
+
+                            </svg>
+
+
+
+                            {/* Curves + UI */}
+
+                            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 20 }}
+
+                                viewBox="0 0 1000 500" preserveAspectRatio="none">
+
+                                <defs>
+
+                                    <linearGradient id="scanFill" x1="0" y1="0" x2="0" y2="1">
+
+                                        <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2" />
+
+                                        <stop offset="50%" stopColor="#0369a1" stopOpacity="0.04" />
+
+                                        <stop offset="100%" stopColor="#020617" stopOpacity="0" />
+
+                                    </linearGradient>
+
+                                    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+
+                                        <feGaussianBlur stdDeviation="5" result="blur" />
+
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                    <filter id="softGlow">
+
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+
+                                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                    <filter id="bigGlow" x="-30%" y="-30%" width="160%" height="160%">
+
+                                        <feGaussianBlur stdDeviation="8" result="g" />
+
+                                        <feMerge><feMergeNode in="g" /><feMergeNode in="g" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                    <filter id="amberGlow" x="-30%" y="-30%" width="160%" height="160%">
+
+                                        <feGaussianBlur stdDeviation="10" result="g" />
+
+                                        <feMerge><feMergeNode in="g" /><feMergeNode in="g" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+                                    </filter>
+
+                                </defs>
+
+
+
+                                {/* FFT */}
+
+                                <path d={fftPath} fill="none" stroke="#182638" strokeWidth="2" strokeLinejoin="round" />
+
+
+
+                                {/* Morphing curve fill */}
+
+                                <path d={curveFill} fill="url(#scanFill)" style={{ mixBlendMode: 'screen' }} />
+
+
+
+                                {/* Morphing curve glow */}
+
+                                <path d={curvePath} fill="none" stroke="#38bdf8" strokeWidth="5"
+
+                                    strokeLinejoin="round" filter="url(#neonGlow)" opacity="0.3" />
+
+
+
+                                {/* Morphing curve sharp */}
+
+                                <path d={curvePath} fill="none" stroke="#38bdf8" strokeWidth="2.5"
+
+                                    strokeLinejoin="round" opacity="0.8" />
+
+
+
+                                {/* ====== CENTER: big ? ====== */}
+
+                                <text x="500" y="230" fill="#f59e0b" fontSize="90" fontWeight="900"
+
+                                    fontFamily="Inter" textAnchor="middle"
+
+                                    filter="url(#amberGlow)" opacity={pulseOp.toFixed(2)}>
+
+                                    ?
+
+                                </text>
+
+
+
+                                {/* Scanning mode label */}
+
+                                <g>
+
+                                    <rect x="390" y="260" width="220" height="36" rx="5"
+
+                                        fill="rgba(0,0,0,0.55)" stroke="rgba(56,189,248,0.15)" strokeWidth="1" />
+
+
+
+                                    <text x="500" y="284" fill="#38bdf8" fontSize="15" fontWeight="700"
+
+                                        fontFamily="Inter" textAnchor="middle" filter="url(#softGlow)">
+
+                                        {currentMode}
+
+                                    </text>
+
+
+
+                                    {/* Scanning dots */}
+
+                                    {[0,1,2].map(i => {
+
+                                        const dotOp = modeRef.current === i ? 1 : 0.2;
+
+                                        return <circle key={i} cx={468 + i * 16} cy={295} r="3"
+
+                                            fill="#38bdf8" opacity={dotOp} />;
+
+                                    })}
+
+                                </g>
+
+
+
+                                {/* Bottom prompt */}
+
+                                <text x="500" y="440" fill="#2a5570" fontSize="12" fontWeight="600"
+
+                                    fontFamily="Inter" textAnchor="middle" opacity="0.6">
+
+                                    TEST YOUR CURVES — HPF • LPF • FULL RANGE
+
+                                </text>
+
+
+
+                                {/* DSP badge */}
+
+                                <text x={MARGIN_L + 10} y="448" fill="#0ea5e9" fontSize="9" fontWeight="600"
+
+                                    fontFamily="Inter" opacity="0.4"
+
+                                    style={{ filter: 'drop-shadow(0 0 5px rgba(14,165,233,0.3))' }}>
+
+                                    DSP CROSSOVER — SCANNING
+
+                                </text>
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<Analyzer />);
+
+    </script>
+
+</body>
+
+</html> \

@@ -1,0 +1,253 @@
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Reports Card</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+
+    body { font-family: 'Inter', sans-serif; }
+
+    .card-surface {
+
+      background: linear-gradient(145deg, #32343a, #1a1b1f);
+
+      box-shadow: 
+
+        /* Outer shadow for depth */
+
+        0 50px 100px -20px rgba(0,0,0,0.9),
+
+        /* Outer glow/rim light */
+
+        0 0 0 1px rgba(255,255,255,0.05),
+
+        /* Thick bottom bevel/thickness */
+
+        inset 0 -10px 15px rgba(0,0,0,0.6),
+
+        /* Top specular highlight for thickness */
+
+        inset 0 3px 3px rgba(255,255,255,0.18);
+
+      position: relative;
+
+    }
+
+    .card-surface::after {
+
+      content: "";
+
+      position: absolute;
+
+      top: 0; left: 0; right: 0; bottom: 0;
+
+      border-radius: 48px;
+
+      pointer-events: none;
+
+      box-shadow: inset 0 25px 50px rgba(255,255,255,0.04);
+
+    }
+
+    .card-top-container {
+
+      background: #121317;
+
+      border-radius: 40px;
+
+      box-shadow: 
+
+        /* Depth of the "hole" */
+
+        inset 0 12px 24px rgba(0,0,0,0.7),
+
+        /* Inner rim highlight */
+
+        0 2px 2px rgba(255,255,255,0.12),
+
+        /* Outer bevel thickness */
+
+        0 5px 8px rgba(0,0,0,0.5);
+
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+
+      border-right: 1px solid rgba(255,255,255,0.04);
+
+    }
+
+    .glossy-bar {
+
+      box-shadow: 
+
+        inset 0 2px 4px rgba(255,255,255,0.4),
+
+        0 4px 10px rgba(0,0,0,0.3);
+
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
+
+    }
+
+    .bar-pill {
+
+      box-shadow: 
+
+        inset 1px 1px 2px rgba(255,255,255,0.3),
+
+        inset -1px -1px 2px rgba(0,0,0,0.2),
+
+        0 10px 15px -3px rgba(0, 0, 0, 0.4);
+
+    }
+
+    .indicator-dot {
+
+      box-shadow: 0 0 8px rgba(255,255,255,0.4);
+
+    }
+
+    .arrow-button {
+
+      background: linear-gradient(145deg, #3a3c44, #23242a);
+
+      box-shadow: 
+
+        4px 4px 8px rgba(0,0,0,0.4),
+
+        -1px -1px 2px rgba(255,255,255,0.05),
+
+        inset 0 1px 1px rgba(255,255,255,0.1);
+
+    }
+
+  </style>
+
+</head>
+
+<body class="bg-[#2c2d33] flex items-center justify-center min-h-screen">
+
+  <div id="root"></div>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+
+
+  <script type="text/babel">
+
+    const App = () => (
+
+      <div className="relative">
+
+        <div className="card-surface w-[640px] h-[310px] rounded-[48px] p-6 flex flex-col">
+
+          <div className="card-top-container h-[210px] px-8 pt-6 pb-5 flex flex-col relative overflow-hidden">
+
+            <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/[0.06] to-transparent pointer-events-none"></div>
+
+
+
+            <div className="flex items-start justify-between relative z-10">
+
+              <div className="flex items-center gap-4">
+
+                <div className="bg-gradient-to-br from-[#5fa2ff] to-[#3b6bff] text-[#0b1120] font-bold tracking-wide px-4 py-2 rounded-xl shadow-[inset_0_2px_3px_rgba(255,255,255,0.35),0_8px_18px_rgba(0,0,0,0.45)] border border-white/20">
+
+                  SORTIE&nbsp;C
+
+                </div>
+
+                <div>
+
+                  <div className="text-[20px] font-bold text-[#9bc3ff] leading-none">Mid L</div>
+
+                  <div className="text-[14px] text-[#9ca3af] mt-1">ES 165 KX3</div>
+
+                </div>
+
+              </div>
+
+
+
+              <div className="bg-gradient-to-br from-[#194a2b] to-[#0f2218] border border-[#3aff74]/30 rounded-2xl px-5 py-3 shadow-[inset_0_2px_4px_rgba(255,255,255,0.15),0_10px_20px_rgba(0,0,0,0.5)]">
+
+                <div className="text-[#64ff9c] font-bold text-[20px]">85% <span className="text-[12px] tracking-widest text-[#7bffb0]">EXCELLENT</span> ▼</div>
+
+              </div>
+
+            </div>
+
+
+
+            <div className="flex items-center gap-4 mt-6 relative z-10">
+
+              <div className="text-[#6b7280] text-[18px]">→</div>
+
+              <div className="flex-1 bg-[#1d1f24] border border-white/10 rounded-xl px-4 py-2 text-[#d1d5db] shadow-[inset_0_3px_6px_rgba(0,0,0,0.6)]">
+
+                Audison SR 6.600
+
+              </div>
+
+              <div className="text-[#ff7a2f] font-bold text-[18px]">CH3</div>
+
+              <div className="text-[#a3a3a3] text-[18px]">▾</div>
+
+            </div>
+
+
+
+            <div className="border-t border-white/10 mt-5 pt-4 text-[14px] text-[#9ca3af] relative z-10">
+
+              <span className="text-[#38f089] font-bold">✓</span> Paire stéréo — canaux adjacents (optimal)
+
+            </div>
+
+
+
+          </div>
+
+
+
+          <div className="flex items-center justify-between px-8 pt-4 text-[#63a4ff] text-[14px] font-semibold">
+
+            <div className="flex items-center gap-2">
+
+              <span>▶</span> Voir détails
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    );
+
+
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+  </script>
+
+</body>
+
+</html>

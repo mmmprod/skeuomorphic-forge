@@ -1,0 +1,871 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Synth Screen</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        :root {
+
+            /* Pierre à fusil — Flint palette */
+
+            --flint-100: #5a5e68;
+
+            --flint-200: #44474f;
+
+            --flint-300: #353840;
+
+            --flint-400: #282b32;
+
+            --flint-500: #1e2028;
+
+            --flint-600: #15171d;
+
+            --flint-700: #0e1014;
+
+            --flint-800: #08090c;
+
+            /* Screen LCD */
+
+            --lcd-hi: #b8ccd8;
+
+            --lcd-lo: #9fb8c8;
+
+            --lcd-ink: #3a5a72;
+
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+
+        body {
+
+            background: var(--flint-700);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            min-height: 100vh;
+
+            font-family: 'Chakra Petch', sans-serif;
+
+        }
+
+
+
+        /* Vignette subtile */
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,0.5) 100%);
+
+            pointer-events: none;
+
+            z-index: 100;
+
+        }
+
+
+
+        /* Grain de fond */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+
+            pointer-events: none;
+
+            z-index: -1;
+
+        }
+
+
+
+        /* ===================================================
+
+           CHASSIS — Plaque de montage extérieure
+
+           =================================================== */
+
+        .chassis {
+
+            position: relative;
+
+            background:
+
+                /* Micro-texture brossée */
+
+                repeating-linear-gradient(
+
+                    90deg,
+
+                    transparent 0px,
+
+                    rgba(255,255,255,0.003) 1px,
+
+                    transparent 2px,
+
+                    transparent 3px
+
+                ),
+
+                linear-gradient(160deg, var(--flint-300) 0%, var(--flint-600) 100%);
+
+            border-radius: 20px;
+
+            padding: 50px 55px;
+
+            box-shadow:
+
+                /* Ombre portée massive 3 couches */
+
+                0 50px 90px -20px rgba(0,0,0,0.95),
+
+                0 25px 40px rgba(0,0,0,0.7),
+
+                0 10px 15px rgba(0,0,0,0.5),
+
+                /* Biseau */
+
+                inset 1px 1px 2px rgba(255,255,255,0.08),
+
+                inset -1px -1px 2px rgba(0,0,0,0.7),
+
+                /* Contour double */
+
+                0 0 0 1px rgba(255,255,255,0.04),
+
+                0 0 0 2.5px var(--flint-800),
+
+                0 0 0 3.5px rgba(255,255,255,0.015);
+
+        }
+
+
+
+        /* ===== VIS TORX ===== */
+
+        .torx {
+
+            position: absolute;
+
+            width: 13px; height: 13px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(circle at 35% 35%, var(--flint-200), var(--flint-700));
+
+            box-shadow:
+
+                inset 0 1px 1px rgba(255,255,255,0.14),
+
+                inset 0 -1px 1px rgba(0,0,0,0.8),
+
+                0 2px 4px rgba(0,0,0,0.5);
+
+            z-index: 20;
+
+        }
+
+        .torx::before, .torx::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            background: rgba(0,0,0,0.65);
+
+            border-radius: 0.5px;
+
+        }
+
+        .torx::before { width: 6px; height: 1.2px; transform: translate(-50%, -50%); }
+
+        .torx::after { width: 1.2px; height: 6px; transform: translate(-50%, -50%); }
+
+
+
+        /* ===== SÉRIGRAPHIE ===== */
+
+        .silk {
+
+            font-family: 'Chakra Petch', sans-serif;
+
+            font-size: 8px;
+
+            font-weight: 600;
+
+            letter-spacing: 3px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.06);
+
+            position: absolute;
+
+            pointer-events: none;
+
+            user-select: none;
+
+            z-index: 5;
+
+        }
+
+
+
+        /* ===================================================
+
+           BEZEL ÉCRAN — Cadre usiné autour du LCD
+
+           =================================================== */
+
+        .screen-bezel {
+
+            background: conic-gradient(
+
+                from 20deg,
+
+                var(--flint-400) 0deg, var(--flint-200) 15deg, var(--flint-500) 40deg,
+
+                var(--flint-300) 80deg, var(--flint-500) 120deg,
+
+                var(--flint-200) 160deg, var(--flint-400) 200deg,
+
+                var(--flint-300) 250deg, var(--flint-500) 300deg,
+
+                var(--flint-200) 340deg, var(--flint-400) 360deg
+
+            );
+
+            border-radius: 42px;
+
+            padding: 5px;
+
+            box-shadow:
+
+                0 15px 30px rgba(0,0,0,0.6),
+
+                0 5px 10px rgba(0,0,0,0.4),
+
+                inset 0 1px 1px rgba(255,255,255,0.1),
+
+                inset 0 -1px 2px rgba(0,0,0,0.8);
+
+        }
+
+
+
+        /* Gorge profonde */
+
+        .screen-recess {
+
+            background: var(--flint-800);
+
+            border-radius: 38px;
+
+            padding: 12px 14px;
+
+            box-shadow:
+
+                inset 0 6px 15px rgba(0,0,0,0.95),
+
+                inset 0 2px 4px rgba(0,0,0,0.8),
+
+                inset 4px 0 8px rgba(0,0,0,0.3),
+
+                inset -4px 0 8px rgba(0,0,0,0.3),
+
+                inset 0 -3px 6px rgba(0,0,0,0.5);
+
+        }
+
+
+
+        /* ===================================================
+
+           ÉCRAN LCD — Rétroéclairé
+
+           =================================================== */
+
+        .screen-lcd {
+
+            position: relative;
+
+            background: linear-gradient(178deg, var(--lcd-hi) 0%, var(--lcd-lo) 100%);
+
+            border-radius: 28px;
+
+            padding: 36px 40px;
+
+            width: 580px;
+
+            height: 280px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+            color: var(--lcd-ink);
+
+            /* Ombres internes profondes — écran enfoncé */
+
+            box-shadow:
+
+                inset 0 12px 25px rgba(0,0,0,0.45),
+
+                inset 0 5px 12px rgba(0,0,0,0.35),
+
+                inset 6px 0 15px rgba(0,0,0,0.12),
+
+                inset -6px 0 15px rgba(0,0,0,0.12),
+
+                inset 0 -8px 16px rgba(255,255,255,0.6),
+
+                inset 0 -2px 4px rgba(255,255,255,0.7);
+
+            border: 1px solid rgba(0,0,0,0.2);
+
+            overflow: hidden;
+
+        }
+
+
+
+        /* Pixel grid LCD */
+
+        .screen-lcd::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 28px;
+
+            background:
+
+                repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
+
+                repeating-linear-gradient(90deg, transparent 0px, transparent 2px, rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px);
+
+            pointer-events: none;
+
+            z-index: 5;
+
+        }
+
+
+
+        /* ===== GLASS LAYERS ===== */
+
+
+
+        /* Couche 1 : Gradient global (profondeur du verre) */
+
+        .glass-depth {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 28px;
+
+            background: linear-gradient(
+
+                140deg,
+
+                rgba(255, 255, 255, 0.22) 0%,
+
+                rgba(255, 255, 255, 0.06) 35%,
+
+                rgba(0, 0, 0, 0.04) 60%,
+
+                rgba(0, 0, 0, 0.1) 100%
+
+            );
+
+            pointer-events: none;
+
+            z-index: 10;
+
+        }
+
+
+
+        /* Couche 2 : Reflet Fresnel principal (bande diagonale nette) */
+
+        .glass-fresnel {
+
+            position: absolute;
+
+            top: -25%;
+
+            left: -12%;
+
+            width: 130%;
+
+            height: 65%;
+
+            background: linear-gradient(
+
+                162deg,
+
+                rgba(255, 255, 255, 0.28) 0%,
+
+                rgba(255, 255, 255, 0.08) 38%,
+
+                transparent 42%
+
+            );
+
+            transform: rotate(-3deg);
+
+            pointer-events: none;
+
+            z-index: 11;
+
+            filter: blur(1.5px);
+
+        }
+
+
+
+        /* Couche 3 : Highlight spéculaire secondaire (coin haut-gauche) */
+
+        .glass-spec {
+
+            position: absolute;
+
+            top: 4%;
+
+            left: 4%;
+
+            width: 25%;
+
+            height: 15%;
+
+            background: radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.18) 0%, transparent 70%);
+
+            pointer-events: none;
+
+            z-index: 12;
+
+            filter: blur(3px);
+
+        }
+
+
+
+        /* Couche 4 : Caustic inférieur (reflet renvoyé par le bord bas) */
+
+        .glass-caustic {
+
+            position: absolute;
+
+            bottom: 4%;
+
+            right: 6%;
+
+            width: 35%;
+
+            height: 8%;
+
+            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+
+            pointer-events: none;
+
+            z-index: 12;
+
+            filter: blur(10px);
+
+        }
+
+
+
+        /* Couche 5 : Rim light (arête supérieure fine) */
+
+        .glass-rim {
+
+            position: absolute;
+
+            top: 0; left: 5%; right: 5%;
+
+            height: 1px;
+
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.25) 70%, transparent);
+
+            pointer-events: none;
+
+            z-index: 13;
+
+        }
+
+
+
+        /* ===== TEXT LCD ===== */
+
+        .lcd-text {
+
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.12);
+
+            filter: brightness(0.88);
+
+        }
+
+
+
+        /* ===================================================
+
+           LUMIÈRE PROJETÉE — Multi-layer screen glow
+
+           =================================================== */
+
+
+
+        /* Couche 1 : halo serré (rétroéclairage proche) */
+
+        .screen-glow-near {
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            width: 110%;
+
+            height: 110%;
+
+            border-radius: 40px;
+
+            background: radial-gradient(ellipse at 50% 50%, rgba(160, 195, 215, 0.1) 0%, transparent 60%);
+
+            pointer-events: none;
+
+            z-index: -1;
+
+        }
+
+
+
+        /* Couche 2 : diffusion sur le bezel */
+
+        .screen-glow-mid {
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            width: 130%;
+
+            height: 140%;
+
+            border-radius: 50px;
+
+            background: radial-gradient(ellipse at 50% 50%, rgba(160, 195, 215, 0.05) 0%, transparent 65%);
+
+            pointer-events: none;
+
+            filter: blur(10px);
+
+            z-index: -2;
+
+        }
+
+
+
+        /* Couche 3 : spill large sur le châssis */
+
+        .screen-glow-far {
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            width: 160%;
+
+            height: 180%;
+
+            border-radius: 50%;
+
+            background: radial-gradient(ellipse at 50% 50%, rgba(160, 195, 215, 0.025) 0%, transparent 60%);
+
+            pointer-events: none;
+
+            filter: blur(25px);
+
+            z-index: -3;
+
+        }
+
+
+
+        /* Lumière projetée sous le châssis (sol) — 3 couches */
+
+        .chassis-spill-1 {
+
+            position: absolute;
+
+            bottom: -25px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 60%; height: 20px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(ellipse, rgba(160, 195, 215, 0.08) 0%, transparent 70%);
+
+            filter: blur(8px);
+
+            pointer-events: none;
+
+        }
+
+        .chassis-spill-2 {
+
+            position: absolute;
+
+            bottom: -45px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 80%; height: 35px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(ellipse, rgba(160, 195, 215, 0.04) 0%, transparent 70%);
+
+            filter: blur(18px);
+
+            pointer-events: none;
+
+        }
+
+        .chassis-spill-3 {
+
+            position: absolute;
+
+            bottom: -75px; left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 110%; height: 55px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(ellipse, rgba(160, 195, 215, 0.02) 0%, transparent 65%);
+
+            filter: blur(35px);
+
+            pointer-events: none;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const SynthScreen = () => {
+
+            return (
+
+                <div className="chassis" style={{ position: 'relative' }}>
+
+                    {/* Vis */}
+
+                    <div className="torx" style={{ top: 14, left: 14 }} />
+
+                    <div className="torx" style={{ top: 14, right: 14 }} />
+
+                    <div className="torx" style={{ bottom: 14, left: 14 }} />
+
+                    <div className="torx" style={{ bottom: 14, right: 14 }} />
+
+
+
+                    {/* Sérigraphie */}
+
+                    <div className="silk" style={{ top: 18, left: '50%', transform: 'translateX(-50%)' }}>
+
+                        MEMORY DISPLAY
+
+                    </div>
+
+                    <div className="silk" style={{ bottom: 18, right: 30, fontSize: '6.5px', letterSpacing: '1.5px' }}>
+
+                        SN:MK-IV — 2025
+
+                    </div>
+
+
+
+                    {/* Lumière projetée sous le châssis */}
+
+                    <div className="chassis-spill-1" />
+
+                    <div className="chassis-spill-2" />
+
+                    <div className="chassis-spill-3" />
+
+
+
+                    {/* Bezel usiné */}
+
+                    <div className="screen-bezel">
+
+                        <div className="screen-recess" style={{ position: 'relative' }}>
+
+                            {/* Glow de rétroéclairage multi-couches */}
+
+                            <div className="screen-glow-near" />
+
+                            <div className="screen-glow-mid" />
+
+                            <div className="screen-glow-far" />
+
+
+
+                            {/* LCD */}
+
+                            <div className="screen-lcd">
+
+                                {/* 5 couches de verre */}
+
+                                <div className="glass-depth" />
+
+                                <div className="glass-fresnel" />
+
+                                <div className="glass-spec" />
+
+                                <div className="glass-caustic" />
+
+                                <div className="glass-rim" />
+
+
+
+                                {/* Pixel grid via ::before */}
+
+
+
+                                {/* Top Row */}
+
+                                <div className="flex justify-between items-start relative z-20">
+
+                                    <div className="flex flex-col">
+
+                                        <span className="text-8xl font-bold leading-none tracking-tighter lcd-text">01</span>
+
+                                        <span className="text-3xl font-bold mt-1 lcd-text">Memory 01</span>
+
+                                    </div>
+
+                                    <div className="flex flex-col items-end pt-2">
+
+                                        <div className="flex items-center gap-1 lcd-text">
+
+                                            <span className="text-3xl">♩=</span>
+
+                                            <span className="text-5xl font-bold">120</span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                {/* Middle Row */}
+
+                                <div className="flex justify-end pr-4 relative z-20">
+
+                                    <span className="text-3xl font-medium italic lcd-text opacity-90">"Master of Puppets"</span>
+
+                                </div>
+
+
+
+                                {/* Bottom Row */}
+
+                                <div className="flex justify-between items-end relative z-20">
+
+                                    <span className="text-xl font-bold tracking-[0.2em] uppercase lcd-text">MEMORY</span>
+
+                                    <span className="text-xl font-bold tracking-tight uppercase lcd-text">MFX: REVERB</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<SynthScreen />);
+
+    </script>
+
+</body>
+
+</html>

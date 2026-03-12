@@ -1,0 +1,667 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Audio Interface Pro</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+
+            background-color: #0c0d0e;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            height: 100vh;
+
+            margin: 0;
+
+            overflow: hidden;
+
+        }
+
+
+
+        .outer-frame {
+
+            background: #1a1b1e;
+
+            padding: 18px;
+
+            border-radius: 40px;
+
+            box-shadow: 
+
+                0 50px 100px rgba(0,0,0,0.9),
+
+                inset 1px 1px 1px rgba(255,255,255,0.05);
+
+            border: 1px solid #25262b;
+
+            display: flex;
+
+            flex-direction: row;
+
+            gap: 20px;
+
+        }
+
+
+
+        .socket {
+
+            background: #050607;
+
+            padding: 3px;
+
+            border-radius: 20px;
+
+            box-shadow: inset 0 8px 16px rgba(0,0,0,0.8);
+
+            position: relative;
+
+            z-index: 1;
+
+        }
+
+
+
+        /* ══════════════════════════════════════════
+
+           MASSIVE GLOW PROJECTION — from code lumineux
+
+           .socket-glow-fx::before { inset: -15px; blur(10px) }
+
+           This is the KEY effect: it bleeds onto neighbors
+
+           ══════════════════════════════════════════ */
+
+
+
+        /* FX glow: bleeds right onto MIC */
+
+        .socket-fx.glow::before {
+
+            content: '';
+
+            position: absolute;
+
+            inset: -15px;
+
+            border-radius: 30px;
+
+            background: radial-gradient(circle at center,
+
+                rgba(255, 60, 0, 0.45) 0%,
+
+                rgba(255, 60, 0, 0.1) 50%,
+
+                transparent 80%);
+
+            filter: blur(10px);
+
+            pointer-events: none;
+
+            z-index: -1;
+
+        }
+
+
+
+        /* MIC glow: bleeds left onto FX */
+
+        .socket-mic.glow::before {
+
+            content: '';
+
+            position: absolute;
+
+            inset: -15px;
+
+            border-radius: 30px;
+
+            background: radial-gradient(circle at center,
+
+                rgba(0, 130, 255, 0.45) 0%,
+
+                rgba(0, 130, 255, 0.1) 50%,
+
+                transparent 80%);
+
+            filter: blur(10px);
+
+            pointer-events: none;
+
+            z-index: -1;
+
+        }
+
+
+
+        /* ══════════════════════════════════════════
+
+           BUTTONS — base (OFF state)
+
+           ══════════════════════════════════════════ */
+
+
+
+        /* ══════ RIM LIGHT from neighbor on sharp edge ══════ */
+
+
+
+        /* Orange rim on MIC left edge (FX is ON) */
+
+        .btn-mic.rim-orange::after {
+
+            content: '';
+
+            position: absolute;
+
+            top: 18%; bottom: 18%; left: 0;
+
+            width: 2px;
+
+            border-radius: 1px;
+
+            z-index: 15;
+
+            pointer-events: none;
+
+            /* Strongest at center, fades to top/bottom */
+
+            background: linear-gradient(180deg,
+
+                transparent 0%,
+
+                rgba(255, 120, 40, 0.12) 18%,
+
+                rgba(255, 120, 40, 0.55) 50%,
+
+                rgba(255, 60, 0, 0.12) 82%,
+
+                transparent 100%);
+
+            box-shadow:
+
+                0 0 3px rgba(255, 60, 0, 0.2),
+
+                0 0 8px rgba(255, 60, 0, 0.08);
+
+        }
+
+
+
+        /* Blue rim on FX right edge (MIC is ON) */
+
+        .btn-fx.rim-blue::after {
+
+            content: '';
+
+            position: absolute;
+
+            top: 18%; bottom: 18%; right: 0;
+
+            width: 2px;
+
+            border-radius: 1px;
+
+            z-index: 15;
+
+            pointer-events: none;
+
+            background: linear-gradient(180deg,
+
+                transparent 0%,
+
+                rgba(80, 180, 255, 0.12) 18%,
+
+                rgba(80, 180, 255, 0.55) 50%,
+
+                rgba(0, 130, 255, 0.12) 82%,
+
+                transparent 100%);
+
+            box-shadow:
+
+                0 0 3px rgba(0, 130, 255, 0.2),
+
+                0 0 8px rgba(0, 130, 255, 0.08);
+
+        }
+
+
+
+        .btn-base {
+
+            width: 240px;
+
+            height: 120px;
+
+            border-radius: 16px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+            transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+
+            position: relative;
+
+            /* NO overflow:hidden — rim light ::after needs to be visible on edges */
+
+            /* OFF state: dark raised slab */
+
+            background: linear-gradient(145deg, #2d2f35 0%, #16171a 100%);
+
+            border: 1px solid #3a3d45;
+
+            transform: translateY(-14px);
+
+            box-shadow: 
+
+                0 4px 0 #0d0e10,
+
+                0 10px 0 #08090a,
+
+                0 14px 0 #040506,
+
+                0 18px 30px rgba(0, 0, 0, 0.8),
+
+                inset 2px 2px 5px rgba(255, 255, 255, 0.08),
+
+                inset -2px -2px 8px rgba(0, 0, 0, 0.7);
+
+        }
+
+
+
+        /* Glass highlight on OFF */
+
+        .btn-base::before {
+
+            content: '';
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 16px;
+
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 50%);
+
+            z-index: 1;
+
+            pointer-events: none;
+
+        }
+
+
+
+        .btn-base:active {
+
+            transform: translateY(-1px);
+
+            box-shadow: 
+
+                0 1px 0 #08090a,
+
+                inset 1px 1px 4px rgba(0, 0, 0, 0.9);
+
+        }
+
+
+
+        /* ══════════════════════════════════════════
+
+           FX ON — EXACT values from code lumineux
+
+           ══════════════════════════════════════════ */
+
+
+
+        .btn-fx.active {
+
+            /* EXACT gradient from code lumineux */
+
+            background: radial-gradient(circle at center, #ffa05d 0%, #ff4d00 45%, #9b1d00 100%);
+
+            /* NO colored border — just keep dark structural border */
+
+            border: 1px solid rgba(80, 30, 0, 0.5);
+
+            transform: translateY(-16px);
+
+            box-shadow:
+
+                /* EXACT glow from code lumineux */
+
+                0 0 50px rgba(255, 60, 0, 0.7),
+
+                /* EXACT thickness steps */
+
+                0 4px 0 #7a1800,
+
+                0 8px 0 #5a1100,
+
+                0 12px 0 #3a0a00,
+
+                0 16px 20px rgba(0, 0, 0, 0.9),
+
+                /* EXACT internal lighting */
+
+                inset 0 18px 22px rgba(255, 255, 255, 0.6),
+
+                inset 0 -12px 30px rgba(0, 0, 0, 0.8);
+
+        }
+
+
+
+        /* Specular on FX active — not flat glass, shaped hotspot */
+
+        .btn-fx.active::before {
+
+            background:
+
+                radial-gradient(ellipse 55% 40% at 38% 20%,
+
+                    rgba(255,255,255,0.2) 0%,
+
+                    rgba(255,200,150,0.05) 60%,
+
+                    transparent 100%);
+
+        }
+
+
+
+        .btn-fx:active {
+
+            transform: translateY(-2px);
+
+            box-shadow: 
+
+                0 0 30px rgba(255, 50, 0, 0.4),
+
+                0 2px 0 #5a1100,
+
+                inset 0 4px 12px rgba(0, 0, 0, 0.6);
+
+        }
+
+
+
+        /* ══════════════════════════════════════════
+
+           MIC ON — same structure, blue palette
+
+           ══════════════════════════════════════════ */
+
+
+
+        .btn-mic.active {
+
+            background: radial-gradient(circle at center, #5dc8ff 0%, #0084ff 50%, #003d7a 100%);
+
+            border: 1px solid rgba(0, 30, 80, 0.5);
+
+            transform: translateY(-16px);
+
+            box-shadow: 
+
+                0 0 50px rgba(0, 130, 255, 0.7),
+
+                0 4px 0 #002d5a,
+
+                0 8px 0 #001a3a,
+
+                0 12px 0 #000d1e,
+
+                0 16px 20px rgba(0, 0, 0, 0.9),
+
+                inset 0 18px 22px rgba(255, 255, 255, 0.5),
+
+                inset 0 -12px 30px rgba(0, 0, 0, 0.8);
+
+        }
+
+
+
+        .btn-mic.active::before {
+
+            background:
+
+                radial-gradient(ellipse 55% 40% at 38% 20%,
+
+                    rgba(255,255,255,0.2) 0%,
+
+                    rgba(180,220,255,0.05) 60%,
+
+                    transparent 100%);
+
+        }
+
+
+
+        .btn-mic:active {
+
+            transform: translateY(-2px);
+
+            box-shadow: 
+
+                0 0 30px rgba(0, 130, 255, 0.4),
+
+                0 2px 0 #001a3a,
+
+                inset 0 4px 12px rgba(0, 0, 0, 0.6);
+
+        }
+
+
+
+        /* ══════════════════════════════════════════
+
+           TEXT — matched to code lumineux
+
+           ══════════════════════════════════════════ */
+
+
+
+        .text-fx {
+
+            font-family: 'Inter', sans-serif;
+
+            font-weight: 900;
+
+            font-size: 22px;
+
+            letter-spacing: 2px;
+
+            text-transform: uppercase;
+
+            color: #4a4d55;
+
+            z-index: 10;
+
+            transition: all 0.2s;
+
+        }
+
+
+
+        /* EXACT text-shadow from code lumineux */
+
+        .active .text-fx {
+
+            color: #ffffff;
+
+            text-shadow:
+
+                0 0 15px rgba(255, 255, 255, 0.9),
+
+                0 0 30px rgba(255, 120, 0, 1);
+
+        }
+
+
+
+        .text-mic {
+
+            font-family: 'Inter', sans-serif;
+
+            font-weight: 900;
+
+            font-size: 22px;
+
+            color: #5a5e69;
+
+            z-index: 10;
+
+            letter-spacing: 2px;
+
+            padding-left: 0;
+
+            text-transform: uppercase;
+
+            transition: all 0.2s;
+
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+
+        }
+
+
+
+        .active .text-mic {
+
+            color: #ffffff;
+
+            text-shadow:
+
+                0 0 15px rgba(255, 255, 255, 0.9),
+
+                0 0 30px rgba(0, 150, 255, 1);
+
+        }
+
+
+
+        /* ══════════════════════════════════════════
+
+           SUBTLE noise on body
+
+           ══════════════════════════════════════════ */
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            top: 0; left: 0; width: 100%; height: 100%;
+
+            opacity: 0.03;
+
+            pointer-events: none;
+
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+
+            z-index: 100;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState } = React;
+
+
+
+        const Interface = () => {
+
+            const [active, setActive] = useState('fx');
+
+
+
+            return (
+
+                <div className="outer-frame">
+
+                    <div className={`socket socket-fx ${active === 'fx' ? 'glow' : ''}`}>
+
+                        <button 
+
+                            className={`btn-base btn-fx ${active === 'fx' ? 'active' : ''} ${active === 'mic' ? 'rim-blue' : ''}`}
+
+                            onClick={() => setActive(active === 'fx' ? null : 'fx')}
+
+                        >
+
+                            <span className="text-fx">Recommandé</span>
+
+                        </button>
+
+                    </div>
+
+                    <div className={`socket socket-mic ${active === 'mic' ? 'glow' : ''}`}>
+
+                        <button 
+
+                            className={`btn-base btn-mic ${active === 'mic' ? 'active' : ''} ${active === 'fx' ? 'rim-orange' : ''}`}
+
+                            onClick={() => setActive(active === 'mic' ? null : 'mic')}
+
+                        >
+
+                            <span className="text-mic">Personnalisé</span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Interface />);
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,684 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Glass Sphere Toggle Switch</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+
+        @keyframes contact-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes arc-flicker {
+            0%, 100% { opacity: 0.7; }
+            30% { opacity: 1; }
+            60% { opacity: 0.5; }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+const { useState, useEffect } = React;
+
+
+
+const App = () => {
+
+    const [isOn, setIsOn] = useState(true);
+
+    const [ready, setReady] = useState(false);
+
+    useEffect(() => { requestAnimationFrame(() => setReady(true)); }, []);
+
+
+
+    const nc = "0,230,255";
+
+    const warm = "255,160,40";
+
+    const ac = isOn ? nc : warm;
+
+
+
+    const noiseSvg = 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")';
+
+
+
+    return (
+
+        <div style={{
+
+            minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+
+            background: "radial-gradient(ellipse at 50% 45%, #242741 0%, #161725 100%)",
+
+            fontFamily: "Inter, -apple-system, sans-serif",
+
+            overflow: "hidden", position: "relative", userSelect: "none",
+
+        }}>
+
+
+
+            {/* Ambient bloom */}
+
+            <div style={{
+
+                position: "absolute", width: 500, height: 300, borderRadius: "50%",
+
+                background: isOn ? `radial-gradient(ellipse, rgba(${nc},0.04) 0%, transparent 65%)` : "none",
+
+                filter: "blur(40px)", pointerEvents: "none", transition: "all 0.8s ease",
+
+            }} />
+
+
+
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 32 }}>
+
+
+
+                {/* ====== SWITCH TRACK ====== */}
+
+                <div
+
+                    onClick={() => setIsOn(!isOn)}
+
+                    style={{
+
+                        position: "relative", width: 380, height: 210, borderRadius: 105,
+
+                        cursor: "pointer",
+
+                        background: "#131523",
+
+                        border: `5px solid rgba(${ac},${isOn ? 0.7 : 0.12})`,
+
+                        boxShadow: [
+
+                            "inset 0 30px 45px rgba(0,0,0,0.8)",
+
+                            "inset 0 6px 12px rgba(0,0,0,0.5)",
+
+                            "inset 4px 0 8px rgba(0,0,0,0.2)",
+
+                            "inset -4px 0 8px rgba(0,0,0,0.2)",
+
+                            "inset 0 -2px 4px rgba(255,255,255,0.01)",
+
+                            "inset 0 0 20px rgba(0,0,0,0.3)",
+
+                            `inset 0 0 ${isOn ? 25 : 0}px rgba(${ac},${isOn ? 0.15 : 0})`,
+
+                            `0 0 ${isOn ? 15 : 0}px rgba(${ac},${isOn ? 0.3 : 0})`,
+
+                            `0 0 ${isOn ? 35 : 0}px rgba(${ac},${isOn ? 0.12 : 0})`,
+
+                            `0 0 ${isOn ? 60 : 0}px rgba(${ac},${isOn ? 0.04 : 0})`,
+
+                            "0 8px 24px rgba(0,0,0,0.35)",
+
+                        ].join(", "),
+
+                        transition: "border-color 0.5s ease, box-shadow 0.5s ease",
+
+                        overflow: "hidden",
+
+                    }}
+
+                >
+
+                    {/* Deep inner shadow */}
+
+                    <div style={{
+
+                        position: "absolute", inset: 0, borderRadius: 100,
+
+                        boxShadow: "inset 0 40px 50px -15px rgba(0,0,0,0.9)",
+
+                        pointerEvents: "none",
+
+                    }} />
+
+
+
+                    {/* Track noise */}
+
+                    <div style={{
+
+                        position: "absolute", inset: 0, borderRadius: 100,
+
+                        backgroundImage: noiseSvg, opacity: 0.02, mixBlendMode: "overlay", pointerEvents: "none",
+
+                    }} />
+
+
+
+                    {/* ============ INTERNAL MECHANISM ============ */}
+
+
+
+                    {/* Central guide rail */}
+
+                    <div style={{
+
+                        position: "absolute",
+
+                        top: "50%", left: 60, right: 60,
+
+                        height: 6, transform: "translateY(-50%)",
+
+                        borderRadius: 3,
+
+                        background: "linear-gradient(180deg, #060810 0%, #0c0e1a 50%, #080a14 100%)",
+
+                        boxShadow: "inset 0 2px 3px rgba(0,0,0,0.9), inset 0 -1px 0 rgba(255,255,255,0.03), 0 1px 0 rgba(255,255,255,0.02)",
+
+                    }}>
+
+                        <div style={{
+
+                            position: "absolute", bottom: 0, left: "10%", right: "10%", height: 1,
+
+                            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)",
+
+                        }} />
+
+                    </div>
+
+
+
+                    {/* Twin guide rails */}
+
+                    {[-22, 22].map((offset, i) => (
+
+                        <div key={i} style={{
+
+                            position: "absolute",
+
+                            top: `calc(50% + ${offset}px)`, left: 50, right: 50,
+
+                            height: 2, transform: "translateY(-50%)",
+
+                            borderRadius: 1,
+
+                            background: "linear-gradient(180deg, #07090f 0%, #0e1018 100%)",
+
+                            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.015)",
+
+                        }} />
+
+                    ))}
+
+
+
+                    {/* Tick marks */}
+
+                    {Array.from({ length: 11 }, (_, i) => {
+
+                        const pct = 14 + i * 7.2;
+
+                        const isMajor = i === 0 || i === 10 || i === 5;
+
+                        return (
+
+                            <div key={`tick-${i}`} style={{
+
+                                position: "absolute",
+
+                                left: `${pct}%`, top: "50%",
+
+                                width: 1, height: isMajor ? 30 : 14,
+
+                                transform: "translate(-50%, -50%)",
+
+                                background: isMajor ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.018)",
+
+                                borderRadius: 0.5,
+
+                            }} />
+
+                        );
+
+                    })}
+
+
+
+                    {/* ====== CONTACT LEFT (OFF) ====== */}
+
+                    <div style={{
+
+                        position: "absolute",
+
+                        left: 24, top: "50%", transform: "translateY(-50%)",
+
+                        width: 22, height: 50, borderRadius: 5,
+
+                        background: !isOn
+
+                            ? "linear-gradient(180deg, #3a2810 0%, #2a1c08 100%)"
+
+                            : "linear-gradient(180deg, #1a1410 0%, #120e08 100%)",
+
+                        border: `1px solid rgba(${warm},${!isOn ? 0.5 : 0.08})`,
+
+                        boxShadow: !isOn
+
+                            ? `0 0 4px rgba(${warm},0.7), 0 0 12px rgba(${warm},0.35), 0 0 28px rgba(${warm},0.15), 0 0 45px rgba(${warm},0.06), inset 0 0 10px rgba(${warm},0.25), inset 0 1px 2px rgba(0,0,0,0.3)`
+
+                            : "inset 0 1px 3px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,255,255,0.02)",
+
+                        transition: "all 0.4s ease", zIndex: 2,
+
+                    }}>
+
+                        <div style={{
+
+                            position: "absolute", inset: 3, borderRadius: 3,
+
+                            background: !isOn
+
+                                ? "linear-gradient(150deg, #6a4820 0%, #4a3015 100%)"
+
+                                : "linear-gradient(150deg, #2a2015 0%, #1e1810 100%)",
+
+                            transition: "all 0.4s ease",
+
+                        }}>
+
+                            {!isOn && <div style={{
+
+                                position: "absolute", top: "50%", left: "50%",
+
+                                width: 6, height: 6, borderRadius: "50%",
+
+                                transform: "translate(-50%, -50%)",
+
+                                background: `radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(${warm},0.4) 50%, transparent 100%)`,
+
+                                boxShadow: `0 0 5px rgba(${warm},0.9), 0 0 10px rgba(${warm},0.5)`,
+
+                                animation: "contact-pulse 2s ease-in-out infinite",
+
+                            }} />}
+
+                        </div>
+
+                    </div>
+
+
+
+                    {/* ====== CONTACT RIGHT (ON) ====== */}
+
+                    <div style={{
+
+                        position: "absolute",
+
+                        right: 24, top: "50%", transform: "translateY(-50%)",
+
+                        width: 22, height: 50, borderRadius: 5,
+
+                        background: isOn
+
+                            ? "linear-gradient(180deg, #0c2530 0%, #081c28 100%)"
+
+                            : "linear-gradient(180deg, #0e1218 0%, #0a0e14 100%)",
+
+                        border: `1px solid rgba(${nc},${isOn ? 0.5 : 0.06})`,
+
+                        boxShadow: isOn
+
+                            ? `0 0 4px rgba(${nc},0.7), 0 0 12px rgba(${nc},0.35), 0 0 28px rgba(${nc},0.15), 0 0 45px rgba(${nc},0.06), inset 0 0 10px rgba(${nc},0.25), inset 0 1px 2px rgba(0,0,0,0.3)`
+
+                            : "inset 0 1px 3px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,255,255,0.02)",
+
+                        transition: "all 0.4s ease", zIndex: 2,
+
+                    }}>
+
+                        <div style={{
+
+                            position: "absolute", inset: 3, borderRadius: 3,
+
+                            background: isOn
+
+                                ? "linear-gradient(150deg, #1a4050 0%, #103040 100%)"
+
+                                : "linear-gradient(150deg, #181c22 0%, #121620 100%)",
+
+                            transition: "all 0.4s ease",
+
+                        }}>
+
+                            {isOn && <div style={{
+
+                                position: "absolute", top: "50%", left: "50%",
+
+                                width: 6, height: 6, borderRadius: "50%",
+
+                                transform: "translate(-50%, -50%)",
+
+                                background: `radial-gradient(circle, rgba(200,250,255,0.95) 0%, rgba(${nc},0.4) 50%, transparent 100%)`,
+
+                                boxShadow: `0 0 5px rgba(${nc},0.9), 0 0 10px rgba(${nc},0.5)`,
+
+                                animation: "contact-pulse 2s ease-in-out infinite",
+
+                            }} />}
+
+                        </div>
+
+                    </div>
+
+
+
+                    {/* Bus bars */}
+
+                    {[-34, 34].map((offset, i) => (
+
+                        <div key={`bus-${i}`} style={{
+
+                            position: "absolute",
+
+                            top: `calc(50% + ${offset}px)`, left: 22, right: 22,
+
+                            height: 1.5, transform: "translateY(-50%)",
+
+                            borderRadius: 1,
+
+                            background: isOn
+
+                                ? `linear-gradient(90deg, rgba(80,60,30,0.06) 0%, rgba(80,60,30,0.04) 30%, rgba(${nc},0.12) 60%, rgba(${nc},0.22) 80%, rgba(${nc},0.28) 100%)`
+
+                                : `linear-gradient(90deg, rgba(${warm},0.28) 0%, rgba(${warm},0.22) 20%, rgba(${warm},0.12) 40%, rgba(80,60,30,0.04) 70%, rgba(80,60,30,0.06) 100%)`,
+
+                            boxShadow: isOn
+
+                                ? `0 0 4px rgba(${nc},0.06)`
+
+                                : `0 0 4px rgba(${warm},0.06)`,
+
+                            transition: "all 0.5s ease",
+
+                        }} />
+
+                    ))}
+
+
+
+                    {/* Arc glow */}
+
+                    <div style={{
+
+                        position: "absolute",
+
+                        top: "50%", transform: "translateY(-50%)",
+
+                        width: 35, height: 65, borderRadius: "50%",
+
+                        left: isOn ? "auto" : 28,
+
+                        right: isOn ? 28 : "auto",
+
+                        background: `radial-gradient(ellipse, rgba(${ac},0.1) 0%, transparent 70%)`,
+
+                        filter: "blur(4px)", pointerEvents: "none",
+
+                        transition: "all 0.4s ease",
+
+                        animation: "arc-flicker 3s ease-in-out infinite",
+
+                    }} />
+
+
+
+                    {/* Neon pool */}
+
+                    <div style={{
+
+                        position: "absolute", bottom: 10, left: isOn ? "46%" : "5%", width: "44%", height: "18%",
+
+                        borderRadius: "50%",
+
+                        background: `radial-gradient(ellipse, rgba(${ac},0.045) 0%, transparent 70%)`,
+
+                        filter: "blur(6px)", pointerEvents: "none", transition: "all 0.5s ease",
+
+                    }} />
+
+
+
+                    {/* ====== KNOB — GLASS SPHERE ====== */}
+
+                    <div style={{
+
+                        position: "absolute",
+
+                        top: "50%", left: 20,
+
+                        width: 165, height: 165, borderRadius: "50%",
+
+                        transform: `translateY(-50%) translateX(${isOn ? 170 : 0}px)`,
+
+                        transition: ready ? "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
+
+                        zIndex: 5,
+
+                        background: "radial-gradient(circle at 35% 30%, #495273 0%, #181a29 55%, #0e0f19 100%)",
+
+                        boxShadow: [
+
+                            "18px 18px 35px rgba(0,0,0,0.8)",
+
+                            "8px 8px 16px rgba(0,0,0,0.5)",
+
+                            "-3px -3px 12px rgba(255,255,255,0.02)",
+
+                            "inset 1px 1px 4px rgba(255,255,255,0.06)",
+
+                            "inset 3px 3px 12px rgba(255,255,255,0.03)",
+
+                            "inset 0 -5px 12px rgba(0,0,0,0.5)",
+
+                            "inset -3px 0 10px rgba(0,0,0,0.3)",
+
+                            "inset 0 0 20px rgba(0,0,0,0.15)",
+
+                            `0 0 10px rgba(${ac},0.08)`,
+
+                        ].join(", "),
+
+                    }}>
+
+
+
+                        {/* PRIMARY GLASS HIGHLIGHT */}
+
+                        <div style={{
+
+                            position: "absolute",
+
+                            top: "8%", left: "12%",
+
+                            width: "75%", height: "55%",
+
+                            borderRadius: "50%",
+
+                            background: "linear-gradient(to bottom right, rgba(255,255,255,0.13), transparent)",
+
+                            transform: "rotate(-12deg)",
+
+                            filter: "blur(1px)",
+
+                            pointerEvents: "none",
+
+                        }} />
+
+
+
+                        {/* GLASS SHEEN */}
+
+                        <div style={{
+
+                            position: "absolute",
+
+                            top: "10%", left: "16%",
+
+                            width: "35%", height: "25%",
+
+                            borderRadius: "50%",
+
+                            background: "radial-gradient(ellipse, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)",
+
+                            pointerEvents: "none",
+
+                        }} />
+
+
+
+                        {/* RIM CATCH */}
+
+                        <div style={{
+
+                            position: "absolute",
+
+                            top: "3%", left: "15%",
+
+                            width: "45%", height: "12%",
+
+                            borderRadius: "50%",
+
+                            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)",
+
+                            transform: "rotate(-20deg)",
+
+                            pointerEvents: "none",
+
+                        }} />
+
+
+
+                        {/* BOTTOM REFLECTED LIGHT */}
+
+                        <div style={{
+
+                            position: "absolute",
+
+                            bottom: "6%", left: "22%",
+
+                            width: "56%", height: "14%",
+
+                            borderRadius: "50%",
+
+                            background: "radial-gradient(ellipse, rgba(255,255,255,0.03) 0%, transparent 70%)",
+
+                            pointerEvents: "none",
+
+                        }} />
+
+
+
+                        {/* NEON COLOR BLEED */}
+
+                        <div style={{
+
+                            position: "absolute", inset: 0, borderRadius: "50%",
+
+                            background: isOn
+
+                                ? `radial-gradient(ellipse at 85% 50%, rgba(${nc},0.08) 0%, transparent 45%)`
+
+                                : `radial-gradient(ellipse at 15% 50%, rgba(${warm},0.08) 0%, transparent 45%)`,
+
+                            pointerEvents: "none",
+
+                            transition: "all 0.5s ease",
+
+                        }} />
+
+
+
+                        {/* Edge ring */}
+
+                        <div style={{
+
+                            position: "absolute", inset: 0, borderRadius: "50%",
+
+                            border: "1px solid rgba(255,255,255,0.035)",
+
+                            pointerEvents: "none",
+
+                        }} />
+
+
+
+                        {/* Noise */}
+
+                        <div style={{
+
+                            position: "absolute", inset: 0, borderRadius: "50%",
+
+                            backgroundImage: noiseSvg, opacity: 0.018, mixBlendMode: "overlay", pointerEvents: "none",
+
+                        }} />
+
+                    </div>
+
+                </div>
+
+
+
+                {/* Status */}
+
+                <div style={{
+
+                    fontSize: 46, fontWeight: 500, letterSpacing: "0.04em",
+
+                    color: isOn ? "#50577a" : "#333852",
+
+                    transition: "all 0.5s ease",
+
+                }}>
+
+                    {isOn ? "On" : "Off"}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    );
+
+};
+
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,407 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic VU Meter</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        body {
+
+            background-color: #0d1117;
+
+            font-family: 'Inter', sans-serif;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            height: 100vh;
+
+            margin: 0;
+
+            overflow: hidden;
+
+        }
+
+        .vu-meter-outer {
+
+            background: linear-gradient(135deg, #242933, #161b22);
+
+            padding: 30px;
+
+            border-radius: 24px;
+
+            box-shadow:
+
+                30px 30px 60px #05070a,
+
+                -10px -10px 40px #2d333d,
+
+                inset 1px 1px 1px rgba(255,255,255,0.05);
+
+            border: 1px solid #000;
+
+        }
+
+        .vu-meter-bezel {
+
+            background: #000;
+
+            padding: 12px;
+
+            border-radius: 16px;
+
+            box-shadow:
+
+                inset 3px 3px 10px rgba(0,0,0,0.9),
+
+                inset -1px -1px 3px rgba(255,255,255,0.1);
+
+            position: relative;
+
+        }
+
+        .vu-meter-screen {
+
+            width: 500px;
+
+            height: 300px;
+
+            background: radial-gradient(circle at 50% 110%, rgba(100, 160, 255, 0.45) 0%, #000 75%);
+
+            border-radius: 12px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            border: 1px solid rgba(255,255,255,0.05);
+
+        }
+
+        .scale-mark {
+
+            position: absolute;
+
+            color: #6a7282;
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+            pointer-events: none;
+
+        }
+
+        .scale-mark.red {
+
+            color: #b91c1c;
+
+        }
+
+        .needle {
+
+            position: absolute;
+
+            bottom: -50px;
+
+            left: 50%;
+
+            width: 2px;
+
+            height: 280px;
+
+            background: #fff;
+
+            transform-origin: bottom center;
+
+            box-shadow: 0 0 15px rgba(255,255,255,1), 0 0 5px rgba(255,255,255,0.8);
+
+            z-index: 10;
+
+            transition: transform 0.05s linear;
+
+        }
+
+        .hub {
+
+            position: absolute;
+
+            bottom: -55px;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 150px;
+
+            height: 100px;
+
+            background: linear-gradient(to bottom, #2d333d, #1a1e26);
+
+            border-radius: 75px 75px 0 0;
+
+            z-index: 15;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: flex-start;
+
+            padding-top: 22px;
+
+            box-shadow:
+
+                0 -10px 30px rgba(0,0,0,0.9),
+
+                inset 0 1px 1px rgba(255,255,255,0.2);
+
+            border: 1.5px solid #000;
+
+        }
+
+        .hub-text {
+
+            color: #4b5563;
+
+            font-weight: 700;
+
+            font-size: 28px;
+
+            letter-spacing: 2px;
+
+            text-shadow: 0 -1px 1px rgba(0,0,0,1);
+
+        }
+
+        .light-source {
+
+            position: absolute;
+
+            bottom: -30px;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 260px;
+
+            height: 160px;
+
+            background: radial-gradient(circle at center bottom, rgba(147, 197, 253, 0.6) 0%, transparent 65%);
+
+            filter: blur(35px);
+
+            z-index: 5;
+
+            pointer-events: none;
+
+        }
+
+        .ticks-svg {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            z-index: 1;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState, useEffect, useRef } = React;
+
+        const VUMeter = () => {
+
+            const [value, setValue] = useState(0.2);
+
+            const requestRef = useRef();
+
+            const animate = (time) => {
+
+                const slowWave = Math.sin(time / 600) * 0.15;
+
+                const mediumWave = Math.sin(time / 200) * 0.1;
+
+                const fastJitter = (Math.random() - 0.5) * 0.04;
+
+                const target = 0.4 + slowWave + mediumWave + fastJitter;
+
+                setValue(prev => prev + (target - prev) * 0.2);
+
+                requestRef.current = requestAnimationFrame(animate);
+
+            };
+
+            useEffect(() => {
+
+                requestRef.current = requestAnimationFrame(animate);
+
+                return () => cancelAnimationFrame(requestRef.current);
+
+            }, []);
+
+            const minAngle = -60;
+
+            const maxAngle = 50;
+
+            const needleRotation = minAngle + (value * (maxAngle - minAngle));
+
+            const scaleMarks = [
+
+                { label: '-20', angle: -60, color: 'gray' },
+
+                { label: '10', angle: -42, color: 'gray' },
+
+                { label: '7', angle: -28, color: 'gray' },
+
+                { label: '5', angle: -15, color: 'gray' },
+
+                { label: '3', angle: -2, color: 'gray' },
+
+                { label: '0', angle: 10, color: 'gray' },
+
+                { label: '3', angle: 30, color: 'red' },
+
+                { label: '+5', angle: 50, color: 'red' },
+
+            ];
+
+            return (
+
+                <div className="vu-meter-outer">
+
+                    <div className="vu-meter-bezel">
+
+                        <div className="vu-meter-screen">
+
+                            <svg className="ticks-svg" viewBox="0 0 500 300">
+
+                                <path d="M 85 210 A 235 235 0 0 1 315 130" fill="none" stroke="#374151" strokeWidth="1.5" transform="rotate(-5, 250, 350)" />
+
+                                <path d="M 315 130 A 235 235 0 0 1 435 210" fill="none" stroke="#b91c1c" strokeWidth="3" transform="rotate(-5, 250, 350)" />
+
+                                {scaleMarks.map((mark, i) => {
+
+                                    const rad = (mark.angle * Math.PI) / 180;
+
+                                    const length = i === 5 || i === 0 || i === 7 ? 25 : 15;
+
+                                    const x1 = 250 + 220 * Math.sin(rad);
+
+                                    const y1 = 350 - 220 * Math.cos(rad);
+
+                                    const x2 = 250 + (220 + length) * Math.sin(rad);
+
+                                    const y2 = 350 - (220 + length) * Math.cos(rad);
+
+                                    return (
+
+                                        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+
+                                            stroke={mark.color === 'red' ? '#b91c1c' : '#4b5563'}
+
+                                            strokeWidth={i === 5 ? "3" : "2"} />
+
+                                    );
+
+                                })}
+
+                            </svg>
+
+                            {scaleMarks.map((mark, i) => (
+
+                                <div key={i} className={`scale-mark ${mark.color === 'red' ? 'red' : ''}`}
+
+                                    style={{
+
+                                        left: '50%', bottom: '-50px',
+
+                                        transform: `translateX(-50%) rotate(${mark.angle}deg) translateY(-260px) rotate(${-mark.angle}deg)`
+
+                                    }}>
+
+                                    {mark.label}
+
+                                </div>
+
+                            ))}
+
+                            <div className="light-source"></div>
+
+                            <div className="needle" style={{ transform: `translateX(-50%) rotate(${needleRotation}deg)` }}></div>
+
+                            <div className="hub">
+
+                                <span className="hub-text">VU</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+        const App = () => (
+
+            <div className="flex flex-col items-center gap-8">
+
+                <VUMeter />
+
+                <div className="text-gray-500 text-sm font-medium tracking-widest uppercase">
+
+                    Analog Signal Monitor
+
+                </div>
+
+            </div>
+
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

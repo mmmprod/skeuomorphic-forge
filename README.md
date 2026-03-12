@@ -9,6 +9,12 @@
 
 # Skeuomorphic Forge
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-skill-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mmmprod/skeuomorphic-forge/pulls)
+[![GitHub stars](https://img.shields.io/github/stars/mmmprod/skeuomorphic-forge?style=social)](https://github.com/mmmprod/skeuomorphic-forge)
+
 **A Claude Code skill that builds physically-realistic UI components.**
 
 Not flat divs with drop shadows. Real objects — machined metal, CRT glass, brushed aluminum, industrial hardware.
@@ -16,17 +22,46 @@ Not flat divs with drop shadows. Real objects — machined metal, CRT glass, bru
 ---
 
 ```
-                              FLAT DESIGN                    vs                 SKEUOMORPHIC FORGE
-                        ___________________                              ___________________________
-                       |                   |                            |   o                   o   |
-                       |                   |                            |  /|\ ~ ~ ~ ~ ~ ~ ~ /|\  |
-                       |      Button       |                            |  |||  ___________  |||  |
-                       |                   |                            |  |||  | B u t t o n|  |||  |
-                       |___________________|                            |  |||  |___________|  |||  |
-                       box-shadow: 0 2px black                          |  \|/ 13 shadow layers \|/  |
-                                                                        |_____________________________|
-                       2 layers. sad.                                   screws. depth. warm light.
+                     FLAT DESIGN                 vs              SKEUOMORPHIC FORGE
+                ___________________                         ___________________________
+               |                   |                       |   o                   o   |
+               |                   |                       |  /|\ ~ ~ ~ ~ ~ ~ ~ /|\  |
+               |      Button       |                       |  |||  ___________  |||  |
+               |                   |                       |  |||  | B u t t o n|  |||  |
+               |___________________|                       |  |||  |___________|  |||  |
+               box-shadow: 0 2px black                     |  \|/ 13 shadow layers \|/  |
+                                                           |_____________________________|
+               2 layers. sad.                              screws. depth. warm light.
 ```
+
+---
+
+## Install
+
+```bash
+# As a Claude Code plugin
+claude /install-plugin github:mmmprod/skeuomorphic-forge
+```
+
+```bash
+# Or clone into your project skills
+mkdir -p .claude/skills && cd .claude/skills
+git clone https://github.com/mmmprod/skeuomorphic-forge.git
+```
+
+Auto-triggers on: `skeuomorphic`, `industrial UI`, `3D button`, `gauge`, `meter`, `realistic depth`, `retro-industrial`, `DSP cockpit`, `CRT display`, `glass effect`, `metal texture`.
+
+---
+
+## The Problem It Solves
+
+| You ask for | Claude gives you | With this skill |
+|-------------|------------------|-----------------|
+| Skeuomorphic button | `box-shadow: 0 2px 4px black` | 5-layer graduated shadow + hover/active states |
+| Industrial panel | Flat div + decorative screws | 11-layer chassis + depth wells + THEN screws |
+| CRT display | Green text on black bg | Phosphor glow + scanlines + glass reflection |
+| Warm lighting | `rgba(255,255,255,0.4)` | `rgba(255,240,220,0.2)` warm specular |
+| Metal knob | Circle with gradient | 8-layer shadow + rim light + specular hotspot |
 
 ---
 
@@ -60,20 +95,6 @@ skeuomorphic-forge/
 ```
 
 **Total: 27,583 lines** of copy-paste-ready patterns, shadow stacks, and production code.
-
----
-
-## The Problem It Solves
-
-Without this skill, Claude produces:
-
-| You ask for | Claude gives you | With this skill |
-|-------------|------------------|-----------------|
-| Skeuomorphic button | `box-shadow: 0 2px 4px black` | 5-layer graduated shadow + hover/active states |
-| Industrial panel | Flat div + decorative screws | 11-layer chassis + depth wells + THEN screws |
-| CRT display | Green text on black bg | Phosphor glow + scanlines + glass reflection |
-| Warm lighting | `rgba(255,255,255,0.4)` | `rgba(255,240,220,0.2)` warm specular |
-| Metal knob | Circle with gradient | 8-layer shadow + rim light + specular hotspot |
 
 ---
 
@@ -116,8 +137,6 @@ buttons, cards             knobs, meters               panels, chassis          
 
 ## Priority System
 
-Rules are ranked so Claude checks the most impactful things first:
-
 | # | Rule | Priority | One-liner |
 |---|------|----------|-----------|
 | 1 | Shadow Depth | CRITICAL | Count layers: 5 / 8 / 11 minimum |
@@ -145,25 +164,6 @@ python3 scripts/search.py "rim light" --context 5       # Limited preview
 ```
 
 Indexes 2,400+ sections. Returns ranked results with file, line numbers, and matching content.
-
----
-
-## Installation
-
-### Claude Code (project-level)
-
-```bash
-# From your project root
-mkdir -p .claude/skills
-cd .claude/skills
-git clone https://github.com/mmmprod/skeuomorphic-forge.git
-```
-
-The skill auto-triggers when Claude detects keywords like: `skeuomorphic`, `industrial UI`, `3D button`, `gauge`, `meter`, `realistic depth`, `retro-industrial`, `DSP cockpit`.
-
-### Manual trigger
-
-Just mention "skeuomorphic" or "industrial design" in your prompt. Or reference the skill directly.
 
 ---
 
@@ -196,7 +196,6 @@ Just mention "skeuomorphic" or "industrial design" in your prompt. Or reference 
 }
 .button:hover {
   transform: translateY(-1px);                  /* lift */
-  /* expanded shadow stack */
 }
 .button:active {
   transform: translateY(1px);                   /* depress */
@@ -227,6 +226,24 @@ Just mention "skeuomorphic" or "industrial design" in your prompt. Or reference 
 
 ---
 
+## Contributing
+
+Contributions welcome! Feel free to:
+
+- Open an **issue** to report bugs or suggest new material/effect types
+- Submit a **pull request** with improvements or new reference guides
+- Fork and adapt for your own projects
+
+```bash
+git checkout -b feature/new-material
+# make changes
+git commit -m "Add ceramic material reference"
+git push origin feature/new-material
+# open PR
+```
+
+---
+
 ## Credits
 
 Built for the [DSP Tuner Pro](https://github.com/mmmprod) project — a Next.js automotive DSP calibration app with a retro-industrial cockpit aesthetic.
@@ -237,4 +254,4 @@ Patterns sourced from production components, CodePen experiments, CSS-Tricks art
 
 ## License
 
-MIT
+[MIT](LICENSE) — use it, modify it, share it, do whatever you want.

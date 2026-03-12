@@ -1,0 +1,677 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Hardware Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+
+            background-color: #050506;
+
+            margin: 0;
+
+            overflow: hidden;
+
+            font-family: 'Rajdhani', sans-serif;
+
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+
+        }
+
+
+
+        .hardware-panel {
+
+            background: linear-gradient(135deg, #2a2d32 0%, #15171a 100%);
+
+            border-radius: 24px;
+
+            box-shadow: 
+
+                0 40px 80px -20px rgba(0,0,0,1),
+
+                inset 1px 1px 2px rgba(255,255,255,0.1),
+
+                inset -1px -1px 3px rgba(0,0,0,0.8),
+
+                0 0 0 1px #000;
+
+        }
+
+
+
+        .gauge-bezel {
+
+            background: linear-gradient(145deg, #111 0%, #333 100%);
+
+            border-radius: 50%;
+
+            padding: 18px;
+
+            box-shadow: 
+
+                0 20px 40px rgba(0,0,0,0.9),
+
+                inset 1px 1px 2px rgba(255,255,255,0.2),
+
+                inset -2px -2px 6px rgba(0,0,0,0.8);
+
+            position: relative;
+
+        }
+
+
+
+        .gauge-face {
+
+            background: radial-gradient(circle at 50% 50%, #15181c 0%, #050608 100%);
+
+            border-radius: 50%;
+
+            box-shadow: 
+
+                inset 0 15px 30px rgba(0,0,0,1),
+
+                inset 0 -2px 5px rgba(255,255,255,0.05),
+
+                0 0 0 2px #000;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+
+
+        .glass-dome {
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 50%;
+
+            background: 
+
+                radial-gradient(120% 90% at 50% -10%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 45%),
+
+                linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%, rgba(0,0,0,0.5) 100%);
+
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+
+            pointer-events: none;
+
+            z-index: 50;
+
+        }
+
+
+
+        .vfd-display {
+
+            background: #020406;
+
+            border: 1px solid #000;
+
+            box-shadow: 
+
+                inset 0 3px 8px rgba(0,0,0,0.9),
+
+                0 1px 0 rgba(255,255,255,0.05);
+
+            font-family: 'Orbitron', monospace;
+
+            color: #0ff;
+
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+
+        }
+
+
+
+        .vfd-display.red {
+
+            color: #f43f5e;
+
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.6);
+
+        }
+
+
+
+        .needle-wrapper {
+
+            position: absolute;
+
+            inset: 0;
+
+            z-index: 40;
+
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.6));
+
+        }
+
+
+
+        .needle-arm {
+
+            position: absolute;
+
+            bottom: 50%;
+
+            left: 50%;
+
+            width: 4px;
+
+            height: 42%;
+
+            background: linear-gradient(to right, #fff 0%, #d4d4d8 50%, #a1a1aa 100%);
+
+            transform: translateX(-50%);
+
+            transform-origin: bottom center;
+
+            border-radius: 4px 4px 0 0;
+
+            /* Ajout d'un glow rouge léger combiné à l'ombre noire */
+
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.4), 0 0 4px rgba(0,0,0,0.5);
+
+        }
+
+
+
+        .needle-arm::after {
+
+            content: '';
+
+            position: absolute;
+
+            top: 2px; left: 1px; right: 1px; bottom: 10px;
+
+            background: linear-gradient(to bottom, #f43f5e, #9f1239);
+
+            border-radius: 2px;
+
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.8);
+
+        }
+
+
+
+        .pivot {
+
+            position: absolute;
+
+            top: 50%; left: 50%;
+
+            width: 32px; height: 32px;
+
+            transform: translate(-50%, -50%);
+
+            background: radial-gradient(circle at 30% 30%, #4a4d52, #181a1d);
+
+            border-radius: 50%;
+
+            box-shadow: 
+
+                0 5px 10px rgba(0,0,0,0.8),
+
+                inset 1px 1px 2px rgba(255,255,255,0.3),
+
+                inset -1px -1px 2px rgba(0,0,0,0.8);
+
+            z-index: 45;
+
+        }
+
+
+
+        .pivot::after {
+
+            content: ''; position: absolute;
+
+            top: 50%; left: 50%;
+
+            width: 12px; height: 12px;
+
+            transform: translate(-50%, -50%);
+
+            background: #000;
+
+            border-radius: 50%;
+
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
+
+        }
+
+
+
+        .industrial-switch {
+
+            background: linear-gradient(180deg, #32363b 0%, #1a1c1f 100%);
+
+            border-radius: 12px;
+
+            box-shadow: 
+
+                0 8px 15px rgba(0,0,0,0.6),
+
+                inset 0 1px 1px rgba(255,255,255,0.1),
+
+                0 0 0 2px #0a0a0c;
+
+            border: 1px solid #444;
+
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+
+        }
+
+
+
+        .industrial-switch:active {
+
+            transform: translateY(4px);
+
+            box-shadow: 
+
+                0 2px 5px rgba(0,0,0,0.8),
+
+                inset 0 2px 4px rgba(0,0,0,0.5),
+
+                0 0 0 2px #0a0a0c;
+
+        }
+
+
+
+        .indicator-led {
+
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), 0 0 10px currentColor;
+
+        }
+
+    </style>
+
+</head>
+
+<body class="h-screen flex items-center justify-center">
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState, useEffect, useRef, useMemo } = React;
+
+
+
+        const GaugeFaceSVG = () => {
+
+            const ticks = [];
+
+            // Mapping: 0 to 120 over a 270 degree sweep (-135 to +135)
+
+            for (let i = 0; i <= 120; i += 2) {
+
+                const angle = -135 + (i / 120) * 270;
+
+                const isMajor = i % 20 === 0;
+
+                const isMedium = i % 10 === 0;
+
+                const isRedZone = i >= 100;
+
+                const isWarning = i >= 80 && i < 100;
+
+
+
+                let color = "#38bdf8"; // Cyan
+
+                if (isWarning) color = "#eab308"; // Yellow
+
+                if (isRedZone) color = "#f43f5e"; // Red
+
+
+
+                const length = isMajor ? 14 : (isMedium ? 8 : 4);
+
+                const strokeWidth = isMajor ? 2.5 : 1;
+
+                const radius = 90;
+
+                const innerRadius = radius - length;
+
+
+
+                // Math for SVG lines
+
+                const rad = (angle - 90) * (Math.PI / 180);
+
+                const x1 = 100 + radius * Math.cos(rad);
+
+                const y1 = 100 + radius * Math.sin(rad);
+
+                const x2 = 100 + innerRadius * Math.cos(rad);
+
+                const y2 = 100 + innerRadius * Math.sin(rad);
+
+
+
+                ticks.push(
+
+                    <g key={i}>
+
+                        <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={strokeWidth} opacity={isMajor ? 1 : 0.6} strokeLinecap="round" style={{ filter: `drop-shadow(0 0 ${isMajor ? 4 : 2}px ${color})` }} />
+
+                        {isMajor && (
+
+                            <text 
+
+                                x={100 + (innerRadius - 12) * Math.cos(rad)} 
+
+                                y={100 + (innerRadius - 12) * Math.sin(rad)} 
+
+                                fill={color} 
+
+                                fontSize="10" 
+
+                                fontWeight="bold" 
+
+                                fontFamily="Rajdhani" 
+
+                                textAnchor="middle" 
+
+                                alignmentBaseline="middle"
+
+                                style={{ filter: `drop-shadow(0 0 4px ${color})` }}
+
+                            >
+
+                                {i}
+
+                            </text>
+
+                        )}
+
+                    </g>
+
+                );
+
+            }
+
+
+
+            return (
+
+                <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full z-10">
+
+                    {/* Red Zone Arc Background */}
+
+                    <path d="M 177.78 145 A 90 90 0 0 0 186.6 69.1" fill="none" stroke="rgba(244, 63, 94, 0.15)" strokeWidth="15" strokeLinecap="round" filter="blur(4px)" />
+
+                    {ticks}
+
+                    <text x="100" y="145" fill="#4a5568" fontSize="8" fontWeight="bold" textAnchor="middle" letterSpacing="2">POWER OUTPUT</text>
+
+                </svg>
+
+            );
+
+        };
+
+
+
+        const Dashboard = () => {
+
+            const [mode, setMode] = useState('MOY');
+
+            const needleRef = useRef(null);
+
+            const textRef = useRef(null);
+
+            const requestRef = useRef(null);
+
+            
+
+            // État physique déporté hors de React
+
+            const physics = useRef({
+
+                current: 0,
+
+                velocity: 0
+
+            });
+
+
+
+            // Moteur DSP / Ballistique
+
+            const animate = () => {
+
+                const targetBase = mode === 'MAX' ? 105 : 65;
+
+                const jitter = (Math.random() * 6 - 3); // Bruit analogique
+
+                const target = targetBase + jitter;
+
+                
+
+                // Calcul de la ballistique asymétrique (Attack rapide, Release lent)
+
+                const p = physics.current;
+
+                const diff = target - p.current;
+
+                
+
+                const damping = diff > 0 ? 0.15 : 0.05; 
+
+                p.velocity = (p.velocity + diff * damping) * 0.7; // Tension du ressort (0.7 friction)
+
+                p.current += p.velocity;
+
+
+
+                // Protection des bornes
+
+                if (p.current < 0) p.current = 0;
+
+                if (p.current > 120) p.current = 120;
+
+
+
+                // Manipulation DOM directe (Zéro Render React)
+
+                if (needleRef.current) {
+
+                    const angle = -135 + (p.current / 120) * 270;
+
+                    needleRef.current.style.transform = `rotate(${angle}deg)`;
+
+                }
+
+                
+
+                if (textRef.current) {
+
+                    textRef.current.innerText = p.current.toFixed(1).padStart(5, '0');
+
+                    if (p.current >= 100) {
+
+                        textRef.current.classList.add('red');
+
+                    } else {
+
+                        textRef.current.classList.remove('red');
+
+                    }
+
+                }
+
+
+
+                requestRef.current = requestAnimationFrame(animate);
+
+            };
+
+
+
+            useEffect(() => {
+
+                requestRef.current = requestAnimationFrame(animate);
+
+                return () => cancelAnimationFrame(requestRef.current);
+
+            }, [mode]);
+
+
+
+            return (
+
+                <div className="hardware-panel p-10 flex flex-col items-center">
+
+                    
+
+                    {/* Gauge Assembly */}
+
+                    <div className="gauge-bezel w-96 h-96">
+
+                        <div className="gauge-face w-full h-full">
+
+                            <GaugeFaceSVG />
+
+                            
+
+                            {/* VFD Digital Readout descendu avec bottom-8 au lieu de bottom-16 */}
+
+                            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+
+                                <div className="vfd-display px-3 py-1 rounded bg-[#0a0a0a] flex items-center space-x-1">
+
+                                    <span ref={textRef} className="text-xl tracking-widest">000.0</span>
+
+                                    <span className="text-[10px] text-gray-500 font-sans mt-1">KW</span>
+
+                                </div>
+
+                            </div>
+
+
+
+                            {/* Needle System */}
+
+                            <div className="needle-wrapper" ref={needleRef} style={{ transform: 'rotate(-135deg)' }}>
+
+                                <div className="needle-arm"></div>
+
+                            </div>
+
+                            <div className="pivot"></div>
+
+
+
+                            <div className="glass-dome"></div>
+
+                        </div>
+
+                    </div>
+
+                    
+
+                    {/* Control Panel */}
+
+                    <div className="mt-10 flex items-center space-x-8 bg-[#15171a] p-4 rounded-2xl border border-white/5 shadow-inner">
+
+                        <div className="flex flex-col items-center space-y-2">
+
+                            <div className={`w-2 h-2 rounded-full indicator-led ${mode === 'MOY' ? 'bg-cyan-400 text-cyan-400' : 'bg-gray-800 text-transparent'}`}></div>
+
+                            <span className="text-xs font-bold text-gray-500 tracking-wider">AVG</span>
+
+                        </div>
+
+
+
+                        {/* Heavy Toggle Switch */}
+
+                        <button 
+
+                            onClick={() => setMode(mode === 'MOY' ? 'MAX' : 'MOY')}
+
+                            className="industrial-switch px-8 py-3 focus:outline-none flex items-center justify-center space-x-3 cursor-pointer"
+
+                        >
+
+                            <svg className={`w-5 h-5 transition-colors duration-300 ${mode === 'MAX' ? 'text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'text-cyan-500 drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]'}`} fill="currentColor" viewBox="0 0 24 24">
+
+                                <path d="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C18.05,7.73 19,9.72 19,12A7,7 0 0,1 12,19A7,7 0 0,1 5,12C5,9.72 5.95,7.73 7.59,6.59L6.17,5.17C4.23,6.82 3,9.26 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12C21,9.26 19.77,6.82 17.83,5.17Z"/>
+
+                            </svg>
+
+                            <span className="text-gray-300 font-bold tracking-widest text-sm">ENGAGE</span>
+
+                        </button>
+
+
+
+                        <div className="flex flex-col items-center space-y-2">
+
+                            <div className={`w-2 h-2 rounded-full indicator-led ${mode === 'MAX' ? 'bg-rose-500 text-rose-500' : 'bg-gray-800 text-transparent'}`}></div>
+
+                            <span className="text-xs font-bold text-gray-500 tracking-wider">PEAK</span>
+
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const App = () => (
+
+            <div className="min-h-screen w-full flex items-center justify-center">
+
+                <Dashboard />
+
+            </div>
+
+        );
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

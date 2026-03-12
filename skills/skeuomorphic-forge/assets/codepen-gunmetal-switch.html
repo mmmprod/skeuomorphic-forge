@@ -1,0 +1,469 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gunmetal Skeuomorphic Switch</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+
+            background-color: #050607;
+
+            margin: 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+            /* Texture de fond globale */
+
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+
+        }
+
+
+
+        /* Plaque de montage Gunmetal */
+
+        .hardware-plate {
+
+            background: linear-gradient(135deg, #25282e 0%, #111316 100%);
+
+            padding: 50px 70px;
+
+            border-radius: 20px;
+
+            position: relative;
+
+            box-shadow: 
+
+                0 40px 60px -10px rgba(0,0,0,0.9),
+
+                inset 1px 1px 2px rgba(255,255,255,0.1),
+
+                inset -2px -2px 5px rgba(0,0,0,0.8),
+
+                0 0 0 2px #000;
+
+        }
+
+
+
+        /* Grain du métal appliqué sur la plaque */
+
+        .hardware-plate::before {
+
+            content: '';
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 20px;
+
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+
+            mix-blend-mode: overlay;
+
+            pointer-events: none;
+
+        }
+
+
+
+        /* Fente usinée CNC */
+
+        .switch-track {
+
+            position: relative;
+
+            width: 320px;
+
+            height: 120px;
+
+            background: #030405;
+
+            border-radius: 60px;
+
+            cursor: pointer;
+
+            padding: 8px;
+
+            display: flex;
+
+            align-items: center;
+
+            /* Lèvres du métal autour du trou */
+
+            box-shadow: 
+
+                inset 0 15px 25px rgba(0,0,0,1),
+
+                inset 0 5px 10px rgba(0,0,0,1),
+
+                inset 0 -2px 4px rgba(255,255,255,0.05),
+
+                0 1px 1px rgba(255,255,255,0.1);
+
+            overflow: hidden;
+
+            -webkit-tap-highlight-color: transparent;
+
+        }
+
+
+
+        /* Filaments Plasma / LED d'état */
+
+        .plasma-core {
+
+            position: absolute;
+
+            left: 10px;
+
+            top: 10px;
+
+            bottom: 10px;
+
+            width: calc(100% - 20px);
+
+            border-radius: 50px;
+
+            background: #000;
+
+            z-index: 1;
+
+        }
+
+
+
+        .switch-track.is-on .plasma-core {
+
+            background: #0a0100;
+
+            box-shadow: 
+
+                inset 30px 0 60px #ff3300,
+
+                0 0 20px rgba(255, 51, 0, 0.4);
+
+            transition: all 0.3s ease-out 0.1s;
+
+        }
+
+
+
+        /* Bloc mécanique lourd (Slider) */
+
+        .slider-knob {
+
+            position: relative;
+
+            width: 140px;
+
+            height: 104px;
+
+            background: linear-gradient(145deg, #4a4f59 0%, #202328 50%, #111316 100%);
+
+            border-radius: 52px;
+
+            z-index: 10;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 12px;
+
+            
+
+            /* Ressort mécanique lourd */
+
+            transition: transform 0.5s cubic-bezier(0.8, -0.2, 0.2, 1.2), box-shadow 0.5s ease;
+
+            
+
+            /* Ombre directionnelle par défaut (Lumière à gauche) */
+
+            box-shadow: 
+
+                15px 0 20px rgba(0,0,0,0.8),
+
+                5px 0 10px rgba(0,0,0,0.6),
+
+                inset 2px 2px 3px rgba(255,255,255,0.2),
+
+                inset -2px -2px 5px rgba(0,0,0,0.7),
+
+                inset 0 0 0 1px rgba(0,0,0,0.8);
+
+        }
+
+
+
+        /* Mouvement & Bascule des ombres au déclenchement */
+
+        .switch-track.is-on .slider-knob {
+
+            transform: translateX(164px);
+
+            /* L'ombre passe à gauche */
+
+            box-shadow: 
+
+                -15px 0 20px rgba(0,0,0,0.9),
+
+                -5px 0 10px rgba(0,0,0,0.7),
+
+                inset 2px 2px 3px rgba(255,255,255,0.2),
+
+                inset -2px -2px 5px rgba(0,0,0,0.7),
+
+                inset 0 0 0 1px rgba(0,0,0,0.8);
+
+        }
+
+
+
+        /* Reflet spéculaire du cylindre métallique */
+
+        .slider-knob::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: 2px; left: 10px; right: 10px; height: 30%;
+
+            border-radius: 50px 50px 0 0;
+
+            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+
+            pointer-events: none;
+
+        }
+
+
+
+        /* Grip Industriel (Stries usinées) */
+
+        .grip-ridge {
+
+            width: 4px;
+
+            height: 44px;
+
+            background: #111316;
+
+            border-radius: 2px;
+
+            box-shadow: 
+
+                inset 1px 0 1px rgba(0,0,0,1),
+
+                inset -1px 0 1px rgba(255,255,255,0.1),
+
+                1px 0 1px rgba(255,255,255,0.1);
+
+        }
+
+
+
+        /* Typographie technique gravée */
+
+        .label {
+
+            font-family: 'Orbitron', sans-serif;
+
+            font-size: 14px;
+
+            color: #2a2d33;
+
+            letter-spacing: 0.2em;
+
+            text-shadow: 0 1px 1px rgba(255,255,255,0.1);
+
+            position: absolute;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            z-index: 5;
+
+            pointer-events: none;
+
+        }
+
+        .label.off { right: 35px; }
+
+        .label.on { left: 35px; color: #000; text-shadow: none; }
+
+
+
+        .switch-track.is-on .label.on {
+
+            color: #ff3300;
+
+            text-shadow: 0 0 10px rgba(255, 51, 0, 0.8), 0 0 20px rgba(255, 51, 0, 0.4);
+
+            transition: color 0.2s 0.2s, text-shadow 0.2s 0.2s;
+
+        }
+
+
+
+        /* Vis de fixation torx */
+
+        .screw {
+
+            position: absolute;
+
+            width: 16px; height: 16px;
+
+            border-radius: 50%;
+
+            background: linear-gradient(135deg, #3a3f4a, #15171a);
+
+            box-shadow: 
+
+                inset 0 1px 2px rgba(255,255,255,0.2), 
+
+                0 2px 4px rgba(0,0,0,0.9),
+
+                0 0 0 1px #050505;
+
+            z-index: 20;
+
+        }
+
+        .screw::after { 
+
+            content: '★'; position: absolute;
+
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+
+            color: #050505; font-size: 8px;
+
+            text-shadow: 0 1px 0 rgba(255,255,255,0.1);
+
+        }
+
+        .screw-tl { top: 20px; left: 20px; transform: rotate(15deg); }
+
+        .screw-tr { top: 20px; right: 20px; transform: rotate(-35deg); }
+
+        .screw-bl { bottom: 20px; left: 20px; transform: rotate(85deg); }
+
+        .screw-br { bottom: 20px; right: 20px; transform: rotate(120deg); }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState } = React;
+
+
+
+        const App = () => {
+
+            const [isOn, setIsOn] = useState(false);
+
+
+
+            return (
+
+                <div className="hardware-plate">
+
+                    <div className="screw screw-tl"></div>
+
+                    <div className="screw screw-tr"></div>
+
+                    <div className="screw screw-bl"></div>
+
+                    <div className="screw screw-br"></div>
+
+
+
+                    <div 
+
+                        className={`switch-track ${isOn ? 'is-on' : ''}`}
+
+                        onClick={() => setIsOn(!isOn)}
+
+                        aria-checked={isOn}
+
+                        role="switch"
+
+                    >
+
+                        <div className="plasma-core"></div>
+
+                        
+
+                        <span className="label on">ARM</span>
+
+                        <span className="label off">SAFE</span>
+
+
+
+                        <div className="slider-knob">
+
+                            <div className="grip-ridge"></div>
+
+                            <div className="grip-ridge"></div>
+
+                            <div className="grip-ridge"></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

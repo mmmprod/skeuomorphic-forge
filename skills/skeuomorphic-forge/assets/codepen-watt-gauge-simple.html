@@ -1,0 +1,559 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>WattMeter</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+
+            background-color: #1a1a1c;
+
+            color: white;
+
+            font-family: 'Rajdhani', sans-serif;
+
+            margin: 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            overflow: hidden;
+
+        }
+
+        .glow-red {
+
+            filter: drop-shadow(0 0 10px rgba(255, 0, 80, 0.8)) drop-shadow(0 0 20px rgba(255, 0, 80, 0.4));
+
+        }
+
+        .text-glow {
+
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+
+        }
+
+        .bevel-outer {
+
+            fill: url(#outerGradient);
+
+        }
+
+        .gauge-bg {
+
+            fill: #141416;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+
+
+    <script type="text/babel">
+
+        const { useState, useEffect } = React;
+
+
+
+        const Speedometer = () => {
+
+            const [speed, setSpeed] = useState(0);
+
+            const [targetSpeed, setTargetSpeed] = useState(162);
+
+            
+
+            useEffect(() => {
+
+                const interval = setInterval(() => {
+
+                    setTargetSpeed(Math.floor(Math.random() * 180));
+
+                }, 3000);
+
+                return () => clearInterval(interval);
+
+            }, []);
+
+
+
+            useEffect(() => {
+
+                const timer = setInterval(() => {
+
+                    setSpeed(prev => {
+
+                        if (Math.abs(prev - targetSpeed) < 0.5) return targetSpeed;
+
+                        return prev + (targetSpeed - prev) * 0.1;
+
+                    });
+
+                }, 30);
+
+                return () => clearInterval(timer);
+
+            }, [targetSpeed]);
+
+
+
+            const displaySpeed = Math.round(speed);
+
+            
+
+            // Configuration
+
+            const size = 600;
+
+            const center = size / 2;
+
+            const radius = 230;
+
+            const strokeWidth = 55;
+
+            
+
+            // Angle mapping: 0 speed at 30 degrees, 180 speed at 300 degrees
+
+            const startAngle = 30;
+
+            const endAngle = 300;
+
+            const totalAngle = endAngle - startAngle; // 270 degrees
+
+            const currentAngle = startAngle + (speed / 180) * totalAngle;
+
+
+
+            // Helper to convert polar to cartesian
+
+            const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+
+                const angleInRadians = (angleInDegrees - 0) * Math.PI / 180.0;
+
+                return {
+
+                    x: centerX + (radius * Math.cos(angleInRadians)),
+
+                    y: centerY + (radius * Math.sin(angleInRadians))
+
+                };
+
+            };
+
+
+
+            const describeArc = (x, y, radius, startAngle, endAngle) => {
+
+                const start = polarToCartesian(x, y, radius, endAngle);
+
+                const end = polarToCartesian(x, y, radius, startAngle);
+
+                const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+                return [
+
+                    "M", start.x, start.y, 
+
+                    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
+
+                ].join(" ");
+
+            };
+
+
+
+            const ticks = [];
+
+            for (let i = 0; i <= 180; i += 20) {
+
+                const angle = startAngle + (i / 180) * totalAngle;
+
+                const p1 = polarToCartesian(center, center, radius - 25, angle);
+
+                const p2 = polarToCartesian(center, center, radius + 25, angle);
+
+                const labelPos = polarToCartesian(center, center, radius + 55, angle);
+
+                ticks.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, label: i, lx: labelPos.x, ly: labelPos.y });
+
+            }
+
+
+
+            // Minor ticks
+
+            const minorTicks = [];
+
+            for (let i = 0; i <= 180; i += 4) {
+
+                if (i % 20 === 0) continue;
+
+                const angle = startAngle + (i / 180) * totalAngle;
+
+                const p1 = polarToCartesian(center, center, radius - 15, angle);
+
+                const p2 = polarToCartesian(center, center, radius + 15, angle);
+
+                minorTicks.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
+
+            }
+
+
+
+            // Pointer coordinates
+
+            const pointerTip = polarToCartesian(center, center, radius + 40, currentAngle);
+
+            const pointerBaseL = polarToCartesian(center, center, radius + 60, currentAngle - 4);
+
+            const pointerBaseR = polarToCartesian(center, center, radius + 60, currentAngle + 4);
+
+            const pointerBack = polarToCartesian(center, center, radius + 75, currentAngle);
+
+
+
+            return (
+
+                <div className="relative flex flex-col items-center justify-center scale-75 md:scale-100">
+
+                    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+
+                        <defs>
+
+                            <linearGradient id="outerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+
+                                <stop offset="0%" style={{ stopColor: '#444', stopOpacity: 1 }} />
+
+                                <stop offset="50%" style={{ stopColor: '#111', stopOpacity: 1 }} />
+
+                                <stop offset="100%" style={{ stopColor: '#333', stopOpacity: 1 }} />
+
+                            </linearGradient>
+
+                            <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+
+                                <stop offset="0%" style={{ stopColor: '#ff0050', stopOpacity: 1 }} />
+
+                                <stop offset="100%" style={{ stopColor: '#ff4d8d', stopOpacity: 1 }} />
+
+                            </linearGradient>
+
+                            <pattern id="concentricLines" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+
+                                <circle cx="5" cy="5" r="4.5" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+
+                            </pattern>
+
+                            <filter id="glow">
+
+                                <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+
+                                <feMerge>
+
+                                    <feMergeNode in="coloredBlur"/>
+
+                                    <feMergeNode in="SourceGraphic"/>
+
+                                </feMerge>
+
+                            </filter>
+
+                        </defs>
+
+
+
+                        {/* Outer Bezel */}
+
+                        <circle cx={center} cy={center} r={radius + 60} fill="#222" stroke="#333" strokeWidth="4" />
+
+                        <circle cx={center} cy={center} r={radius + 55} className="bevel-outer" />
+
+                        <circle cx={center} cy={center} r={radius + 40} fill="#141416" stroke="#000" strokeWidth="2" />
+
+
+
+                        {/* Ticks and background track */}
+
+                        <path 
+
+                            d={describeArc(center, center, radius, startAngle, endAngle)} 
+
+                            fill="none" 
+
+                            stroke="#1a1a1c" 
+
+                            strokeWidth={strokeWidth} 
+
+                        />
+
+
+
+                        {/* Active Red Track */}
+
+                        <path 
+
+                            d={describeArc(center, center, radius, startAngle, currentAngle)} 
+
+                            fill="none" 
+
+                            stroke="url(#redGradient)" 
+
+                            strokeWidth={strokeWidth}
+
+                            className="glow-red"
+
+                        />
+
+                        
+
+                        {/* Decorative concentric rings inside the red track */}
+
+                        {[radius - 15, radius - 5, radius + 5, radius + 15].map((r, i) => (
+
+                            <path 
+
+                                key={i}
+
+                                d={describeArc(center, center, r, startAngle, currentAngle)} 
+
+                                fill="none" 
+
+                                stroke="rgba(255,255,255,0.15)" 
+
+                                strokeWidth="1"
+
+                            />
+
+                        ))}
+
+
+
+                        {/* Major Ticks */}
+
+                        {ticks.map((tick, i) => (
+
+                            <g key={i}>
+
+                                <line 
+
+                                    x1={tick.x1} y1={tick.y1} x2={tick.x2} y2={tick.y2} 
+
+                                    stroke={speed >= tick.label ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.3)"} 
+
+                                    strokeWidth="2" 
+
+                                />
+
+                                <text 
+
+                                    x={tick.lx} y={tick.ly} 
+
+                                    fill={speed >= tick.label ? "white" : "rgba(255,255,255,0.5)"}
+
+                                    fontSize="22" 
+
+                                    textAnchor="middle" 
+
+                                    dominantBaseline="middle"
+
+                                    fontWeight="500"
+
+                                >
+
+                                    {tick.label}
+
+                                </text>
+
+                            </g>
+
+                        ))}
+
+
+
+                        {/* Minor Ticks */}
+
+                        {minorTicks.map((tick, i) => (
+
+                            <line 
+
+                                key={i}
+
+                                x1={tick.x1} y1={tick.y1} x2={tick.x2} y2={tick.y2} 
+
+                                stroke="rgba(255,255,255,0.15)" 
+
+                                strokeWidth="1" 
+
+                            />
+
+                        ))}
+
+
+
+                        {/* Pointer */}
+
+                        <polygon 
+
+                            points={`${pointerTip.x},${pointerTip.y} ${pointerBaseL.x},${pointerBaseL.y} ${pointerBack.x},${pointerBack.y} ${pointerBaseR.x},${pointerBaseR.y}`}
+
+                            fill="#ff4d8d"
+
+                            className="glow-red"
+
+                        />
+
+                        <line 
+
+                            x1={pointerTip.x} y1={pointerTip.y} x2={pointerBack.x} y2={pointerBack.y} 
+
+                            stroke="rgba(255,255,255,0.5)" 
+
+                            strokeWidth="1" 
+
+                        />
+
+
+
+                        {/* Inner Face */}
+
+                        <circle cx={center} cy={center} r={radius - strokeWidth/2 - 10} fill="#141416" />
+
+                        
+
+                        {/* Upper/Lower decorative lines */}
+
+                        <path 
+
+                            d={`M ${center - 80} ${center - 90} Q ${center} ${center - 110} ${center + 80} ${center - 90}`} 
+
+                            fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" 
+
+                        />
+
+                        <path 
+
+                            d={`M ${center - 80} ${center + 120} Q ${center} ${center + 140} ${center + 80} ${center + 120}`} 
+
+                            fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" 
+
+                        />
+
+
+
+                        {/* Center Text */}
+
+                        <text 
+
+                            x={center} y={center + 50} 
+
+                            fill="white" 
+
+                            fontSize="180" 
+
+                            textAnchor="middle" 
+
+                            fontWeight="300"
+
+                            className="text-glow"
+
+                            style={{ letterSpacing: '-2px', fontFamily: 'sans-serif' }}
+
+                        >
+
+                            {displaySpeed}
+
+                        </text>
+
+
+
+                        {/* Units */}
+
+                        <text 
+
+                            x={center} y={center - 110} 
+
+                            fill="rgba(255,255,255,0.4)" 
+
+                            fontSize="32" 
+
+                            textAnchor="middle" 
+
+                            fontWeight="400"
+
+                            style={{ letterSpacing: '2px', textTransform: 'uppercase' }}
+
+                        >
+
+                            watts
+
+                        </text>
+
+                    </svg>
+
+                    
+
+                    {/* Shadow at the bottom */}
+
+                    <div className="w-[500px] h-4 bg-black/40 blur-xl rounded-[100%] absolute -bottom-10"></div>
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const App = () => {
+
+            return (
+
+                <div className="w-full h-screen flex items-center justify-center bg-[#1a1a1c] p-10 overflow-hidden">
+
+                    <Speedometer />
+
+                </div>
+
+            );
+
+        };
+
+
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        root.render(<App />);
+
+    </script>
+
+</body>
+
+</html>

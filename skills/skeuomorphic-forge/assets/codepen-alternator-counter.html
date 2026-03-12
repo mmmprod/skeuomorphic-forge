@@ -1,0 +1,755 @@
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Skeuomorphic Counter — ALTERNATOR 175A</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+
+            background: radial-gradient(ellipse 80% 80% at 50% 45%, #2a3040 0%, #12161e 60%, #0a0c10 100%);
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+        .chassis {
+
+            position: relative;
+
+            background:
+
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+
+                linear-gradient(142deg, #2e2e34 0%, #222228 25%, #1a1a20 50%, #20202a 75%, #26262c 100%);
+
+            background-blend-mode: overlay, normal;
+
+            border-radius: 28px;
+
+            padding: 48px 52px 44px;
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,255,255,0.14),
+
+                inset 0 2px 3px rgba(255,255,255,0.05),
+
+                inset 1px 0 0 rgba(255,255,255,0.08),
+
+                inset 0 -1px 0 rgba(0,0,0,0.7),
+
+                inset -1px 0 0 rgba(0,0,0,0.35),
+
+                inset 0 0 30px rgba(0,0,0,0.1),
+
+                0 2px 4px rgba(0,0,0,0.5),
+
+                0 4px 8px rgba(0,0,0,0.45),
+
+                0 8px 16px rgba(0,0,0,0.4),
+
+                0 16px 32px rgba(0,0,0,0.35),
+
+                0 24px 48px rgba(0,0,0,0.25),
+
+                0 32px 64px rgba(0,0,0,0.2),
+
+                0 48px 96px rgba(0,0,0,0.15),
+
+                0 0 120px rgba(0,0,0,0.5);
+
+        }
+
+        .screw {
+
+            position: absolute;
+
+            width: 14px; height: 14px;
+
+            border-radius: 50%;
+
+            background: radial-gradient(circle at 32% 26%, #888 0%, #666 15%, #444 40%, #2a2a2a 70%, #151515 100%);
+
+            box-shadow:
+
+                inset 0 2.5px 5px rgba(0,0,0,0.95),
+
+                inset 0 -0.5px 0 rgba(255,255,255,0.2),
+
+                inset 0.5px 0 0 rgba(255,255,255,0.1),
+
+                0 1px 1px rgba(0,0,0,0.9),
+
+                0 2px 2px rgba(0,0,0,0.8),
+
+                0 3px 4px rgba(0,0,0,0.65),
+
+                0 4px 6px rgba(0,0,0,0.5),
+
+                0 5px 10px rgba(0,0,0,0.35),
+
+                0 7px 14px rgba(0,0,0,0.2),
+
+                0 0.5px 0 rgba(255,255,255,0.09),
+
+                0 0 0 0.5px rgba(0,0,0,0.8);
+
+        }
+
+        .screw::before {
+
+            content: '';
+
+            position: absolute; top: 50%; left: 14%; right: 14%; height: 1.5px;
+
+            background: linear-gradient(90deg, rgba(10,10,10,0.5), #080808, rgba(10,10,10,0.5));
+
+            border-radius: 1px;
+
+            transform: translateY(-50%) rotate(var(--a, 30deg));
+
+            box-shadow: 0 0.5px 0 rgba(255,255,255,0.12);
+
+        }
+
+        .screw::after {
+
+            content: '';
+
+            position: absolute; top: 14%; bottom: 14%; left: 50%; width: 1.5px;
+
+            background: linear-gradient(180deg, rgba(10,10,10,0.5), #080808, rgba(10,10,10,0.5));
+
+            border-radius: 1px;
+
+            transform: translateX(-50%) rotate(var(--a, 30deg));
+
+            box-shadow: 0.5px 0 0 rgba(255,255,255,0.12);
+
+        }
+
+        .s-tl { top: 14px; left: 14px; --a: 22deg; }
+
+        .s-tr { top: 14px; right: 14px; --a: -15deg; }
+
+        .s-ml { top: 50%; left: 14px; transform: translateY(-50%); --a: 42deg; }
+
+        .s-mr { top: 50%; right: 14px; transform: translateY(-50%); --a: -8deg; }
+
+        .s-bl { bottom: 14px; left: 14px; --a: 55deg; }
+
+        .s-br { bottom: 14px; right: 14px; --a: 10deg; }
+
+        .label-bar {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-bottom: 14px;
+
+            position: relative;
+
+        }
+
+        .label-text {
+
+            font-family: 'Inter', sans-serif;
+
+            font-weight: 900;
+
+            font-size: 16px;
+
+            letter-spacing: 8px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.22);
+
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06), 0 0 12px rgba(255,60,40,0.15);
+
+        }
+
+        .label-line {
+
+            flex: 1;
+
+            height: 3px;
+
+            border-radius: 2px;
+
+            margin: 0 16px;
+
+        }
+
+        .label-line-left {
+
+            background: linear-gradient(90deg, transparent, #ff2a1a 70%, #ff4030);
+
+            box-shadow: 0 0 8px rgba(255,40,20,0.4), 0 0 20px rgba(255,40,20,0.15);
+
+        }
+
+        .label-line-right {
+
+            background: linear-gradient(90deg, #ff4030, #ff2a1a 30%, transparent);
+
+            box-shadow: 0 0 8px rgba(255,40,20,0.4), 0 0 20px rgba(255,40,20,0.15);
+
+        }
+
+        .outer-bezel {
+
+            position: relative;
+
+            background: linear-gradient(152deg,
+
+                #68686e 0%, #3e3e44 14%, #72727a 32%, #2c2c34 48%,
+
+                #60606a 62%, #38383e 78%, #505058 92%, #444448 100%);
+
+            border-radius: 20px;
+
+            padding: 10px;
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,255,255,0.4),
+
+                inset 0 2px 2px rgba(255,255,255,0.15),
+
+                inset 0 3px 5px rgba(255,255,255,0.06),
+
+                inset 0 -1px 0 rgba(0,0,0,0.8),
+
+                inset 0 -2px 3px rgba(0,0,0,0.5),
+
+                inset 0 -3px 6px rgba(0,0,0,0.2),
+
+                inset 1px 0 0 rgba(255,255,255,0.2),
+
+                inset -1px 0 0 rgba(255,255,255,0.12),
+
+                0 2px 3px rgba(0,0,0,0.6),
+
+                0 4px 8px rgba(0,0,0,0.5),
+
+                0 0 1px rgba(255,255,255,0.3);
+
+        }
+
+        .outer-bezel::before {
+
+            content: '';
+
+            position: absolute; inset: 0; border-radius: 20px;
+
+            background:
+
+                radial-gradient(ellipse 50% 22% at 24% 8%, rgba(255,255,255,0.32) 0%, transparent 55%),
+
+                radial-gradient(ellipse 35% 14% at 72% 92%, rgba(255,255,255,0.07) 0%, transparent 50%);
+
+            pointer-events: none; z-index: 1;
+
+        }
+
+        .mid-bezel {
+
+            background: linear-gradient(155deg, #505058 0%, #2a2a30 35%, #404048 65%, #242428 100%);
+
+            border-radius: 13px;
+
+            padding: 6px;
+
+            box-shadow:
+
+                inset 0 1px 0 rgba(255,255,255,0.22),
+
+                inset 0 -1px 0 rgba(0,0,0,0.65),
+
+                inset 1px 0 0 rgba(255,255,255,0.12),
+
+                0 1px 2px rgba(0,0,0,0.5);
+
+        }
+
+        .inner-bezel {
+
+            background: linear-gradient(162deg, #06060a 0%, #0e0e12 30%, #040406 100%);
+
+            border-radius: 9px;
+
+            padding: 8px;
+
+            box-shadow:
+
+                inset 0 6px 16px rgba(0,0,0,0.98),
+
+                inset 0 3px 8px rgba(0,0,0,0.95),
+
+                inset 4px 0 8px rgba(0,0,0,0.75),
+
+                inset -4px 0 8px rgba(0,0,0,0.75),
+
+                inset 0 0 20px rgba(0,0,0,0.5),
+
+                0 1px 0 rgba(255,255,255,0.07);
+
+        }
+
+        .display-well {
+
+            position: relative;
+
+            display: flex;
+
+            border-radius: 4px;
+
+            overflow: hidden;
+
+            box-shadow:
+
+                inset 0 16px 40px rgba(0,0,0,0.95),
+
+                inset 0 10px 20px rgba(0,0,0,0.85),
+
+                inset 0 -16px 40px rgba(0,0,0,0.8),
+
+                inset 6px 0 16px rgba(0,0,0,0.65),
+
+                inset -6px 0 16px rgba(0,0,0,0.65),
+
+                inset 0 0 60px rgba(0,0,0,0.45),
+
+                inset 0 0 40px rgba(255,180,60,0.03),
+
+                0 0 0 1px rgba(0,0,0,0.95),
+
+                0 1px 0 rgba(255,255,255,0.04);
+
+        }
+
+        .digit-col {
+
+            flex: 1;
+
+            position: relative;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: linear-gradient(180deg,
+
+                #0a0a0c 0%, #111114 8%, #161618 20%,
+
+                #1a1a1e 50%,
+
+                #161618 80%, #111114 92%, #0a0a0c 100%);
+
+            min-height: 220px;
+
+            overflow: hidden;
+
+        }
+
+        .digit-col::before {
+
+            content: '';
+
+            position: absolute; inset: 0;
+
+            background: repeating-linear-gradient(0deg,
+
+                transparent 0px, transparent 3px,
+
+                rgba(0,0,0,0.35) 3px, rgba(0,0,0,0.35) 4px);
+
+            z-index: 6;
+
+            pointer-events: none;
+
+        }
+
+        .digit-col::after {
+
+            content: '';
+
+            position: absolute; inset: 0;
+
+            background:
+
+                linear-gradient(180deg,
+
+                    rgba(0,0,0,0.7) 0%, transparent 30%,
+
+                    transparent 70%, rgba(0,0,0,0.7) 100%),
+
+                radial-gradient(ellipse 80% 50% at 50% 50%,
+
+                    rgba(255,220,140,0.04) 0%, transparent 70%);
+
+            z-index: 5;
+
+            pointer-events: none;
+
+        }
+
+        .sep {
+
+            width: 3px;
+
+            flex-shrink: 0;
+
+            background: linear-gradient(180deg, #000 0%, #0a0a0a 50%, #000 100%);
+
+            box-shadow:
+
+                -1px 0 3px rgba(0,0,0,0.8),
+
+                1px 0 3px rgba(0,0,0,0.8),
+
+                inset 0 0 4px rgba(0,0,0,0.9);
+
+            z-index: 10;
+
+        }
+
+        .digit-char {
+
+            font-family: 'Inter', sans-serif;
+
+            font-weight: 900;
+
+            font-size: 180px;
+
+            line-height: 1;
+
+            color: #f0ece4;
+
+            position: relative;
+
+            z-index: 4;
+
+            user-select: none;
+
+            text-shadow:
+
+                0 2px 4px rgba(0,0,0,0.85),
+
+                0 4px 8px rgba(0,0,0,0.6),
+
+                0 -1px 0 rgba(255,255,255,0.06),
+
+                0 0 30px rgba(255,240,200,0.04);
+
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.9));
+
+        }
+
+        .digit-char-a {
+
+            font-size: 150px;
+
+            color: #e8e0d4;
+
+            letter-spacing: -4px;
+
+        }
+
+        .glass {
+
+            position: absolute; inset: 0;
+
+            z-index: 8;
+
+            pointer-events: none;
+
+            border-radius: 4px;
+
+            background:
+
+                radial-gradient(ellipse 50% 28% at 20% 10%, rgba(255,255,255,0.12) 0%, transparent 50%),
+
+                radial-gradient(ellipse 90% 35% at 40% 18%, rgba(200,210,255,0.04) 0%, transparent 55%),
+
+                linear-gradient(150deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 22%, transparent 42%, rgba(0,0,0,0.04) 70%, rgba(0,0,0,0.1) 100%);
+
+        }
+
+        .noise {
+
+            position: absolute; inset: 0;
+
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+            opacity: 0.025;
+
+            mix-blend-mode: overlay;
+
+            pointer-events: none;
+
+            z-index: 7;
+
+            border-radius: 4px;
+
+        }
+
+        .red-line {
+
+            flex: 1;
+
+            height: 4px;
+
+            background: linear-gradient(90deg,
+
+                transparent 0%, #ff2a1a 15%, #ff4030 50%, #ff2a1a 85%, transparent 100%);
+
+            border-radius: 2px;
+
+            box-shadow:
+
+                0 0 6px rgba(255,40,20,0.5),
+
+                0 0 14px rgba(255,40,20,0.25),
+
+                0 0 28px rgba(255,20,10,0.1);
+
+        }
+
+        .info-text {
+
+            font-family: 'Inter', sans-serif;
+
+            font-size: 9px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.12);
+
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03);
+
+        }
+
+        .led {
+
+            width: 6px; height: 6px;
+
+            border-radius: 50%;
+
+            display: inline-block;
+
+            vertical-align: middle;
+
+            margin-left: 6px;
+
+        }
+
+        .led-green {
+
+            background: radial-gradient(circle at 35% 30%, #80ffa0 0%, #30cc55 55%, #1a8833 100%);
+
+            box-shadow:
+
+                0 0 3px #50ff70,
+
+                0 0 8px rgba(80,255,120,0.6),
+
+                0 0 16px rgba(40,200,70,0.25);
+
+            animation: led-p 2.4s ease-in-out infinite;
+
+        }
+
+        .led-blue {
+
+            background: radial-gradient(circle at 35% 30%, #a0d4ff 0%, #4090ee 55%, #2060bb 100%);
+
+            box-shadow:
+
+                0 0 3px #80b8ff,
+
+                0 0 8px rgba(100,170,255,0.6),
+
+                0 0 16px rgba(60,130,255,0.3);
+
+            animation: led-p 2.8s ease-in-out infinite;
+
+        }
+
+        @keyframes led-p { 0%,100% { opacity: 0.75; } 50% { opacity: 1; } }
+
+        .silk-label {
+
+            font-family: 'Inter', sans-serif;
+
+            font-size: 7px;
+
+            font-weight: 700;
+
+            letter-spacing: 3.5px;
+
+            text-transform: uppercase;
+
+            color: rgba(255,255,255,0.13);
+
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03);
+
+            text-align: center;
+
+            margin-top: 4px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const Counter = () => (
+
+            <div className="chassis">
+
+                <div className="screw s-tl" />
+
+                <div className="screw s-tr" />
+
+                <div className="screw s-ml" />
+
+                <div className="screw s-mr" />
+
+                <div className="screw s-bl" />
+
+                <div className="screw s-br" />
+
+                <div className="label-bar">
+
+                    <div className="label-line label-line-left" />
+
+                    <div className="label-text">ALTERNATOR</div>
+
+                    <div className="label-line label-line-right" />
+
+                </div>
+
+                <div className="outer-bezel">
+
+                    <div className="mid-bezel">
+
+                        <div className="inner-bezel">
+
+                            <div className="display-well">
+
+                                <div className="noise" />
+
+                                <div className="glass" />
+
+                                <div className="digit-col">
+
+                                    <span className="digit-char">1</span>
+
+                                </div>
+
+                                <div className="sep" />
+
+                                <div className="digit-col">
+
+                                    <span className="digit-char">7</span>
+
+                                </div>
+
+                                <div className="sep" />
+
+                                <div className="digit-col">
+
+                                    <span className="digit-char">5</span>
+
+                                </div>
+
+                                <div className="sep" />
+
+                                <div className="digit-col">
+
+                                    <span className="digit-char digit-char-a">A</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div style={{ marginTop: 12, display: 'flex' }}>
+
+                    <div className="red-line" />
+
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, padding: '0 4px' }}>
+
+                    <span className="info-text">ANL — at battery</span>
+
+                    <span className="info-text">
+
+                        FUSE
+
+                        <span className="led led-green" />
+
+                        <span className="led led-blue" />
+
+                    </span>
+
+                </div>
+
+                <div className="silk-label">Digital Instruments</div>
+
+            </div>
+
+        );
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Counter />);
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1003 @@
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Bouton Skeuomorphique</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+
+    body {
+
+      font-family: 'Inter', sans-serif;
+
+      background-color: #0a0a0a;
+
+      margin: 0;
+
+      overflow: hidden;
+
+    }
+
+
+
+    /* ===== SURFACE: dark brushed panel ===== */
+
+    .surface-texture {
+
+      position: relative;
+
+      height: 100vh;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      background: #0b0b0b;
+
+      background-image:
+
+        radial-gradient(circle at 50% 42%, #131313 0%, #0a0a0a 60%, #050505 100%);
+
+    }
+
+
+
+    /* ===== LIGHT PROJECTION ON SURFACE ===== */
+
+    /* The button casts red light onto the panel when ON */
+
+    .light-projection {
+
+      position: absolute;
+
+      width: 550px;
+
+      height: 350px;
+
+      border-radius: 50%;
+
+      pointer-events: none;
+
+      transition: opacity 0.6s ease;
+
+      opacity: 0;
+
+      background:
+
+        /* Hot center */
+
+        radial-gradient(
+
+          ellipse 60% 50% at 50% 40%,
+
+          rgba(220,40,30,0.2) 0%,
+
+          rgba(200,30,20,0.1) 40%,
+
+          transparent 70%),
+
+        /* Wider wash */
+
+        radial-gradient(
+
+          ellipse 100% 80% at 50% 38%,
+
+          rgba(180,25,15,0.1) 0%,
+
+          rgba(160,20,10,0.04) 50%,
+
+          transparent 80%);
+
+    }
+
+    .light-projection.active {
+
+      opacity: 1;
+
+    }
+
+
+
+    /* ===== WELL: machined recess in panel ===== */
+
+    .button-well {
+
+      position: relative;
+
+      padding: 14px;
+
+      border-radius: 9999px;
+
+      background: linear-gradient(180deg, #040404 0%, #080808 50%, #060606 100%);
+
+      box-shadow:
+
+        inset 0 3px 8px rgba(0,0,0,0.9),
+
+        inset 0 6px 20px rgba(0,0,0,0.5),
+
+        inset 0 -1px 2px rgba(255,255,255,0.02),
+
+        0 -1px 0 rgba(255,255,255,0.05),
+
+        0 1px 0 rgba(0,0,0,0.8),
+
+        0 4px 20px rgba(0,0,0,0.6);
+
+      border: 1px solid #060606;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      z-index: 2;
+
+      transition: box-shadow 0.5s ease, border-color 0.5s ease;
+
+    }
+
+
+
+    /* RIM LIGHT on chassis border when ON */
+
+    .button-well.well-lit {
+
+      border-color: rgba(220,60,50,0.24);
+
+      box-shadow:
+
+        inset 0 3px 8px rgba(0,0,0,0.9),
+
+        inset 0 6px 20px rgba(0,0,0,0.5),
+
+        inset 0 -1px 2px rgba(255,255,255,0.02),
+
+        /* === RIM LIGHT on chassis lip (8 layers) === */
+
+        /* top: primary rim catch */
+
+        0 -1px 0 rgba(255,180,160,0.36),
+
+        0 -2px 4px rgba(220,50,40,0.28),
+
+        0 -3px 10px rgba(200,40,30,0.16),
+
+        /* left: light-side */
+
+        -1px 0 0 rgba(255,170,150,0.24),
+
+        -2px 0 6px rgba(200,45,35,0.16),
+
+        /* bottom: red bounce up */
+
+        0 1px 0 rgba(220,60,50,0.16),
+
+        0 2px 6px rgba(200,40,30,0.12),
+
+        /* right: weaker */
+
+        1px 0 0 rgba(200,50,40,0.08),
+
+        /* ground */
+
+        0 4px 20px rgba(0,0,0,0.6);
+
+    }
+
+
+
+    /* Red light bouncing inside well walls when ON */
+
+    .button-well::before {
+
+      content: '';
+
+      position: absolute;
+
+      inset: 0;
+
+      border-radius: 9999px;
+
+      pointer-events: none;
+
+      z-index: 1;
+
+      transition: opacity 0.5s;
+
+      opacity: 0;
+
+      /* Red projected light splashing on the inner rim of the well */
+
+      background:
+
+        /* top inner rim: strong hot spot */
+
+        radial-gradient(ellipse 70% 12% at 50% 0%,
+
+          rgba(240,60,50,0.44) 0%, rgba(220,50,40,0.2) 40%, transparent 100%),
+
+        /* top secondary: wider wash */
+
+        radial-gradient(ellipse 85% 18% at 50% 2%,
+
+          rgba(200,40,30,0.16) 0%, transparent 100%),
+
+        /* bottom inner rim */
+
+        radial-gradient(ellipse 60% 10% at 50% 100%,
+
+          rgba(220,50,40,0.28) 0%, rgba(200,40,30,0.12) 50%, transparent 100%),
+
+        /* bottom secondary */
+
+        radial-gradient(ellipse 75% 15% at 50% 98%,
+
+          rgba(190,35,25,0.1) 0%, transparent 100%),
+
+        /* left inner rim */
+
+        radial-gradient(ellipse 6% 40% at 0% 50%,
+
+          rgba(230,55,45,0.32) 0%, rgba(200,40,30,0.12) 50%, transparent 100%),
+
+        /* left secondary */
+
+        radial-gradient(ellipse 10% 55% at 1% 50%,
+
+          rgba(190,35,25,0.1) 0%, transparent 100%),
+
+        /* right inner rim */
+
+        radial-gradient(ellipse 5% 35% at 100% 50%,
+
+          rgba(210,45,35,0.24) 0%, rgba(190,35,25,0.08) 50%, transparent 100%),
+
+        /* right secondary */
+
+        radial-gradient(ellipse 8% 50% at 99% 50%,
+
+          rgba(180,30,20,0.08) 0%, transparent 100%);
+
+    }
+
+    .button-well.well-lit::before {
+
+      opacity: 1;
+
+    }
+
+
+
+    .button-well::after {
+
+      content: '';
+
+      position: absolute;
+
+      inset: 6px;
+
+      border-radius: 9999px;
+
+      pointer-events: none;
+
+      transition: opacity 0.5s;
+
+      opacity: 0;
+
+      z-index: 1;
+
+      /* Deeper red light bouncing inside well cavity */
+
+      box-shadow:
+
+        inset 0 -6px 20px rgba(220,40,30,0.36),
+
+        inset 0 6px 16px rgba(220,40,30,0.2),
+
+        inset 6px 0 14px rgba(210,35,25,0.16),
+
+        inset -6px 0 12px rgba(200,30,20,0.12);
+
+    }
+
+    .button-well.well-lit::after {
+
+      opacity: 1;
+
+    }
+
+
+
+    /* ===== BUTTON ===== */
+
+    .skeuo-button {
+
+      position: relative;
+
+      width: 380px;
+
+      height: 160px;
+
+      border-radius: 80px;
+
+      cursor: pointer;
+
+      outline: none;
+
+      border: none;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+
+    }
+
+
+
+    /* ---- OFF: dark anodized ---- */
+
+    .skeuo-off {
+
+      background-color: #180808;
+
+      background-image:
+
+        /* Specular: offset top-left (35%, 22%) per light physics */
+
+        radial-gradient(ellipse 45% 30% at 35% 22%,
+
+          rgba(255,180,180,0.07) 0%, transparent 100%),
+
+        /* Convex curvature */
+
+        radial-gradient(ellipse 130% 90% at 50% 40%,
+
+          #220e0e 0%, #180808 45%, #0c0303 100%);
+
+
+
+      box-shadow:
+
+        /* RIM LIGHT: top + left edges (light from top-left) */
+
+        inset 0 1px 0 rgba(255,200,200,0.06),
+
+        inset 1px 0 0 rgba(255,200,200,0.03),
+
+        /* Shadow side: bottom + right */
+
+        inset 0 -1px 0 rgba(0,0,0,0.4),
+
+        inset -1px 0 0 rgba(0,0,0,0.2),
+
+        /* Depth */
+
+        inset 0 4px 10px rgba(255,150,150,0.02),
+
+        inset 0 -6px 16px rgba(0,0,0,0.5),
+
+        inset 8px 0 14px rgba(0,0,0,0.2),
+
+        inset -8px 0 14px rgba(0,0,0,0.25),
+
+        /* Cast */
+
+        2px 3px 8px rgba(0,0,0,0.5),
+
+        0 0 12px rgba(0,0,0,0.3);
+
+    }
+
+
+
+    /* ---- ON: hot anodized with rim + projection ---- */
+
+    .skeuo-on {
+
+      background-color: #8a1515;
+
+      background-image:
+
+        /* Surface glow: hot zone center-top (ON the button) */
+
+        radial-gradient(ellipse 80% 50% at 50% 35%,
+
+          rgba(255,80,60,0.14) 0%, transparent 70%),
+
+        /* Surface glow: secondary warm wash */
+
+        radial-gradient(ellipse 100% 60% at 50% 45%,
+
+          rgba(255,50,40,0.08) 0%, transparent 60%),
+
+        /* Primary specular: top-left offset, tight metal */
+
+        radial-gradient(ellipse 40% 25% at 35% 20%,
+
+          rgba(255,255,255,0.22) 0%,
+
+          rgba(255,200,200,0.06) 50%,
+
+          transparent 100%),
+
+        /* Secondary: wider body reflection */
+
+        radial-gradient(ellipse 60% 35% at 45% 32%,
+
+          rgba(255,120,120,0.1) 0%, transparent 100%),
+
+        /* Brush texture */
+
+        repeating-radial-gradient(ellipse at 50% 50%,
+
+          transparent 0%, transparent 2.5%, rgba(255,255,255,0.015) 2.8%, transparent 3.1%),
+
+        /* Curvature */
+
+        radial-gradient(ellipse 130% 90% at 50% 38%,
+
+          #cc2222 0%, #a01818 30%, #651010 65%, #350808 100%);
+
+
+
+      box-shadow:
+
+        /* === RIM LIGHT (top-left source) === */
+
+        /* top: bright edge catch */
+
+        inset 0 1px 0 rgba(255,220,200,0.18),
+
+        /* top-left: secondary catch */
+
+        inset 1px 1px 0 rgba(255,200,180,0.08),
+
+        /* left: side rim */
+
+        inset 1px 0 0 rgba(255,180,160,0.06),
+
+        /* bottom: faint bounce */
+
+        inset 0 -1px 0 rgba(255,150,130,0.03),
+
+        /* right: shadow side */
+
+        inset -1px 0 0 rgba(0,0,0,0.3),
+
+
+
+        /* === DEPTH === */
+
+        /* 6. Upper bevel light */
+
+        inset 0 4px 8px rgba(255,180,160,0.08),
+
+        /* 7. Surface body glow (ON the surface) */
+
+        inset 0 0 24px rgba(255,60,50,0.14),
+
+        inset 0 0 40px rgba(255,40,30,0.06),
+
+        inset 0 -8px 20px rgba(0,0,0,0.5),
+
+        inset 8px 0 16px rgba(0,0,0,0.2),
+
+        inset -8px 0 16px rgba(0,0,0,0.25),
+
+
+
+        /* === PROJECTED LIGHT (close to button) === */
+
+        2px 3px 6px rgba(0,0,0,0.5),
+
+        3px 5px 14px rgba(0,0,0,0.4),
+
+        0 0 12px rgba(200,30,30,0.12),
+
+        0 0 30px rgba(180,20,20,0.06);
+
+    }
+
+
+
+    /* Hover: rim + surface glow intensifies */
+
+    .skeuo-button:hover.skeuo-on {
+
+      box-shadow:
+
+        inset 0 1px 0 rgba(255,220,200,0.22),
+
+        inset 1px 1px 0 rgba(255,200,180,0.1),
+
+        inset 1px 0 0 rgba(255,180,160,0.08),
+
+        inset 0 -1px 0 rgba(255,150,130,0.04),
+
+        inset -1px 0 0 rgba(0,0,0,0.3),
+
+        inset 0 4px 8px rgba(255,180,160,0.1),
+
+        inset 0 0 28px rgba(255,60,50,0.18),
+
+        inset 0 0 45px rgba(255,40,30,0.08),
+
+        inset 0 -8px 20px rgba(0,0,0,0.5),
+
+        inset 8px 0 16px rgba(0,0,0,0.2),
+
+        inset -8px 0 16px rgba(0,0,0,0.25),
+
+        2px 3px 6px rgba(0,0,0,0.5),
+
+        3px 5px 14px rgba(0,0,0,0.4),
+
+        0 0 15px rgba(200,30,30,0.15),
+
+        0 0 35px rgba(180,20,20,0.08);
+
+    }
+
+
+
+    /* Active: mechanical press */
+
+    .skeuo-button:active {
+
+      transform: scale(0.97) translateY(1px);
+
+      box-shadow:
+
+        inset 0 0 0 2px rgba(0,0,0,0.5),
+
+        inset 0 6px 14px rgba(0,0,0,0.5),
+
+        inset 0 0 16px rgba(255,30,30,0.15),
+
+        inset 0 -4px 8px rgba(0,0,0,0.3),
+
+        inset 6px 0 12px rgba(0,0,0,0.25),
+
+        inset -6px 0 12px rgba(0,0,0,0.25),
+
+        1px 1px 4px rgba(0,0,0,0.5),
+
+        0 0 10px rgba(200,30,30,0.1);
+
+    }
+
+
+
+    /* ===== RIM TOP: concentrated bright spot at top center ===== */
+
+    /* Dual radial: bright core (0.25) + soft halo (0.06) */
+
+    .rim-top {
+
+      position: absolute;
+
+      top: -1px;
+
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      width: 45%;
+
+      height: 2px;
+
+      pointer-events: none;
+
+      z-index: 6;
+
+      border-radius: 1px;
+
+      transition: opacity 0.4s;
+
+      background:
+
+        radial-gradient(ellipse at 50% 0%,
+
+          rgba(255,200,180,0.25) 0%,
+
+          transparent 70%),
+
+        radial-gradient(ellipse at 50% 0%,
+
+          rgba(255,180,160,0.06) 0%,
+
+          transparent 90%);
+
+      mix-blend-mode: screen;
+
+    }
+
+    .skeuo-off .rim-top { opacity: 0.3; }
+
+    .skeuo-on .rim-top { opacity: 1; }
+
+
+
+    /* ===== RIM LEFT: vertical edge catch ===== */
+
+    .rim-left {
+
+      position: absolute;
+
+      top: 50%;
+
+      left: -1px;
+
+      transform: translateY(-50%);
+
+      width: 2px;
+
+      height: 35%;
+
+      pointer-events: none;
+
+      z-index: 6;
+
+      border-radius: 1px;
+
+      transition: opacity 0.4s;
+
+      background:
+
+        radial-gradient(ellipse at 0% 50%,
+
+          rgba(255,200,180,0.15) 0%,
+
+          transparent 80%);
+
+      mix-blend-mode: screen;
+
+    }
+
+    .skeuo-off .rim-left { opacity: 0.2; }
+
+    .skeuo-on .rim-left { opacity: 0.8; }
+
+
+
+    /* ===== SPECULAR: offset top-left, blurred for metal ===== */
+
+    .specular-layer {
+
+      position: absolute;
+
+      top: 3%;
+
+      left: 12%;
+
+      width: 55%;
+
+      height: 30%;
+
+      pointer-events: none;
+
+      z-index: 5;
+
+      border-radius: 50%;
+
+      background: linear-gradient(
+
+        170deg,
+
+        rgba(255,255,255,0.16) 0%,
+
+        rgba(255,255,255,0.04) 35%,
+
+        transparent 70%
+
+      );
+
+      filter: blur(2px);
+
+      transition: opacity 0.3s;
+
+    }
+
+    .skeuo-off .specular-layer { opacity: 0.25; }
+
+    .skeuo-on .specular-layer { opacity: 0.85; }
+
+
+
+    /* ===== EDGE CATCH: cylindrical left/right ===== */
+
+    .edge-catch {
+
+      position: absolute;
+
+      inset: 0;
+
+      border-radius: inherit;
+
+      pointer-events: none;
+
+      z-index: 4;
+
+      background: linear-gradient(
+
+        90deg,
+
+        transparent 0%,
+
+        rgba(255,200,180,0.04) 1.5%,
+
+        transparent 4%,
+
+        transparent 96%,
+
+        rgba(255,180,160,0.02) 98.5%,
+
+        transparent 100%
+
+      );
+
+      transition: opacity 0.4s;
+
+    }
+
+    .skeuo-off .edge-catch { opacity: 0.4; }
+
+    .skeuo-on .edge-catch { opacity: 1; }
+
+
+
+    /* ===== NOISE ===== */
+
+    .noise-layer {
+
+      position: absolute;
+
+      inset: 0;
+
+      border-radius: inherit;
+
+      pointer-events: none;
+
+      z-index: 3;
+
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+
+      mix-blend-mode: overlay;
+
+      opacity: 0.4;
+
+    }
+
+
+
+    /* ===== TEXT ===== */
+
+    .button-text {
+
+      font-size: 3.5rem;
+
+      font-weight: 700;
+
+      letter-spacing: 2px;
+
+      user-select: none;
+
+      z-index: 10;
+
+      position: relative;
+
+      transition: all 0.3s;
+
+    }
+
+
+
+    .button-text-on {
+
+      color: #fff;
+
+      text-shadow:
+
+        0 -1px 1px rgba(80,0,0,0.5),
+
+        -1px -1px 1px rgba(255,220,200,0.2),
+
+        0 0 10px rgba(255,100,100,0.35),
+
+        0 0 25px rgba(255,50,50,0.15);
+
+    }
+
+
+
+    .button-text-off {
+
+      color: #3a1515;
+
+      text-shadow:
+
+        0 -1px 1px rgba(0,0,0,0.6),
+
+        0 1px 0 rgba(255,150,150,0.03);
+
+    }
+
+
+
+    /* ===== BREATHE: subtle rim + projection pulse ===== */
+
+    @keyframes rim-breathe {
+
+      0%, 100% { opacity: 1; }
+
+      50% { opacity: 0.8; }
+
+    }
+
+    .skeuo-on .rim-top {
+
+      animation: rim-breathe 3s infinite ease-in-out;
+
+    }
+
+
+
+    @keyframes projection-breathe {
+
+      0%, 100% { opacity: 1; }
+
+      50% { opacity: 0.75; }
+
+    }
+
+    .light-projection.active {
+
+      animation: projection-breathe 3s infinite ease-in-out;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div id="root"></div>
+
+
+
+  <script type="text/babel">
+
+    const { useState } = React;
+
+
+
+    const App = () => {
+
+      const [isOn, setIsOn] = useState(false);
+
+
+
+      return (
+
+        <div className="surface-texture">
+
+
+
+          {/* Projected light on panel surface */}
+
+          <div className={`light-projection ${isOn ? 'active' : ''}`}
+
+            style={{ top: 'calc(50% - 80px)', left: 'calc(50% - 250px)' }}
+
+          />
+
+
+
+          <div className="flex flex-col items-center gap-12" style={{ position: 'relative', zIndex: 2 }}>
+
+            <div className={`button-well ${isOn ? 'well-lit' : ''}`}>
+
+              <button
+
+                className={`skeuo-button ${isOn ? 'skeuo-on' : 'skeuo-off'}`}
+
+                onClick={() => setIsOn(!isOn)}
+
+                aria-pressed={isOn}
+
+              >
+
+                {/* Rim highlights */}
+
+                <div className="rim-top" />
+
+                <div className="rim-left" />
+
+                {/* Metal specular */}
+
+                <div className="specular-layer" />
+
+                {/* Cylindrical edge catches */}
+
+                <div className="edge-catch" />
+
+                {/* Surface texture */}
+
+                <div className="noise-layer" />
+
+                {/* Label */}
+
+                <span className={`button-text ${isOn ? 'button-text-on' : 'button-text-off'}`}>VALIDER</span>
+
+              </button>
+
+            </div>
+
+
+
+            <div className="flex items-center gap-4 bg-black/40 px-6 py-3 rounded-full border border-white/5">
+
+              <div className={`w-3 h-3 rounded-full transition-all duration-300 ${isOn ? 'bg-red-500' : 'bg-neutral-700'}`}
+
+                style={{
+
+                  boxShadow: isOn
+
+                    ? '0 0 3px rgba(220,40,40,0.7), 0 0 8px rgba(220,40,40,0.3), inset 0 1px 2px rgba(255,255,255,0.25)'
+
+                    : 'inset 0 1px 2px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03)'
+
+                }}
+
+              />
+
+              <span className="text-gray-500 text-sm tracking-widest uppercase" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+
+                {isOn ? 'System Active' : 'System Off'}
+
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      );
+
+    };
+
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+
+    root.render(<App />);
+
+  </script>
+
+</body>
+
+</html> \
