@@ -1,0 +1,138 @@
+name: Skill Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-skill:
+    name: Validate SKILL.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check YAML frontmatter
+        run: |
+          head -20 SKILL.md | grep -q "^name:" || { echo "::error::SKILL.md missing 'name' in frontmatter"; exit 1; }
+          head -20 SKILL.md | grep -q "^description:" || { echo "::error::SKILL.md missing 'description' in frontmatter"; exit 1; }
+          echo "Frontmatter OK"
+
+      - name: Check file references exist
+        run: |
+          errors=0
+          for f in assets/*.html; do
+            basename=$(basename "$f")
+            if ! grep -q "$basename" SKILL.md; then
+              echo "::error::$basename exists in assets/ but is not referenced in SKILL.md"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors unreferenced asset files found"
+            exit 1
+          fi
+          echo "All asset files referenced in SKILL.md"
+
+  search-engine:
+    name: Search Engine Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify FILE_MAP completeness
+        run: |
+          python3 -c "
+          import sys
+          sys.path.insert(0, 'scripts')
+          from search import FILE_MAP, HTML_MAP, REFS_DIR, ASSETS_DIR
+
+          errors = 0
+
+          for key, fname in FILE_MAP.items():
+              fpath = REFS_DIR / fname
+              if not fpath.exists():
+                  print(f'::error::FILE_MAP[{key}] -> {fname} NOT FOUND')
+                  errors += 1
+
+          for key, fname in HTML_MAP.items():
+              fpath = ASSETS_DIR / fname
+              if not fpath.exists():
+                  print(f'::error::HTML_MAP[{key}] -> {fname} NOT FOUND')
+                  errors += 1
+
+          ref_files = {f.name for f in REFS_DIR.iterdir() if f.suffix == '.md'}
+          orphans = ref_files - set(FILE_MAP.values())
+          for o in orphans:
+              print(f'::warning::Orphan reference file: {o}')
+
+          asset_files = {f.name for f in ASSETS_DIR.iterdir() if f.suffix == '.html'}
+          orphan_assets = asset_files - set(HTML_MAP.values())
+          for o in orphan_assets:
+              print(f'::warning::Orphan asset file: {o}')
+
+          total = len(FILE_MAP) + len(HTML_MAP)
+          print(f'Maps OK: {len(FILE_MAP)} refs + {len(HTML_MAP)} assets = {total} sources')
+
+          if errors > 0:
+              sys.exit(1)
+          "
+
+      - name: Run search engine smoke test
+        run: |
+          output=$(python3 scripts/search.py "button shadow" -n 2)
+          echo "$output"
+          section_count=$(echo "$output" | grep -oP 'Total sections scanned: \K\d+')
+          if [ "$section_count" -lt 2000 ]; then
+            echo "::error::Expected 2000+ sections, got $section_count"
+            exit 1
+          fi
+          echo "Search engine OK: $section_count sections indexed"
+
+      - name: Test HTML filter keys
+        run: |
+          for key in gauge alert phosphor folding thermometer; do
+            output=$(python3 scripts/search.py "test" --file "$key" -n 1)
+            if echo "$output" | grep -q "Error:"; then
+              echo "::error::File filter '$key' failed"
+              exit 1
+            fi
+            echo "Filter '$key' OK"
+          done
+
+  asset-validation:
+    name: Asset HTML Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check HTML assets are not empty
+        run: |
+          errors=0
+          for f in assets/*.html; do
+            size=$(wc -c < "$f")
+            lines=$(wc -l < "$f")
+            if [ "$size" -lt 500 ]; then
+              echo "::error::$f is suspiciously small ($size bytes)"
+              errors=$((errors + 1))
+            fi
+            echo "$f: ${lines}L, ${size}B"
+          done
+          if [ $errors -gt 0 ]; then exit 1; fi
+
+      - name: Check HTML assets contain shadow stacks
+        run: |
+          warnings=0
+          for f in assets/*.html; do
+            shadow_count=$(grep -c "box-shadow" "$f" || true)
+            if [ "$shadow_count" -lt 2 ]; then
+              echo "::warning::$f has only $shadow_count box-shadow declarations (expected 2+)"
+              warnings=$((warnings + 1))
+            fi
+          done
+          echo "Shadow stack check done ($warnings warnings)"
