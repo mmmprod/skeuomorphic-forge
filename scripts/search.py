@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Skeuomorphic Forge Search — Find patterns across 12 reference files + 2 HTML assets.
+Skeuomorphic Forge Search — Find patterns across 13 reference files + 13 HTML assets.
 
 Usage:
   python3 search.py "button"                    # Search all references
@@ -37,8 +37,24 @@ FILE_MAP = {
     "09": "09-rim-light-effects.md",
     "10": "10-particle-effects.md",
     "11": "11-retro-industrial-patterns.md",
-    "html1": "../assets/agile-tech-skeuomorphic-site.html",
-    "html2": "../assets/codepen-deep-screen.html",
+    "12": "12-production-components.md",
+}
+
+# HTML assets indexed separately — resolved from ASSETS_DIR
+HTML_MAP = {
+    "site": "agile-tech-skeuomorphic-site.html",
+    "deep-screen": "codepen-deep-screen.html",
+    "power-button": "power-button.html",
+    "synthscore": "synthscore-analytics.html",
+    "vu-meter": "tube-compressor-vu.html",
+    "switch": "skeuomorphic-switch.html",
+    "lcd": "lcd-db-display.html",
+    "lever": "industrial-lever.html",
+    "gauge": "credit-score-gauge.html",
+    "alert": "autochord-alert-panel.html",
+    "phosphor": "deep-screen-phosphor.html",
+    "folding": "folding-header.html",
+    "thermometer": "horizontal-thermometer.html",
 }
 
 
@@ -166,21 +182,21 @@ def search(
     """Search across all reference files and return formatted results."""
 
     # Determine which files to search
+    all_keys = {**FILE_MAP, **HTML_MAP}
     if file_filter:
-        keys = [k for k in FILE_MAP if file_filter.lower() in k.lower()]
+        keys = [k for k in all_keys if file_filter.lower() in k.lower()]
         if not keys:
-            return f"Error: No file matching '{file_filter}'. Available: {', '.join(FILE_MAP.keys())}"
+            return f"Error: No file matching '{file_filter}'. Available: {', '.join(all_keys.keys())}"
     else:
-        keys = list(FILE_MAP.keys())
+        keys = list(all_keys.keys())
 
     # Load all sections
     all_sections = []
     for key in keys:
-        fname = FILE_MAP[key]
-        if fname.startswith(".."):
-            fpath = REFS_DIR / fname
+        if key in HTML_MAP:
+            fpath = ASSETS_DIR / HTML_MAP[key]
         else:
-            fpath = REFS_DIR / fname
+            fpath = REFS_DIR / FILE_MAP[key]
         sections = load_file_sections(fpath)
         all_sections.extend(sections)
 
@@ -248,7 +264,7 @@ def search(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Skeuomorphic Forge Pattern Search")
     parser.add_argument("query", help="Search query (e.g., 'button shadow', 'CRT display', 'knob gradient')")
-    parser.add_argument("--file", "-f", help="Filter to specific file (e.g., '04', '11', 'html1')")
+    parser.add_argument("--file", "-f", help="Filter to specific file (e.g., '04', '11', 'gauge', 'phosphor')")
     parser.add_argument("--max-results", "-n", type=int, default=3, help="Max results (default: 3)")
     parser.add_argument("--code-only", "-c", action="store_true", help="Only show code blocks from matching sections")
     parser.add_argument("--context", type=int, default=0, help="Lines of context to show (0 = full section, capped at 40)")
