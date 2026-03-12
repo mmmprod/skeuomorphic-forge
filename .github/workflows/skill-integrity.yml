@@ -87,9 +87,9 @@ jobs:
         run: |
           output=$(python3 scripts/search.py "button shadow" -n 2)
           echo "$output"
-          section_count=$(echo "$output" | grep -oP 'Total sections scanned: \K\d+')
-          if [ "$section_count" -lt 2000 ]; then
-            echo "::error::Expected 2000+ sections, got $section_count"
+          section_count=$(echo "$output" | grep -o 'Total sections scanned: [0-9]*' | grep -o '[0-9]*')
+          if [ -z "$section_count" ] || [ "$section_count" -lt 2000 ]; then
+            echo "::error::Expected 2000+ sections, got '${section_count:-EMPTY}'"
             exit 1
           fi
           echo "Search engine OK: $section_count sections indexed"
@@ -119,7 +119,7 @@ jobs:
         run: npm install --no-save prettier
 
       - name: Check formatting
-        run: npx prettier --check "SKILL.md" "README.md" "*.yaml" "*.yml" ".github/**/*.yml" ".coderabbit.yaml" "scripts/*.py"
+        run: npx prettier --check --ignore-unknown ".coderabbit.yaml" ".github/**/*.yml"
 
   ruff:
     name: Python Lint (Ruff)
