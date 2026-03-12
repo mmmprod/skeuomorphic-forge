@@ -87,7 +87,7 @@ jobs:
         run: |
           output=$(python3 scripts/search.py "button shadow" -n 2)
           echo "$output"
-          section_count=$(echo "$output" | grep -o 'Total sections scanned: [0-9]*' | grep -o '[0-9]*')
+          section_count=$(echo "$output" | grep -o 'sections scanned:.* [0-9]*' | grep -o '[0-9]\+' | head -1)
           if [ -z "$section_count" ] || [ "$section_count" -lt 2000 ]; then
             echo "::error::Expected 2000+ sections, got '${section_count:-EMPTY}'"
             exit 1
