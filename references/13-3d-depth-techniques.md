@@ -9,23 +9,23 @@
 
 Users say many things when they want 3D. This table maps natural language to CSS techniques.
 
-| User says | They mean | Primary technique | Secondary technique |
-|-----------|-----------|-------------------|---------------------|
-| "3D effect" | Physical depth illusion | Multi-layer shadow stack (§13.3) | perspective + rotateX/Y (§13.4) |
-| "depth" / "profondeur" | Element sits below/above surface | Inset shadows (recess) or drop shadows (raise) | translateZ + preserve-3d (§13.4) |
-| "relief" / "embossed" | Text or shape raised from surface | Emboss/deboss text (§13.8) | Multi-directional border bevels |
-| "raised" / "protruding" | Element pops out toward viewer | Drop shadow stack 5+ layers (§13.3) | perspective + slight rotateX (§13.4) |
-| "recessed" / "inset" / "well" | Element sunk into surface | Inset shadow stack 4+ layers | Inner border-bottom highlight |
-| "3D button" | Button with physical press feel | Shadow state change rest→active (§13.5) | translateY + shadow compression |
-| "flip card" | Card that rotates to show back | rotateY(180deg) + backface-visibility (§13.6) | preserve-3d container |
-| "parallax" | Layers move at different speeds | translateZ + perspective (§13.11) | scroll-driven transform |
-| "isometric" | 45° angled view of flat element | rotateX + rotateY + skew (§13.7) | preserve-3d + multiple faces |
-| "glass dome" / "bubble" | Curved transparent surface | Radial gradient + pseudo-element (§13.9) | backdrop-filter blur |
-| "3D text" | Text with physical thickness | text-shadow stack (§13.8) | clip-path + gradient |
-| "floating" / "levitating" | Element hovering above surface | Large blur drop shadow + translateY (§13.3) | Animation: gentle bounce |
-| "pressed" / "pushed in" | Element pushed into surface | Inset shadows + translateY(1px) (§13.5) | Reduced/inverted gradient |
-| "tilted" / "angled" | Element rotated in 3D space | perspective + rotateX/Y small angle (§13.4) | transform-origin control |
-| "layered" / "stacked" | Multiple planes at different depths | translateZ per layer (§13.10) | z-index + shadow progression |
+| User says                     | They mean                           | Primary technique                              | Secondary technique                  |
+| ----------------------------- | ----------------------------------- | ---------------------------------------------- | ------------------------------------ |
+| "3D effect"                   | Physical depth illusion             | Multi-layer shadow stack (§13.3)               | perspective + rotateX/Y (§13.4)      |
+| "depth" / "profondeur"        | Element sits below/above surface    | Inset shadows (recess) or drop shadows (raise) | translateZ + preserve-3d (§13.4)     |
+| "relief" / "embossed"         | Text or shape raised from surface   | Emboss/deboss text (§13.8)                     | Multi-directional border bevels      |
+| "raised" / "protruding"       | Element pops out toward viewer      | Drop shadow stack 5+ layers (§13.3)            | perspective + slight rotateX (§13.4) |
+| "recessed" / "inset" / "well" | Element sunk into surface           | Inset shadow stack 4+ layers                   | Inner border-bottom highlight        |
+| "3D button"                   | Button with physical press feel     | Shadow state change rest→active (§13.5)        | translateY + shadow compression      |
+| "flip card"                   | Card that rotates to show back      | rotateY(180deg) + backface-visibility (§13.6)  | preserve-3d container                |
+| "parallax"                    | Layers move at different speeds     | translateZ + perspective (§13.11)              | scroll-driven transform              |
+| "isometric"                   | 45° angled view of flat element     | rotateX + rotateY + skew (§13.7)               | preserve-3d + multiple faces         |
+| "glass dome" / "bubble"       | Curved transparent surface          | Radial gradient + pseudo-element (§13.9)       | backdrop-filter blur                 |
+| "3D text"                     | Text with physical thickness        | text-shadow stack (§13.8)                      | clip-path + gradient                 |
+| "floating" / "levitating"     | Element hovering above surface      | Large blur drop shadow + translateY (§13.3)    | Animation: gentle bounce             |
+| "pressed" / "pushed in"       | Element pushed into surface         | Inset shadows + translateY(1px) (§13.5)        | Reduced/inverted gradient            |
+| "tilted" / "angled"           | Element rotated in 3D space         | perspective + rotateX/Y small angle (§13.4)    | transform-origin control             |
+| "layered" / "stacked"         | Multiple planes at different depths | translateZ per layer (§13.10)                  | z-index + shadow progression         |
 
 ---
 
@@ -62,22 +62,22 @@ Each shadow layer simulates light being blocked at a different distance. Close s
 /* RAISING an element — 5-layer standard */
 .raised-element {
   box-shadow:
-    0 1px 2px rgba(0,0,0,0.4),     /* contact shadow — very tight */
-    0 2px 4px rgba(0,0,0,0.35),    /* close shadow */
-    0 4px 8px rgba(0,0,0,0.3),     /* near-mid */
-    0 8px 16px rgba(0,0,0,0.2),    /* mid depth */
-    0 16px 32px rgba(0,0,0,0.1);   /* ambient/far */
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    /* contact shadow — very tight */ 0 2px 4px rgba(0, 0, 0, 0.35),
+    /* close shadow */ 0 4px 8px rgba(0, 0, 0, 0.3),
+    /* near-mid */ 0 8px 16px rgba(0, 0, 0, 0.2),
+    /* mid depth */ 0 16px 32px rgba(0, 0, 0, 0.1); /* ambient/far */
 }
 
 /* SINKING an element — 4-layer recess */
 .recessed-well {
   box-shadow:
-    inset 0 2px 6px rgba(0,0,0,0.6),    /* top lip shadow */
-    inset 0 -1px 3px rgba(0,0,0,0.3),   /* bottom ambient */
-    inset 2px 0 4px rgba(0,0,0,0.4),    /* left wall */
-    inset -2px 0 4px rgba(0,0,0,0.4);   /* right wall */
+    inset 0 2px 6px rgba(0, 0, 0, 0.6),
+    /* top lip shadow */ inset 0 -1px 3px rgba(0, 0, 0, 0.3),
+    /* bottom ambient */ inset 2px 0 4px rgba(0, 0, 0, 0.4),
+    /* left wall */ inset -2px 0 4px rgba(0, 0, 0, 0.4); /* right wall */
   /* Add bottom highlight to sell the recess: */
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 ```
 
@@ -88,22 +88,22 @@ Extreme depth creates "floating" illusion:
 ```css
 .floating-element {
   box-shadow:
-    0 2px 4px rgba(0,0,0,0.3),
-    0 8px 16px rgba(0,0,0,0.25),
-    0 16px 32px rgba(0,0,0,0.2),
-    0 32px 64px rgba(0,0,0,0.15),    /* very far = floating high */
-    0 48px 80px rgba(0,0,0,0.08);    /* ambient floor glow */
-  transform: translateY(-4px);        /* lift off surface */
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.25),
+    0 16px 32px rgba(0, 0, 0, 0.2),
+    0 32px 64px rgba(0, 0, 0, 0.15),
+    /* very far = floating high */ 0 48px 80px rgba(0, 0, 0, 0.08); /* ambient floor glow */
+  transform: translateY(-4px); /* lift off surface */
 }
 
 /* Hover: float higher */
 .floating-element:hover {
   box-shadow:
-    0 4px 8px rgba(0,0,0,0.3),
-    0 12px 24px rgba(0,0,0,0.25),
-    0 24px 48px rgba(0,0,0,0.2),
-    0 40px 80px rgba(0,0,0,0.15),
-    0 60px 100px rgba(0,0,0,0.08);
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 12px 24px rgba(0, 0, 0, 0.25),
+    0 24px 48px rgba(0, 0, 0, 0.2),
+    0 40px 80px rgba(0, 0, 0, 0.15),
+    0 60px 100px rgba(0, 0, 0, 0.08);
   transform: translateY(-8px);
 }
 ```
@@ -119,15 +119,15 @@ Use `perspective` on a parent to create a 3D rendering context. Child elements c
 ```css
 /* Parent establishes 3D context */
 .scene {
-  perspective: 800px;              /* viewing distance — lower = more dramatic */
-  perspective-origin: 50% 50%;    /* vanishing point */
+  perspective: 800px; /* viewing distance — lower = more dramatic */
+  perspective-origin: 50% 50%; /* vanishing point */
 }
 
 /* Child moves in 3D space */
 .object {
-  transform-style: preserve-3d;   /* children inherit 3D context */
-  transform: rotateX(5deg) rotateY(-3deg);  /* tilt */
-  backface-visibility: hidden;     /* hide rear face if rotating */
+  transform-style: preserve-3d; /* children inherit 3D context */
+  transform: rotateX(5deg) rotateY(-3deg); /* tilt */
+  backface-visibility: hidden; /* hide rear face if rotating */
 }
 ```
 
@@ -158,22 +158,22 @@ Combine perspective with shadow for dramatic single-direction depth:
 .perspective-panel {
   transform: perspective(600px) rotateY(-2deg);
   box-shadow:
-    4px 0 8px rgba(0,0,0,0.3),      /* shadow falls to the right */
-    8px 0 16px rgba(0,0,0,0.2),
-    12px 0 24px rgba(0,0,0,0.1);
+    4px 0 8px rgba(0, 0, 0, 0.3),
+    /* shadow falls to the right */ 8px 0 16px rgba(0, 0, 0, 0.2),
+    12px 0 24px rgba(0, 0, 0, 0.1);
   /* Left edge catches light */
-  border-left: 1px solid rgba(255,255,255,0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 ```
 
 ### perspective values guide
 
-| Value | Effect | Use for |
-|-------|--------|---------|
-| 200-400px | Extreme distortion, fish-eye | Dramatic reveals, hero animations |
-| 600-800px | Natural depth, noticeable 3D | Card tilts, panel angles |
-| 1000-1500px | Subtle, barely perceptible | Hover effects, parallax layers |
-| 2000px+ | Almost flat, minimal distortion | Very subtle ambient movement |
+| Value       | Effect                          | Use for                           |
+| ----------- | ------------------------------- | --------------------------------- |
+| 200-400px   | Extreme distortion, fish-eye    | Dramatic reveals, hero animations |
+| 600-800px   | Natural depth, noticeable 3D    | Card tilts, panel angles          |
+| 1000-1500px | Subtle, barely perceptible      | Hover effects, parallax layers    |
+| 2000px+     | Almost flat, minimal distortion | Very subtle ambient movement      |
 
 ---
 
@@ -186,27 +186,24 @@ The most common "3D effect" request. A button that physically presses into the s
 ```css
 .press-button {
   /* Surface modeling — convex top surface */
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.08) 0%,    /* top surface catches light */
-    transparent 40%,
-    rgba(0,0,0,0.15) 100%         /* bottom edge in shadow */
-  ), linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, /* top surface catches light */ transparent 40%, rgba(0, 0, 0, 0.15) 100% /* bottom edge in shadow */),
+    linear-gradient(145deg, #2a2a2a, #1a1a1a);
 
   /* Raised state — shadows underneath */
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),   /* top edge highlight */
-    inset 0 -1px 0 rgba(0,0,0,0.3),         /* bottom edge dark */
-    0 2px 4px rgba(0,0,0,0.4),              /* close contact */
-    0 4px 8px rgba(0,0,0,0.3),              /* near shadow */
-    0 8px 16px rgba(0,0,0,0.2),             /* mid shadow */
-    0 12px 24px rgba(0,0,0,0.1);            /* far ambient */
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    /* top edge highlight */ inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    /* bottom edge dark */ 0 2px 4px rgba(0, 0, 0, 0.4),
+    /* close contact */ 0 4px 8px rgba(0, 0, 0, 0.3),
+    /* near shadow */ 0 8px 16px rgba(0, 0, 0, 0.2),
+    /* mid shadow */ 0 12px 24px rgba(0, 0, 0, 0.1); /* far ambient */
 
   /* Bevel edges — top/left lit, bottom/right shadowed */
-  border-top: 1px solid rgba(255,255,255,0.1);
-  border-left: 1px solid rgba(255,255,255,0.06);
-  border-bottom: 1px solid rgba(0,0,0,0.4);
-  border-right: 1px solid rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
 
   transition: all 0.1s ease-out;
   cursor: pointer;
@@ -216,12 +213,12 @@ The most common "3D effect" request. A button that physically presses into the s
 .press-button:hover {
   transform: translateY(-1px);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 -1px 0 rgba(0,0,0,0.3),
-    0 3px 6px rgba(0,0,0,0.4),
-    0 6px 12px rgba(0,0,0,0.3),
-    0 12px 24px rgba(0,0,0,0.2),
-    0 16px 32px rgba(0,0,0,0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.4),
+    0 6px 12px rgba(0, 0, 0, 0.3),
+    0 12px 24px rgba(0, 0, 0, 0.2),
+    0 16px 32px rgba(0, 0, 0, 0.1);
 }
 
 /* ACTIVE — press into surface */
@@ -229,35 +226,32 @@ The most common "3D effect" request. A button that physically presses into the s
   transform: translateY(2px);
 
   /* Surface flips — concave (pressed in) */
-  background: linear-gradient(
-    180deg,
-    rgba(0,0,0,0.1) 0%,             /* top now in shadow */
-    transparent 40%,
-    rgba(255,255,255,0.03) 100%      /* bottom edge catches reflected light */
-  ), linear-gradient(145deg, #1a1a1a, #222222);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, /* top now in shadow */ transparent 40%, rgba(255, 255, 255, 0.03) 100% /* bottom edge catches reflected light */),
+    linear-gradient(145deg, #1a1a1a, #222222);
 
   /* Shadows compress — element is now AT the surface */
   box-shadow:
-    inset 0 2px 6px rgba(0,0,0,0.5),   /* pressed-in gorge */
-    inset 0 1px 2px rgba(0,0,0,0.4),   /* tight top shadow */
-    0 1px 2px rgba(0,0,0,0.3);         /* minimal contact shadow */
+    inset 0 2px 6px rgba(0, 0, 0, 0.5),
+    /* pressed-in gorge */ inset 0 1px 2px rgba(0, 0, 0, 0.4),
+    /* tight top shadow */ 0 1px 2px rgba(0, 0, 0, 0.3); /* minimal contact shadow */
 
   /* Borders flip — bottom/right now lit */
-  border-top: 1px solid rgba(0,0,0,0.3);
-  border-left: 1px solid rgba(0,0,0,0.2);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  border-right: 1px solid rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid rgba(255, 255, 255, 0.02);
 }
 ```
 
 ### Key principle: shadow tells the story
 
-| State | Shadow behavior | Physical analog |
-|-------|----------------|-----------------|
-| Rest | 5-6 layers underneath, graduated | Button raised above panel |
-| Hover | +1px lift, shadows expand | Finger approaching, button lifts |
-| Active | Shadows compress to 1-2 layers, add inset | Button pushed flush into panel |
-| Disabled | Shadows at 50% opacity, no interaction | Dead mechanism |
+| State    | Shadow behavior                           | Physical analog                  |
+| -------- | ----------------------------------------- | -------------------------------- |
+| Rest     | 5-6 layers underneath, graduated          | Button raised above panel        |
+| Hover    | +1px lift, shadows expand                 | Finger approaching, button lifts |
+| Active   | Shadows compress to 1-2 layers, add inset | Button pushed flush into panel   |
+| Disabled | Shadows at 50% opacity, no interaction    | Dead mechanism                   |
 
 ---
 
@@ -287,7 +281,8 @@ Two-sided card that rotates to reveal a back face. Requires `preserve-3d`.
 }
 
 /* Both faces share positioning */
-.flip-front, .flip-back {
+.flip-front,
+.flip-back {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
@@ -298,18 +293,18 @@ Two-sided card that rotates to reveal a back face. Requires `preserve-3d`.
 .flip-front {
   background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 4px 8px rgba(0,0,0,0.3),
-    0 8px 16px rgba(0,0,0,0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Back face — pre-rotated 180° */
 .flip-back {
   background: linear-gradient(145deg, #1a2a1a, #0a1a0a);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 4px 8px rgba(0,0,0,0.3),
-    0 8px 16px rgba(0,0,0,0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
   transform: rotateY(180deg);
 }
 ```
@@ -342,15 +337,13 @@ View cards at an angle to suggest 3D depth — popular for dashboards and data d
   border-radius: 12px;
   box-shadow:
     /* Right face shadow (from Y rotation) */
-    4px 4px 8px rgba(0,0,0,0.35),
-    8px 8px 16px rgba(0,0,0,0.25),
-    /* Bottom face shadow (from X rotation) */
-    0 6px 12px rgba(0,0,0,0.3),
-    /* Ambient */
-    0 16px 32px rgba(0,0,0,0.15);
+    4px 4px 8px rgba(0, 0, 0, 0.35),
+    8px 8px 16px rgba(0, 0, 0, 0.25),
+    /* Bottom face shadow (from X rotation) */ 0 6px 12px rgba(0, 0, 0, 0.3),
+    /* Ambient */ 0 16px 32px rgba(0, 0, 0, 0.15);
   /* Left/top edges catch light */
-  border-top: 1px solid rgba(255,255,255,0.1);
-  border-left: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .iso-card:hover {
@@ -372,26 +365,30 @@ Add visible edge faces for real thickness:
 
 /* Right edge face */
 .thick-card::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0; right: -8px;
-  width: 8px; height: 100%;
+  top: 0;
+  right: -8px;
+  width: 8px;
+  height: 100%;
   background: linear-gradient(90deg, #1a1a1a, #111111);
   transform: rotateY(90deg);
   transform-origin: left;
-  border-right: 1px solid rgba(0,0,0,0.5);
+  border-right: 1px solid rgba(0, 0, 0, 0.5);
 }
 
 /* Bottom edge face */
 .thick-card::before {
-  content: '';
+  content: "";
   position: absolute;
-  bottom: -8px; left: 0;
-  width: 100%; height: 8px;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 8px;
   background: linear-gradient(180deg, #181818, #0e0e0e);
   transform: rotateX(-90deg);
   transform-origin: top;
-  border-bottom: 1px solid rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
 ```
 
@@ -406,18 +403,13 @@ Physical text effects without 3D transforms. Text appears carved into or raised 
 ```css
 .embossed-text {
   color: transparent;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.15) 0%,
-    rgba(255,255,255,0.05) 50%,
-    rgba(0,0,0,0.1) 100%
-  );
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.1) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   /* Shadow below text = raised */
   text-shadow:
-    0 1px 1px rgba(0,0,0,0.5),    /* contact shadow */
-    0 2px 3px rgba(0,0,0,0.3);    /* depth shadow */
+    0 1px 1px rgba(0, 0, 0, 0.5),
+    /* contact shadow */ 0 2px 3px rgba(0, 0, 0, 0.3); /* depth shadow */
   font-weight: 700;
   letter-spacing: 0.05em;
 }
@@ -427,10 +419,10 @@ Physical text effects without 3D transforms. Text appears carved into or raised 
 
 ```css
 .engraved-text {
-  color: rgba(0,0,0,0.6);          /* dark — inside the groove */
+  color: rgba(0, 0, 0, 0.6); /* dark — inside the groove */
   text-shadow:
-    0 1px 0 rgba(255,240,220,0.15), /* highlight BELOW text = light hitting bottom edge of groove */
-    0 -1px 0 rgba(0,0,0,0.3);      /* shadow ABOVE text = top edge casting shadow */
+    0 1px 0 rgba(255, 240, 220, 0.15),
+    /* highlight BELOW text = light hitting bottom edge of groove */ 0 -1px 0 rgba(0, 0, 0, 0.3); /* shadow ABOVE text = top edge casting shadow */
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -441,11 +433,11 @@ Physical text effects without 3D transforms. Text appears carved into or raised 
 
 ```css
 .silkscreen-text {
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.6);
   text-shadow:
-    0 0 1px rgba(0,0,0,0.8),       /* ink spread */
-    0 1px 2px rgba(0,0,0,0.4);     /* painted shadow */
-  font-family: 'Arial', sans-serif;
+    0 0 1px rgba(0, 0, 0, 0.8),
+    /* ink spread */ 0 1px 2px rgba(0, 0, 0, 0.4); /* painted shadow */
+  font-family: "Arial", sans-serif;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -459,12 +451,12 @@ Physical text effects without 3D transforms. Text appears carved into or raised 
 .deep-3d-text {
   color: #2a2a2a;
   text-shadow:
-    0 1px 0 #1f1f1f,    /* layer 1 */
-    0 2px 0 #1a1a1a,    /* layer 2 */
-    0 3px 0 #151515,    /* layer 3 */
-    0 4px 0 #111111,    /* layer 4 — deepest edge */
-    0 5px 5px rgba(0,0,0,0.4),   /* contact shadow */
-    0 8px 12px rgba(0,0,0,0.3);  /* ambient shadow */
+    0 1px 0 #1f1f1f,
+    /* layer 1 */ 0 2px 0 #1a1a1a,
+    /* layer 2 */ 0 3px 0 #151515,
+    /* layer 3 */ 0 4px 0 #111111,
+    /* layer 4 — deepest edge */ 0 5px 5px rgba(0, 0, 0, 0.4),
+    /* contact shadow */ 0 8px 12px rgba(0, 0, 0, 0.3); /* ambient shadow */
   font-size: 3rem;
   font-weight: 900;
 }
@@ -485,15 +477,15 @@ Curved transparent surface over content — gives the illusion of a glass cover.
 
 /* Glass curvature — highlight at top-left */
 .glass-dome::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: radial-gradient(
     ellipse at 30% 20%,
-    rgba(255,255,255,0.25) 0%,     /* bright specular hotspot */
-    rgba(255,255,255,0.08) 30%,    /* diffuse highlight */
-    transparent 60%                 /* fades to transparent */
+    rgba(255, 255, 255, 0.25) 0%,
+    /* bright specular hotspot */ rgba(255, 255, 255, 0.08) 30%,
+    /* diffuse highlight */ transparent 60% /* fades to transparent */
   );
   pointer-events: none;
   z-index: 2;
@@ -501,15 +493,15 @@ Curved transparent surface over content — gives the illusion of a glass cover.
 
 /* Glass edge refraction */
 .glass-dome::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   /* Inner rim highlight */
   box-shadow:
-    inset 0 -4px 8px rgba(0,0,0,0.4),    /* bottom shadow inside dome */
-    inset 0 2px 4px rgba(255,240,220,0.1); /* top warm catch */
+    inset 0 -4px 8px rgba(0, 0, 0, 0.4),
+    /* bottom shadow inside dome */ inset 0 2px 4px rgba(255, 240, 220, 0.1); /* top warm catch */
   pointer-events: none;
   z-index: 3;
 }
@@ -524,16 +516,10 @@ Curved transparent surface over content — gives the illusion of a glass cover.
 }
 
 .glass-panel::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255,255,255,0.06) 0%,
-    transparent 40%,
-    transparent 60%,
-    rgba(255,255,255,0.03) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 40%, transparent 60%, rgba(255, 255, 255, 0.03) 100%);
   pointer-events: none;
   z-index: 10;
 }
@@ -558,24 +544,24 @@ Stack multiple DOM layers at different visual depths. Each layer has progressive
   transform: translateZ(-50px) scale(1.1);
   /* scale compensates for perspective shrink */
   filter: brightness(0.6);
-  box-shadow: none;                           /* no shadow — it IS the surface */
+  box-shadow: none; /* no shadow — it IS the surface */
 }
 
 /* Mid layer */
 .layer-mid {
   transform: translateZ(0px);
   box-shadow:
-    0 4px 8px rgba(0,0,0,0.3),
-    0 8px 16px rgba(0,0,0,0.2);
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Foreground layer — closest to viewer */
 .layer-fg {
   transform: translateZ(40px);
   box-shadow:
-    0 8px 16px rgba(0,0,0,0.4),              /* strong close shadow */
-    0 16px 32px rgba(0,0,0,0.3),
-    0 24px 48px rgba(0,0,0,0.15);            /* wide ambient */
+    0 8px 16px rgba(0, 0, 0, 0.4),
+    /* strong close shadow */ 0 16px 32px rgba(0, 0, 0, 0.3),
+    0 24px 48px rgba(0, 0, 0, 0.15); /* wide ambient */
 }
 ```
 
@@ -584,34 +570,34 @@ Stack multiple DOM layers at different visual depths. Each layer has progressive
 ```css
 /* Layer 0 — sunken surface */
 .depth-0 {
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
   background: #0a0a0a;
 }
 
 /* Layer 1 — at surface */
 .depth-1 {
   box-shadow:
-    0 1px 2px rgba(0,0,0,0.3),
-    0 2px 4px rgba(0,0,0,0.2);
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
   background: #181818;
 }
 
 /* Layer 2 — slightly raised */
 .depth-2 {
   box-shadow:
-    0 2px 4px rgba(0,0,0,0.35),
-    0 4px 8px rgba(0,0,0,0.25),
-    0 8px 16px rgba(0,0,0,0.15);
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.15);
   background: #222222;
 }
 
 /* Layer 3 — floating */
 .depth-3 {
   box-shadow:
-    0 4px 8px rgba(0,0,0,0.4),
-    0 8px 16px rgba(0,0,0,0.3),
-    0 16px 32px rgba(0,0,0,0.2),
-    0 24px 48px rgba(0,0,0,0.1);
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 16px 32px rgba(0, 0, 0, 0.2),
+    0 24px 48px rgba(0, 0, 0, 0.1);
   background: #2a2a2a;
 }
 ```
@@ -631,7 +617,7 @@ Multiple layers moving at different speeds on scroll or mouse movement, creating
   height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
-  perspective: 1px;                /* KEY — creates depth rendering */
+  perspective: 1px; /* KEY — creates depth rendering */
   perspective-origin: 50% 50%;
 }
 
@@ -664,14 +650,14 @@ Multiple layers moving at different speeds on scroll or mouse movement, creating
 ```javascript
 // Apply to a container with data-depth attributes on children
 function initParallax(container) {
-  container.addEventListener('mousemove', (e) => {
+  container.addEventListener("mousemove", (e) => {
     const rect = container.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;  // -0.5 to 0.5
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
     const y = (e.clientY - rect.top) / rect.height - 0.5;
 
-    container.querySelectorAll('[data-depth]').forEach(layer => {
+    container.querySelectorAll("[data-depth]").forEach((layer) => {
       const depth = parseFloat(layer.dataset.depth);
-      const moveX = x * depth * 30;  // pixels of movement
+      const moveX = x * depth * 30; // pixels of movement
       const moveY = y * depth * 30;
       layer.style.transform = `translate(${moveX}px, ${moveY}px)`;
     });
@@ -697,23 +683,21 @@ CSS `@property` enables smooth gradient and shadow animations that create dynami
 
 ```css
 @property --specular-x {
-  syntax: '<percentage>';
+  syntax: "<percentage>";
   inherits: false;
   initial-value: 30%;
 }
 @property --specular-y {
-  syntax: '<percentage>';
+  syntax: "<percentage>";
   inherits: false;
   initial-value: 20%;
 }
 
 .animated-surface {
-  background: radial-gradient(
-    circle at var(--specular-x) var(--specular-y),
-    rgba(255,240,220,0.15) 0%,
-    transparent 50%
-  ), linear-gradient(145deg, #2a2a2a, #1a1a1a);
-  transition: --specular-x 0.6s, --specular-y 0.6s;
+  background: radial-gradient(circle at var(--specular-x) var(--specular-y), rgba(255, 240, 220, 0.15) 0%, transparent 50%), linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  transition:
+    --specular-x 0.6s,
+    --specular-y 0.6s;
 }
 
 .animated-surface:hover {
@@ -727,16 +711,16 @@ CSS `@property` enables smooth gradient and shadow animations that create dynami
 
 ```css
 @property --shadow-depth {
-  syntax: '<length>';
+  syntax: "<length>";
   inherits: false;
   initial-value: 8px;
 }
 
 .depth-animated {
   box-shadow:
-    0 2px 4px rgba(0,0,0,0.4),
-    0 var(--shadow-depth) calc(var(--shadow-depth) * 2) rgba(0,0,0,0.25),
-    0 calc(var(--shadow-depth) * 2) calc(var(--shadow-depth) * 4) rgba(0,0,0,0.15);
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 var(--shadow-depth) calc(var(--shadow-depth) * 2) rgba(0, 0, 0, 0.25),
+    0 calc(var(--shadow-depth) * 2) calc(var(--shadow-depth) * 4) rgba(0, 0, 0, 0.15);
   transition: --shadow-depth 0.4s ease;
 }
 
@@ -750,18 +734,13 @@ CSS `@property` enables smooth gradient and shadow animations that create dynami
 
 ```css
 @property --light-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   inherits: false;
   initial-value: 145deg;
 }
 
 .rotating-surface {
-  background: linear-gradient(
-    var(--light-angle),
-    rgba(255,255,255,0.08) 0%,
-    transparent 50%,
-    rgba(0,0,0,0.1) 100%
-  ), #222;
+  background: linear-gradient(var(--light-angle), rgba(255, 255, 255, 0.08) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%), #222;
   transition: --light-angle 0.8s ease;
 }
 
@@ -792,18 +771,18 @@ This example combines shadow depth + surface modeling + glass dome + embossed la
 
   /* Level 1 — Shadow depth (8 layers = advanced) */
   box-shadow:
-    inset 0 2px 4px rgba(0,0,0,0.5),
-    inset 0 -1px 2px rgba(0,0,0,0.3),
-    inset 2px 0 3px rgba(0,0,0,0.4),
-    inset -2px 0 3px rgba(0,0,0,0.4),
-    0 2px 4px rgba(0,0,0,0.4),
-    0 4px 8px rgba(0,0,0,0.3),
-    0 8px 16px rgba(0,0,0,0.2),
-    0 16px 32px rgba(0,0,0,0.1);
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    inset 2px 0 3px rgba(0, 0, 0, 0.4),
+    inset -2px 0 3px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    0 16px 32px rgba(0, 0, 0, 0.1);
 
   /* Level 2 — Surface modeling */
   background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 
   /* Level 3 — Hover tilt */
   transition: transform 0.3s ease;
@@ -816,31 +795,24 @@ This example combines shadow depth + surface modeling + glass dome + embossed la
 
 /* Glass dome over gauge */
 .gauge::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 4px;
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 35% 25%,
-    rgba(255,240,220,0.2) 0%,
-    rgba(255,255,255,0.05) 40%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse at 35% 25%, rgba(255, 240, 220, 0.2) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 70%);
   z-index: 10;
   pointer-events: none;
 }
 
 /* Rim light */
 .gauge::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: -1px; left: 10%; right: 10%;
+  top: -1px;
+  left: 10%;
+  right: 10%;
   height: 2px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255,255,255,0.3),
-    transparent 70%
-  );
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3), transparent 70%);
   border-radius: 50%;
   z-index: 11;
   pointer-events: none;
@@ -848,9 +820,8 @@ This example combines shadow depth + surface modeling + glass dome + embossed la
 
 /* Embossed label on bezel */
 .gauge-label {
-  color: rgba(0,0,0,0.5);
-  text-shadow:
-    0 1px 0 rgba(255,240,220,0.12);
+  color: rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 240, 220, 0.12);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -862,17 +833,17 @@ This example combines shadow depth + surface modeling + glass dome + embossed la
 
 ## 13.14 — Cross-References to Other Files
 
-| Technique | Also covered in | What that file adds |
-|-----------|----------------|---------------------|
-| Shadow stacks | `00-golden-examples.md` | Production-tested stacks (5/8/13/31 layers) |
-| Surface gradients | `01-shadows-materials-textures.md` | 16 material gradients (chrome, leather, wood) |
-| Glass effects | `07-glass-effects.md` | 10 specialized glass techniques (frosted, dark, SVG warp) |
-| Metal effects | `08-metal-effects.md` | 8 metal finishes (brushed, chrome, gold, conic) |
-| Rim light | `09-rim-light-effects.md` | 4-layer rim light system |
-| 3D perspective glow | `04-community-techniques.md` §14.78 | Animated 3D orbiting light |
-| 3D capsule button | `04-community-techniques.md` §14.5 | Capsule shape with perspective |
-| Isometric cube mixin | `04-community-techniques.md` §14.91 | Full 6-face SCSS cube system |
-| 3D toolbar button | `04-community-techniques.md` §14.35 | Toolbar button with perspective |
-| Perspective shadow | `04-community-techniques.md` (line ~5800) | Curled paper / one-sided depth |
-| Deep CRT chassis | `assets/codepen-deep-screen.html` | 31-layer ultra shadow stack |
-| Power button dome | `assets/power-button.html` | 17-layer button with LED glow |
+| Technique            | Also covered in                           | What that file adds                                       |
+| -------------------- | ----------------------------------------- | --------------------------------------------------------- |
+| Shadow stacks        | `00-golden-examples.md`                   | Production-tested stacks (5/8/13/31 layers)               |
+| Surface gradients    | `01-shadows-materials-textures.md`        | 16 material gradients (chrome, leather, wood)             |
+| Glass effects        | `07-glass-effects.md`                     | 10 specialized glass techniques (frosted, dark, SVG warp) |
+| Metal effects        | `08-metal-effects.md`                     | 8 metal finishes (brushed, chrome, gold, conic)           |
+| Rim light            | `09-rim-light-effects.md`                 | 4-layer rim light system                                  |
+| 3D perspective glow  | `04-community-techniques.md` §14.78       | Animated 3D orbiting light                                |
+| 3D capsule button    | `04-community-techniques.md` §14.5        | Capsule shape with perspective                            |
+| Isometric cube mixin | `04-community-techniques.md` §14.91       | Full 6-face SCSS cube system                              |
+| 3D toolbar button    | `04-community-techniques.md` §14.35       | Toolbar button with perspective                           |
+| Perspective shadow   | `04-community-techniques.md` (line ~5800) | Curled paper / one-sided depth                            |
+| Deep CRT chassis     | `assets/codepen-deep-screen.html`         | 31-layer ultra shadow stack                               |
+| Power button dome    | `assets/power-button.html`                | 17-layer button with LED glow                             |

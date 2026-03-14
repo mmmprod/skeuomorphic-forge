@@ -1,4 +1,5 @@
 <!-- CI: 7 jobs | CodeRabbit: assertive -->
+
 ```
     ______ __ __                                      __    _         ______
    / ____// //_/___   __  __ ____   ____ ___   ____  / /__ (_)____   / ____/____   _____ ____ _ ___
@@ -56,13 +57,13 @@ Auto-triggers on: `skeuomorphic`, `industrial UI`, `3D button`, `gauge`, `meter`
 
 ## The Problem It Solves
 
-| You ask for | Claude gives you | With this skill |
-|-------------|------------------|-----------------|
+| You ask for         | Claude gives you              | With this skill                                |
+| ------------------- | ----------------------------- | ---------------------------------------------- |
 | Skeuomorphic button | `box-shadow: 0 2px 4px black` | 5-layer graduated shadow + hover/active states |
-| Industrial panel | Flat div + decorative screws | 11-layer chassis + depth wells + THEN screws |
-| CRT display | Green text on black bg | Phosphor glow + scanlines + glass reflection |
-| Warm lighting | `rgba(255,255,255,0.4)` | `rgba(255,240,220,0.2)` warm specular |
-| Metal knob | Circle with gradient | 8-layer shadow + rim light + specular hotspot |
+| Industrial panel    | Flat div + decorative screws  | 11-layer chassis + depth wells + THEN screws   |
+| CRT display         | Green text on black bg        | Phosphor glow + scanlines + glass reflection   |
+| Warm lighting       | `rgba(255,255,255,0.4)`       | `rgba(255,240,220,0.2)` warm specular          |
+| Metal knob          | Circle with gradient          | 8-layer shadow + rim light + specular hotspot  |
 
 ---
 
@@ -138,17 +139,17 @@ buttons, cards             knobs, meters               panels, chassis          
 
 ## Priority System
 
-| # | Rule | Priority | One-liner |
-|---|------|----------|-----------|
-| 1 | Shadow Depth | CRITICAL | Count layers: 5 / 8 / 11 minimum |
-| 2 | Light vs Shadow | CRITICAL | Dark rgba = depth, warm rgba = specular. Separate. |
-| 3 | Warm Highlights | CRITICAL | `rgba(255,240,220,...)` not pure white |
-| 4 | Assembly Order | HIGH | Depth first, hardware last |
-| 5 | Interaction States | HIGH | hover + active + disabled + focus-visible |
-| 6 | Physical Naming | HIGH | "machined aluminum" not "container div" |
-| 7 | Typography | MEDIUM | Silkscreen / engraved / embossed |
-| 8 | Accessibility | MEDIUM | Contrast, focus rings, 44px targets |
-| 9 | Performance | MEDIUM | transform + opacity only in animations |
+| #   | Rule               | Priority | One-liner                                          |
+| --- | ------------------ | -------- | -------------------------------------------------- |
+| 1   | Shadow Depth       | CRITICAL | Count layers: 5 / 8 / 11 minimum                   |
+| 2   | Light vs Shadow    | CRITICAL | Dark rgba = depth, warm rgba = specular. Separate. |
+| 3   | Warm Highlights    | CRITICAL | `rgba(255,240,220,...)` not pure white             |
+| 4   | Assembly Order     | HIGH     | Depth first, hardware last                         |
+| 5   | Interaction States | HIGH     | hover + active + disabled + focus-visible          |
+| 6   | Physical Naming    | HIGH     | "machined aluminum" not "container div"            |
+| 7   | Typography         | MEDIUM   | Silkscreen / engraved / embossed                   |
+| 8   | Accessibility      | MEDIUM   | Contrast, focus rings, 44px targets                |
+| 9   | Performance        | MEDIUM   | transform + opacity only in animations             |
 
 ---
 
@@ -175,7 +176,7 @@ Indexes 2,400+ sections. Returns ranked results with file, line numbers, and mat
 .button {
   background: #333;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);     /* 1 layer. flat. */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* 1 layer. flat. */
   color: white;
 }
 
@@ -183,27 +184,27 @@ Indexes 2,400+ sections. Returns ranked results with file, line numbers, and mat
 .button {
   background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
   border-radius: 8px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  border-left: 1px solid rgba(255,255,255,0.04);
-  border-bottom: 1px solid rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),      /* edge catch */
-    inset 0 -1px 0 rgba(0,0,0,0.3),            /* bottom gorge */
-    0 2px 4px rgba(0,0,0,0.4),                 /* close shadow */
-    0 8px 16px rgba(0,0,0,0.3),                /* mid depth */
-    0 16px 32px rgba(0,0,0,0.2);               /* ambient shadow */
-  color: rgba(255,255,255,0.9);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    /* edge catch */ inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    /* bottom gorge */ 0 2px 4px rgba(0, 0, 0, 0.4),
+    /* close shadow */ 0 8px 16px rgba(0, 0, 0, 0.3),
+    /* mid depth */ 0 16px 32px rgba(0, 0, 0, 0.2); /* ambient shadow */
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 .button:hover {
-  transform: translateY(-1px);                  /* lift */
+  transform: translateY(-1px); /* lift */
 }
 .button:active {
-  transform: translateY(1px);                   /* depress */
+  transform: translateY(1px); /* depress */
   box-shadow:
-    inset 0 2px 4px rgba(0,0,0,0.5),
-    inset 0 1px 1px rgba(0,0,0,0.3),
-    0 1px 2px rgba(0,0,0,0.3);                 /* compressed */
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.3); /* compressed */
 }
 ```
 

@@ -8,12 +8,12 @@ Comprehensive glass simulation techniques for CSS. Covers frosted, refractive, t
 
 Real glass has 4 optical properties that CSS must simulate:
 
-| Property | Physical behavior | CSS technique |
-|----------|-------------------|---------------|
-| **Transparency** | Light passes through with absorption | `background: hsla(..., 0.1-0.4)` or `rgba()` |
-| **Refraction** | Light bends at surface boundary | `backdrop-filter: blur()`, SVG `feDisplacementMap`, duplicate-background + clip-path |
-| **Reflection** | Specular highlights on surface | `background-image: linear-gradient()` or `radial-gradient()` with white/high-opacity stops |
-| **Caustics** | Focused light patterns below/behind | Separate element with `filter: blur()` + radial gradient, or `::before`/`::after` pseudo-elements |
+| Property         | Physical behavior                    | CSS technique                                                                                     |
+| ---------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Transparency** | Light passes through with absorption | `background: hsla(..., 0.1-0.4)` or `rgba()`                                                      |
+| **Refraction**   | Light bends at surface boundary      | `backdrop-filter: blur()`, SVG `feDisplacementMap`, duplicate-background + clip-path              |
+| **Reflection**   | Specular highlights on surface       | `background-image: linear-gradient()` or `radial-gradient()` with white/high-opacity stops        |
+| **Caustics**     | Focused light patterns below/behind  | Separate element with `filter: blur()` + radial gradient, or `::before`/`::after` pseudo-elements |
 
 **Light consistency rule:** Glass highlights and caustics must align with the global light source direction established for the component.
 
@@ -30,7 +30,7 @@ Technique that works without `backdrop-filter` by duplicating the background ima
 ```css
 /* Container: sets the background */
 body {
-  background-image: url('scene.jpg');
+  background-image: url("scene.jpg");
   background-size: cover;
   background-position: center;
 }
@@ -39,11 +39,11 @@ body {
 .glass {
   height: 100%;
   width: 100%;
-  background-image: url('scene.jpg');  /* SAME image as parent */
+  background-image: url("scene.jpg"); /* SAME image as parent */
   background-size: cover;
   background-position: center;
-  clip-path: inset(10em);              /* Defines glass region */
-  filter: blur(20px);                  /* Frosted blur amount */
+  clip-path: inset(10em); /* Defines glass region */
+  filter: blur(20px); /* Frosted blur amount */
 }
 ```
 
@@ -53,7 +53,7 @@ The blurred region needs edge definition. A `drop-shadow` on a parent wrapper si
 
 ```css
 .drop-shadow {
-  filter: drop-shadow(0px 20px 10px rgba(0, 0, 0, 0.30));
+  filter: drop-shadow(0px 20px 10px rgba(0, 0, 0, 0.3));
 }
 
 .drop-shadow::before {
@@ -75,17 +75,19 @@ The blurred region needs edge definition. A `drop-shadow` on a parent wrapper si
 
 ```css
 @media (max-width: 980px) {
-  .glass { clip-path: inset(5em); }
+  .glass {
+    clip-path: inset(5em);
+  }
 }
 ```
 
 ### Tuning parameters
 
-| Parameter | Low | Medium | High |
-|-----------|-----|--------|------|
-| `filter: blur()` | 5px (light haze) | 15-20px (standard frost) | 40px+ (deep ice) |
-| `clip-path: inset()` | 2em (thin border) | 5-10em (typical panel) | 15em+ (small viewport) |
-| Shadow opacity | 0.15 (subtle) | 0.30 (standard) | 0.50 (dramatic) |
+| Parameter            | Low               | Medium                   | High                   |
+| -------------------- | ----------------- | ------------------------ | ---------------------- |
+| `filter: blur()`     | 5px (light haze)  | 15-20px (standard frost) | 40px+ (deep ice)       |
+| `clip-path: inset()` | 2em (thin border) | 5-10em (typical panel)   | 15em+ (small viewport) |
+| Shadow opacity       | 0.15 (subtle)     | 0.30 (standard)          | 0.50 (dramatic)        |
 
 ---
 
@@ -98,7 +100,7 @@ The simplest and most common glass effect. A semi-transparent surface with `back
 ```css
 .frosted-glass {
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);  /* Safari */
+  -webkit-backdrop-filter: blur(20px); /* Safari */
   box-shadow:
     0 0.3px 0.7px rgba(0, 0, 0, 0.126),
     0 0.9px 1.7px rgba(0, 0, 0, 0.179),
@@ -111,13 +113,13 @@ The simplest and most common glass effect. A semi-transparent surface with `back
 
 **Shadow stack anatomy (5 layers, progressive depth):**
 
-| Layer | Offset | Blur | Opacity | Role |
-|-------|--------|------|---------|------|
-| 1 | 0 0.3px | 0.7px | 0.126 | Contact shadow (sharp) |
-| 2 | 0 0.9px | 1.7px | 0.179 | Near shadow |
-| 3 | 0 1.8px | 3.5px | 0.224 | Mid shadow |
-| 4 | 0 3.7px | 7.3px | 0.277 | Far shadow |
-| 5 | 0 10px | 20px | 0.4 | Ambient shadow (soft) |
+| Layer | Offset  | Blur  | Opacity | Role                   |
+| ----- | ------- | ----- | ------- | ---------------------- |
+| 1     | 0 0.3px | 0.7px | 0.126   | Contact shadow (sharp) |
+| 2     | 0 0.9px | 1.7px | 0.179   | Near shadow            |
+| 3     | 0 1.8px | 3.5px | 0.224   | Mid shadow             |
+| 4     | 0 3.7px | 7.3px | 0.277   | Far shadow             |
+| 5     | 0 10px  | 20px  | 0.4     | Ambient shadow (soft)  |
 
 Each layer roughly doubles the offset and blur of the previous one. Opacity increases with distance — farther shadows are darker because ambient occlusion accumulates.
 
@@ -159,12 +161,7 @@ Advanced dark glass panel with animated conic-gradient shine lines, noise-masked
   border: var(--border) solid var(--border-color);
   padding: 1em;
   background:
-    linear-gradient(235deg,
-      hsl(var(--hue1) 50% 10% / 0.8),
-      hsl(var(--hue1) 50% 10% / 0) 33%),
-    linear-gradient(45deg,
-      hsl(var(--hue2) 50% 10% / 0.8),
-      hsl(var(--hue2) 50% 10% / 0) 33%),
+    linear-gradient(235deg, hsl(var(--hue1) 50% 10% / 0.8), hsl(var(--hue1) 50% 10% / 0) 33%), linear-gradient(45deg, hsl(var(--hue2) 50% 10% / 0.8), hsl(var(--hue2) 50% 10% / 0) 33%),
     linear-gradient(hsl(220deg 25% 4.8% / 0.66));
   backdrop-filter: blur(12px);
   box-shadow:
@@ -174,6 +171,7 @@ Advanced dark glass panel with animated conic-gradient shine lines, noise-masked
 ```
 
 **Background stack (3 layers):**
+
 1. Top-right tinted gradient (hue1, 235deg) — directional color bleed
 2. Bottom-left tinted gradient (hue2, 45deg) — complementary color bleed
 3. Base dark layer (near-black, 66% opacity) — the glass tint
@@ -194,17 +192,10 @@ The shine simulates light catching the glass edge. Uses `mask-composite: subtrac
   border-radius: inherit;
   z-index: 1;
 
-  background: conic-gradient(
-    from -45deg at center in oklch,
-    transparent 12%,
-    hsl(var(--hue), 80%, 60%),
-    transparent 50%
-  ) border-box;
+  background: conic-gradient(from -45deg at center in oklch, transparent 12%, hsl(var(--hue), 80%, 60%), transparent 50%) border-box;
 
   /* Restrict to border only */
-  mask:
-    linear-gradient(transparent),
-    linear-gradient(black);
+  mask: linear-gradient(transparent), linear-gradient(black);
   mask-clip: padding-box, border-box;
   mask-composite: subtract;
 }
@@ -214,12 +205,7 @@ The shine simulates light catching the glass edge. Uses `mask-composite: subtrac
   content: "";
   inset: -2px;
   z-index: 2;
-  background: conic-gradient(
-    from -45deg at center in oklch,
-    transparent 17%,
-    hsl(var(--hue), 80%, 85%),   /* Higher lightness = brighter */
-    transparent 33%
-  );
+  background: conic-gradient(from -45deg at center in oklch, transparent 17%, hsl(var(--hue), 80%, 85%), /* Higher lightness = brighter */ transparent 33%);
 }
 ```
 
@@ -240,7 +226,7 @@ The glow adds a diffuse color halo around corners, masked with a noise texture f
   border-radius: calc(var(--radius) * 2.5);
 
   /* Noise mask — breaks up the glow into organic speckles */
-  mask: url('noise-texture.png');
+  mask: url("noise-texture.png");
   mask-mode: luminance;
   mask-size: 29%;
 
@@ -255,15 +241,8 @@ The glow adds a diffuse color halo around corners, masked with a noise texture f
   inset: 0;
   border: inherit;
   border-radius: inherit;
-  background: conic-gradient(
-    from -45deg at center in oklch,
-    transparent 0%,
-    hsl(var(--hue), 95%, 60%),
-    transparent 50%
-  ) border-box;
-  mask:
-    linear-gradient(transparent),
-    linear-gradient(black);
+  background: conic-gradient(from -45deg at center in oklch, transparent 0%, hsl(var(--hue), 95%, 60%), transparent 50%) border-box;
+  mask: linear-gradient(transparent), linear-gradient(black);
   mask-clip: padding-box, border-box;
   mask-composite: subtract;
   filter: saturate(2) brightness(1);
@@ -282,22 +261,42 @@ The glow adds a diffuse color halo around corners, masked with a noise texture f
 
 ```css
 @keyframes glow {
-  0%  { opacity: 0; }
-  3%  { opacity: 1; }
-  10% { opacity: 0; }
-  12% { opacity: 0.7; }
-  16% { opacity: 0.3; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  16% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes glowoff {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 
 /* Staggered delays for organic reveal */
-.panel.open .shine      { animation: glow 2s var(--ease) both; }
-.panel.open .glow       { animation: glow 1s var(--ease) 0.2s both; }
-.panel.open .glow-bright { animation: glow 1.5s var(--ease) 0.1s both; }
+.panel.open .shine {
+  animation: glow 2s var(--ease) both;
+}
+.panel.open .glow {
+  animation: glow 1s var(--ease) 0.2s both;
+}
+.panel.open .glow-bright {
+  animation: glow 1.5s var(--ease) 0.1s both;
+}
 ```
 
 The flicker pattern (on → off → partial → full) simulates a neon tube or fluorescent light warming up.
@@ -307,10 +306,7 @@ The flicker pattern (on → off → partial → full) simulates a neon tube or f
 ```css
 .glass-panel input {
   border: 1px solid hsl(var(--hue2) 13% 18.5% / 0.5);
-  background:
-    linear-gradient(to bottom,
-      hsl(var(--hue1) 20% 20% / 0.1) 50%,
-      hsl(var(--hue1) 50% 50% / 0.8) 180%);
+  background: linear-gradient(to bottom, hsl(var(--hue1) 20% 20% / 0.1) 50%, hsl(var(--hue1) 50% 50% / 0.8) 180%);
   background-size: 100% 300%;
   background-position: 0% 0%;
   border-radius: calc(var(--radius) * 0.333);
@@ -319,7 +315,7 @@ The flicker pattern (on → off → partial → full) simulates a neon tube or f
 
 .glass-panel input:focus {
   border-color: hsl(var(--hue1) 20% 70% / 0.5);
-  background-position: 0% 50%;  /* Slides gradient up on focus */
+  background-position: 0% 50%; /* Slides gradient up on focus */
 }
 ```
 
@@ -336,13 +332,11 @@ The flicker pattern (on → off → partial → full) simulates a neon tube or f
   --item-hue: var(--hue2);
   border: 1px solid transparent;
   border-radius: calc(var(--radius) * 0.333);
-  background:
-    linear-gradient(90deg in oklch,
-      hsl(var(--item-hue) 29% 13% / var(--item-opacity)),
-      hsl(var(--item-hue) 30% 15% / var(--item-opacity)) 24% 32%,
-      hsl(var(--item-hue) 5% 7% / 0) 95%
-    ) border-box;
-  transition: all 0.3s ease-in, --item-opacity 0.3s ease-in;
+  background: linear-gradient(90deg in oklch, hsl(var(--item-hue) 29% 13% / var(--item-opacity)), hsl(var(--item-hue) 30% 15% / var(--item-opacity)) 24% 32%, hsl(var(--item-hue) 5% 7% / 0) 95%)
+    border-box;
+  transition:
+    all 0.3s ease-in,
+    --item-opacity 0.3s ease-in;
 }
 
 /* Border via mask-composite subtract */
@@ -352,22 +346,18 @@ The flicker pattern (on → off → partial → full) simulates a neon tube or f
   inset: 0;
   border-radius: inherit;
   border: inherit;
-  background:
-    linear-gradient(90deg in oklch,
-      hsl(var(--item-hue) 15% 16% / var(--item-opacity)),
-      hsl(var(--item-hue) 40% 24% / var(--item-opacity)) 20% 32%,
-      hsl(var(--item-hue) 2% 12% / 0) 95%
-    ) border-box;
-  mask:
-    linear-gradient(transparent),
-    linear-gradient(to right, black, transparent);
+  background: linear-gradient(90deg in oklch, hsl(var(--item-hue) 15% 16% / var(--item-opacity)), hsl(var(--item-hue) 40% 24% / var(--item-opacity)) 20% 32%, hsl(var(--item-hue) 2% 12% / 0) 95%)
+    border-box;
+  mask: linear-gradient(transparent), linear-gradient(to right, black, transparent);
   mask-clip: padding-box, border-box;
   mask-composite: subtract;
 }
 
 .glass-panel li:hover {
   --item-opacity: 0.5;
-  transition: all 0.1s ease-out, --item-opacity 0.1s ease-out;
+  transition:
+    all 0.1s ease-out,
+    --item-opacity 0.1s ease-out;
   color: white;
 }
 ```
@@ -385,10 +375,7 @@ Large glass icon with 10-layer box-shadow creating convex curvature illusion. Su
   width: 15.5em;
   height: 15.5em;
   border-radius: 3.25em;
-  background-image: linear-gradient(
-    hsla(0, 0%, 0%, 0.2),
-    hsla(0, 0%, 0%, 0)
-  );
+  background-image: linear-gradient(hsla(0, 0%, 0%, 0.2), hsla(0, 0%, 0%, 0));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -401,27 +388,13 @@ Large glass icon with 10-layer box-shadow creating convex curvature illusion. Su
   box-shadow:
     /* 1. Top edge catch — dark line at top from light above */
     0 -0.125em 0.25em hsla(0, 0%, 0%, 0.2),
-
-    /* 2. Bottom rim glow — colored light bleeding from under */
-    0 0.25em 0.25em hsla(var(--h), var(--s), var(--l), 0.5),
-
-    /* 3. Border ring — solid colored outline */
-    0 0 0 0.25em hsla(var(--h), var(--s), var(--l), 0.5),
-
-    /* 4. Inner top glow — light entering from top */
-    0 0.375em 0.5em hsla(var(--h), var(--s), var(--l), 0.5) inset,
-
-    /* 5. Inner bottom catch — secondary internal reflection */
-    0 -0.125em 0.375em hsla(var(--h), var(--s), var(--l), 0.4) inset,
-
-    /* 6. Deep inner glow — ambient colored light inside glass */
-    0 -1.25em 2em 0.5em hsla(var(--h), var(--s), var(--l), 0.3) inset,
-
-    /* 7. Top internal reflection — convex surface simulation */
-    0 1.25em 0 hsla(var(--h), var(--s), var(--l), 0.3) inset,
-
-    /* 8. Cast shadow — ground shadow below icon */
-    0 5em 3em hsla(0, 0%, 0%, 0.4);
+    /* 2. Bottom rim glow — colored light bleeding from under */ 0 0.25em 0.25em hsla(var(--h), var(--s), var(--l), 0.5),
+    /* 3. Border ring — solid colored outline */ 0 0 0 0.25em hsla(var(--h), var(--s), var(--l), 0.5),
+    /* 4. Inner top glow — light entering from top */ 0 0.375em 0.5em hsla(var(--h), var(--s), var(--l), 0.5) inset,
+    /* 5. Inner bottom catch — secondary internal reflection */ 0 -0.125em 0.375em hsla(var(--h), var(--s), var(--l), 0.4) inset,
+    /* 6. Deep inner glow — ambient colored light inside glass */ 0 -1.25em 2em 0.5em hsla(var(--h), var(--s), var(--l), 0.3) inset,
+    /* 7. Top internal reflection — convex surface simulation */ 0 1.25em 0 hsla(var(--h), var(--s), var(--l), 0.3) inset,
+    /* 8. Cast shadow — ground shadow below icon */ 0 5em 3em hsla(0, 0%, 0%, 0.4);
 }
 ```
 
@@ -438,11 +411,7 @@ The light pool below the glass icon — focused light passing through:
   width: 9em;
   height: 3em;
   transform: translateX(-50%);
-  background: radial-gradient(
-    100% 100% at center,
-    hsla(var(--h), var(--s), 80%, 0.25),
-    hsla(var(--h), var(--s), 80%, 0) 50%
-  );
+  background: radial-gradient(100% 100% at center, hsla(var(--h), var(--s), 80%, 0.25), hsla(var(--h), var(--s), 80%, 0) 50%);
 }
 ```
 
@@ -462,29 +431,24 @@ Each piece is a rotated square with directional gradient + matching shadow direc
   transform-origin: 100% 100%;
 
   /* Gradient direction matches rotation */
-  background-image: linear-gradient(-45deg,
-    hsla(var(--h), var(--s), var(--l), 0.8),
-    hsla(var(--h), var(--s), var(--l), 0.2) 67%
-  );
+  background-image: linear-gradient(-45deg, hsla(var(--h), var(--s), var(--l), 0.8), hsla(var(--h), var(--s), var(--l), 0.2) 67%);
 
   box-shadow:
     /* Inner specular highlight */
     -0.125em -0.125em 0.25em hsla(var(--h), var(--s), var(--l), 0.5) inset,
-    /* Inner depth shading */
-    0.3em 0.3em 0 hsla(var(--h), var(--s), var(--l), 0.2) inset,
-    /* Cast shadow */
-    0.375em 0.375em 0.5em hsla(0, 0%, 0%, 0.3),
-    /* Colored glow (caustic from piece) */
-    0.5em 0.5em 0.75em hsla(var(--h), var(--s), 80%, 0.7);
+    /* Inner depth shading */ 0.3em 0.3em 0 hsla(var(--h), var(--s), var(--l), 0.2) inset,
+    /* Cast shadow */ 0.375em 0.375em 0.5em hsla(0, 0%, 0%, 0.3),
+    /* Colored glow (caustic from piece) */ 0.5em 0.5em 0.75em hsla(var(--h), var(--s), 80%, 0.7);
 }
 
 /* Each rotation (90deg increments) flips the gradient + shadow direction */
 .glass-glyph-piece:nth-child(2) {
   background-image: linear-gradient(-135deg, ...);
-  box-shadow: -0.125em 0.125em ... inset,
-              0.3em -0.3em ... inset,
-              0.375em -0.375em ...,
-              0.5em -0.5em ...;
+  box-shadow:
+    -0.125em 0.125em... inset,
+    0.3em -0.3em... inset,
+    0.375em -0.375em...,
+    0.5em -0.5em...;
   transform: rotate(135deg) translate(-0.25em, -0.25em);
 }
 /* :nth-child(3) = 225deg, :nth-child(4) = 315deg — same pattern */
@@ -494,9 +458,9 @@ Each piece is a rotated square with directional gradient + matching shadow direc
 
 ```css
 :root {
-  --h: 33;    /* Hue — amber by default */
-  --s: 90%;   /* Saturation */
-  --l: 90%;   /* Lightness */
+  --h: 33; /* Hue — amber by default */
+  --s: 90%; /* Saturation */
+  --l: 90%; /* Lightness */
 }
 ```
 
@@ -522,12 +486,12 @@ Pure CSS glass sphere using 15+ stacked `radial-gradient` layers for light, shad
 
 /* The sphere ::before is the main visible element */
 .sphere::before {
-  content: '';
+  content: "";
   width: 300px;
   height: 300px;
   border-radius: 50%;
   position: absolute;
-  background-color: rgb(148, 147, 143);  /* Base glass tint */
+  background-color: rgb(148, 147, 143); /* Base glass tint */
 }
 ```
 
@@ -540,36 +504,21 @@ The background-image stack on `::before` builds the sphere optics:
   background-image:
     /* === SPECULAR HIGHLIGHT (top) === */
     /* 1. Primary shine — small bright point */
-    radial-gradient(circle,
-      rgba(255,255,255,0.3),
-      rgba(255,255,255,0.1) 25%,
-      transparent 50%),
-
-    /* === LIGHT REFRACTION (bottom half) === */
-    /* 2-5. Small refracted light spots */
-    radial-gradient(ellipse, rgba(210,210,210,0.7), transparent 50%),
-    radial-gradient(ellipse, rgba(210,210,210,0.7), transparent 50%),
-    radial-gradient(ellipse, rgba(255,255,255,0.7), transparent 50%),
-    radial-gradient(ellipse, rgba(255,255,255,0.7), transparent 50%),
-
-    /* 6-9. Large refracted light areas */
-    radial-gradient(ellipse, rgba(255,255,255,0.4), transparent 50%),
-    radial-gradient(ellipse, rgba(255,255,255,0.5), transparent 50%),
-    radial-gradient(ellipse, rgba(255,255,255,0.7), transparent 50%),
-    radial-gradient(ellipse, rgba(255,255,255,0.5), transparent 50%),
-
-    /* === SHADOW REGIONS === */
-    /* 10-11. Shadow crescent (opposite light source) */
-    radial-gradient(ellipse, rgba(0,0,0,0.1), transparent 60%),
-    radial-gradient(ellipse, rgba(0,0,0,0.2), transparent 60%),
-
-    /* 12-13. Dark rim areas */
-    radial-gradient(ellipse, rgba(57,57,57,0.5), transparent 50%),
-    radial-gradient(ellipse, rgba(57,57,57,0.5), transparent 50%),
-
-    /* 14-15. Mid-tone transitional areas */
-    radial-gradient(ellipse, rgba(109,109,109,0.1), transparent 50%),
-    radial-gradient(ellipse, rgba(121,121,121,0.2), transparent 50%);
+    radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1) 25%, transparent 50%),
+    /* === LIGHT REFRACTION (bottom half) === */ /* 2-5. Small refracted light spots */ radial-gradient(ellipse, rgba(210, 210, 210, 0.7), transparent 50%),
+    radial-gradient(ellipse, rgba(210, 210, 210, 0.7), transparent 50%),
+    radial-gradient(ellipse, rgba(255, 255, 255, 0.7), transparent 50%),
+    radial-gradient(ellipse, rgba(255, 255, 255, 0.7), transparent 50%),
+    /* 6-9. Large refracted light areas */ radial-gradient(ellipse, rgba(255, 255, 255, 0.4), transparent 50%),
+    radial-gradient(ellipse, rgba(255, 255, 255, 0.5), transparent 50%),
+    radial-gradient(ellipse, rgba(255, 255, 255, 0.7), transparent 50%),
+    radial-gradient(ellipse, rgba(255, 255, 255, 0.5), transparent 50%),
+    /* === SHADOW REGIONS === */ /* 10-11. Shadow crescent (opposite light source) */ radial-gradient(ellipse, rgba(0, 0, 0, 0.1), transparent 60%),
+    radial-gradient(ellipse, rgba(0, 0, 0, 0.2), transparent 60%),
+    /* 12-13. Dark rim areas */ radial-gradient(ellipse, rgba(57, 57, 57, 0.5), transparent 50%),
+    radial-gradient(ellipse, rgba(57, 57, 57, 0.5), transparent 50%),
+    /* 14-15. Mid-tone transitional areas */ radial-gradient(ellipse, rgba(109, 109, 109, 0.1), transparent 50%),
+    radial-gradient(ellipse, rgba(121, 121, 121, 0.2), transparent 50%);
 }
 ```
 
@@ -580,18 +529,40 @@ Each gradient has a specific size and position to simulate real light behavior:
 ```css
 .sphere::before {
   background-size:
-    /* Shine */       100px 100px,
-    /* Light small */  100px 100px, 100px 100px, 100px 100px, 100px 100px,
-    /* Light large */  200px 200px, 200px 200px, 200px 200px, 200px 200px,
-    /* Dark */         100px 100px, 120px 120px, 120px 120px, 120px 120px,
-                       120px 120px, 120px 120px;
+    /* Shine */
+    100px 100px,
+    /* Light small */ 100px 100px,
+    100px 100px,
+    100px 100px,
+    100px 100px,
+    /* Light large */ 200px 200px,
+    200px 200px,
+    200px 200px,
+    200px 200px,
+    /* Dark */ 100px 100px,
+    120px 120px,
+    120px 120px,
+    120px 120px,
+    120px 120px,
+    120px 120px;
 
   background-position:
-    /* Shine */       58% -5%,
-    /* Light small */ -15% 90%, -5% 100%, 5% 110%, 20% 120%,
-    /* Light large */ -70% 170%, -35% 210%, -10% 215%, 80% 225%,
-    /* Dark */        -35% 25%, -10% -30%, 135% 15%, 80% -45%,
-                      15% 40%, 75% 80%;
+    /* Shine */
+    58% -5%,
+    /* Light small */ -15% 90%,
+    -5% 100%,
+    5% 110%,
+    20% 120%,
+    /* Light large */ -70% 170%,
+    -35% 210%,
+    -10% 215%,
+    80% 225%,
+    /* Dark */ -35% 25%,
+    -10% -30%,
+    135% 15%,
+    80% -45%,
+    15% 40%,
+    75% 80%;
 
   background-repeat: no-repeat;
 }
@@ -605,19 +576,13 @@ Each gradient has a specific size and position to simulate real light behavior:
 .sphere::before {
   box-shadow:
     /* 1. Sharp rim — edge catch from light */
-    inset -5px 5px 8px 0px rgba(0,0,0,0.15),
-    /* 2. Wide rim shadow — atmospheric occlusion */
-    inset -30px 15px 20px -10px rgba(0,0,0,0.2),
-    /* 3. Deep ambient — overall concavity */
-    inset -10px 10px 30px 5px rgba(0,0,0,0.2),
-    /* 4. Soft edge shadow */
-    inset -10px 10px 10px -5px rgba(0,0,0,0.1),
-    /* 5. Bright rim highlight (opposite side) */
-    inset 12px -20px 5px -21px rgba(255,255,255,0.8),
-    /* 6. Secondary rim highlight */
-    inset 10px -30px 20px -20px rgba(255,255,255,0.5),
-    /* 7. Internal depth tint */
-    inset 50px -50px 20px -10px rgba(108,108,108,0.15);
+    inset -5px 5px 8px 0px rgba(0, 0, 0, 0.15),
+    /* 2. Wide rim shadow — atmospheric occlusion */ inset -30px 15px 20px -10px rgba(0, 0, 0, 0.2),
+    /* 3. Deep ambient — overall concavity */ inset -10px 10px 30px 5px rgba(0, 0, 0, 0.2),
+    /* 4. Soft edge shadow */ inset -10px 10px 10px -5px rgba(0, 0, 0, 0.1),
+    /* 5. Bright rim highlight (opposite side) */ inset 12px -20px 5px -21px rgba(255, 255, 255, 0.8),
+    /* 6. Secondary rim highlight */ inset 10px -30px 20px -20px rgba(255, 255, 255, 0.5),
+    /* 7. Internal depth tint */ inset 50px -50px 20px -10px rgba(108, 108, 108, 0.15);
 }
 ```
 
@@ -627,23 +592,14 @@ The sharp specular reflection on the upper surface:
 
 ```css
 .sphere::after {
-  content: '';
+  content: "";
   width: 60px;
   height: 80px;
   border-radius: 40px 0 0 0 / 15px 0 0 0;
   position: absolute;
-  transform: perspective(100px) scaleY(0.5)
-             rotateX(-5deg) rotateY(-15deg) rotateZ(25deg);
+  transform: perspective(100px) scaleY(0.5) rotateX(-5deg) rotateY(-15deg) rotateZ(25deg);
   background-color: white;
-  background-image:
-    linear-gradient(to right,
-      transparent 20%,
-      rgba(255,255,255,0.5) 50%,
-      transparent 100%),
-    linear-gradient(to top,
-      transparent 70%,
-      rgba(0,0,0,0.4) 80%,
-      transparent 90%);
+  background-image: linear-gradient(to right, transparent 20%, rgba(255, 255, 255, 0.5) 50%, transparent 100%), linear-gradient(to top, transparent 70%, rgba(0, 0, 0, 0.4) 80%, transparent 90%);
   filter: blur(0.5px);
 }
 ```
@@ -659,17 +615,13 @@ The body element (behind `::before`) creates the neck/stem distortion effect see
   width: 200px;
   height: 300px;
   border-radius: 50% 50% 30% 30%;
-  background-image: radial-gradient(
-    ellipse at top center,
-    rgba(255,255,255,1),
-    transparent 50%
-  );
+  background-image: radial-gradient(ellipse at top center, rgba(255, 255, 255, 1), transparent 50%);
   background-size: 150px 300px;
   background-position: 10px 0px;
   background-repeat: no-repeat;
   box-shadow:
-    -5px -60px 20px 5px rgba(0,0,0,0.4),
-    inset 0px 50px 20px -15px rgba(0,0,0,0.4);
+    -5px -60px 20px 5px rgba(0, 0, 0, 0.4),
+    inset 0px 50px 20px -15px rgba(0, 0, 0, 0.4);
 }
 ```
 
@@ -700,7 +652,7 @@ div.outer.highlight   — z:1   Caustic light below sphere
   z-index: 2;
   width: 450px;
   height: 450px;
-  background: var(--base-color);  /* e.g. #ffc3d98a — semi-transparent pink */
+  background: var(--base-color); /* e.g. #ffc3d98a — semi-transparent pink */
   border-radius: 50%;
 }
 ```
@@ -732,7 +684,7 @@ div.outer.highlight   — z:1   Caustic light below sphere
   z-index: 3;
   width: 360px;
   height: 360px;
-  background: var(--base-shadow);     /* e.g. #ff93b9 */
+  background: var(--base-shadow); /* e.g. #ff93b9 */
   border-radius: 50%;
   filter: blur(40px);
 }
@@ -742,7 +694,7 @@ div.outer.highlight   — z:1   Caustic light below sphere
   top: 100px;
   width: 150px;
   height: 150px;
-  background: var(--darkest-shadow);  /* e.g. #f01260f3 */
+  background: var(--darkest-shadow); /* e.g. #f01260f3 */
   filter: blur(50px);
 }
 ```
@@ -757,7 +709,7 @@ div.outer.highlight   — z:1   Caustic light below sphere
   top: 140px;
   width: 25px;
   height: 30px;
-  background: var(--lightest);  /* white */
+  background: var(--lightest); /* white */
   border-radius: 50%;
   transform: rotate(30deg);
   filter: blur(8px);
@@ -804,7 +756,7 @@ div.outer.highlight   — z:1   Caustic light below sphere
   background: #ffe7f0;
   filter: blur(30px);
   border-radius: 50%;
-  transform: rotateX(50deg);  /* Flattens into an ellipse on the ground */
+  transform: rotateX(50deg); /* Flattens into an ellipse on the ground */
 }
 
 /* Ground shadow */
@@ -815,10 +767,7 @@ div.outer.highlight   — z:1   Caustic light below sphere
   z-index: -1;
   width: 400px;
   height: 400px;
-  background: linear-gradient(180deg,
-    #ff4184d7 20%,
-    #fd2d765b,
-    var(--lightest));
+  background: linear-gradient(180deg, #ff4184d7 20%, #fd2d765b, var(--lightest));
   filter: blur(60px);
   border-radius: 50%;
   transform: rotateX(50deg);
@@ -829,13 +778,13 @@ div.outer.highlight   — z:1   Caustic light below sphere
 
 ```css
 :root {
-  --base-color: #ffc3d98a;        /* Sphere body — semi-transparent */
-  --base-shadow: #ff93b9;         /* Inner shadow color */
-  --darker-shadow: #f01260f3;     /* Deep shadow */
-  --darkest-shadow: #fd4686;      /* Core shadow */
-  --base-highlight: #ff86b1;      /* Highlight tint */
-  --lighter-highlight: #ffc8dc;   /* Lighter tint */
-  --lightest: #ffffff;            /* Pure white */
+  --base-color: #ffc3d98a; /* Sphere body — semi-transparent */
+  --base-shadow: #ff93b9; /* Inner shadow color */
+  --darker-shadow: #f01260f3; /* Deep shadow */
+  --darkest-shadow: #fd4686; /* Core shadow */
+  --base-highlight: #ff86b1; /* Highlight tint */
+  --lighter-highlight: #ffc8dc; /* Lighter tint */
+  --lightest: #ffffff; /* Pure white */
 }
 ```
 
@@ -850,6 +799,7 @@ Advanced glass effects using SVG filters applied via `backdrop-filter: url(#filt
 Define these in the HTML (or inline SVG) — they become referenceable by CSS:
 
 **Standard glass distortion:**
+
 ```xml
 <svg class="filter" xmlns="http://www.w3.org/2000/svg">
   <filter id="filter">
@@ -863,6 +813,7 @@ Define these in the HTML (or inline SVG) — they become referenceable by CSS:
 ```
 
 **Warp glass (stronger distortion):**
+
 ```xml
 <svg class="filter" xmlns="http://www.w3.org/2000/svg">
   <filter id="warp">
@@ -876,6 +827,7 @@ Define these in the HTML (or inline SVG) — they become referenceable by CSS:
 ```
 
 **Chromatic RGB split:**
+
 ```xml
 <svg class="filter" xmlns="http://www.w3.org/2000/svg">
   <filter id="rgb-split">
@@ -924,28 +876,17 @@ Define these in the HTML (or inline SVG) — they become referenceable by CSS:
   width: calc(var(--width) * 1px);
   border-radius: calc(var(--radius) * 1px);
   z-index: 999999;
-  background: light-dark(
-    hsl(0 0% 100% / var(--frost, 0.5)),
-    hsl(0 0% 0% / var(--frost, 0.5))
-  );
+  background: light-dark(hsl(0 0% 100% / var(--frost, 0.5)), hsl(0 0% 0% / var(--frost, 0.5)));
   box-shadow:
     /* Inner edge highlights (2 layers) */
-    0 0 2px 1px light-dark(
-      color-mix(in oklch, canvasText, #0000 85%),
-      color-mix(in oklch, canvasText, #0000 65%)
-    ) inset,
-    0 0 10px 4px light-dark(
-      color-mix(in oklch, canvasText, #0000 90%),
-      color-mix(in oklch, canvasText, #0000 85%)
-    ) inset,
-    /* External depth shadows (5 layers) */
-    0px 4px 16px rgba(17, 17, 26, 0.05),
+    0 0 2px 1px light-dark(color-mix(in oklch, canvasText, #0000 85%), color-mix(in oklch, canvasText, #0000 65%)) inset,
+    0 0 10px 4px light-dark(color-mix(in oklch, canvasText, #0000 90%), color-mix(in oklch, canvasText, #0000 85%)) inset,
+    /* External depth shadows (5 layers) */ 0px 4px 16px rgba(17, 17, 26, 0.05),
     0px 8px 24px rgba(17, 17, 26, 0.05),
     0px 0 8px rgba(17, 17, 26, 0.05),
     0px 8px 24px rgba(17, 17, 26, 0.2),
     0px 16px 56px rgba(17, 17, 26, 0.05),
-    /* Internal depth shadows (3 layers) */
-    0px 4px 16px rgba(17, 17, 26, 0.05) inset,
+    /* Internal depth shadows (3 layers) */ 0px 4px 16px rgba(17, 17, 26, 0.05) inset,
     0px 8px 24px rgba(17, 17, 26, 0.05) inset,
     0px 16px 56px rgba(17, 17, 26, 0.05) inset;
 }
@@ -955,18 +896,19 @@ Define these in the HTML (or inline SVG) — they become referenceable by CSS:
 
 ### Tuning parameters
 
-| Parameter | Effect | Range |
-|-----------|--------|-------|
-| `--frost` | Glass opacity (0 = clear, 1 = opaque) | 0.0 - 1.0 |
-| `--saturation` | Color intensity through glass | 0.5 - 2.0 |
-| `--height`, `--width` | Glass element dimensions | px values |
-| `--radius` | Border radius | px values |
-| `baseFrequency` (SVG) | Distortion pattern density | 0.005 (subtle) - 0.05 (heavy) |
-| `scale` (SVG) | Distortion intensity | 5 (slight) - 40 (extreme) |
+| Parameter             | Effect                                | Range                         |
+| --------------------- | ------------------------------------- | ----------------------------- |
+| `--frost`             | Glass opacity (0 = clear, 1 = opaque) | 0.0 - 1.0                     |
+| `--saturation`        | Color intensity through glass         | 0.5 - 2.0                     |
+| `--height`, `--width` | Glass element dimensions              | px values                     |
+| `--radius`            | Border radius                         | px values                     |
+| `baseFrequency` (SVG) | Distortion pattern density            | 0.005 (subtle) - 0.05 (heavy) |
+| `scale` (SVG)         | Distortion intensity                  | 5 (slight) - 40 (extreme)     |
 
 ### Light/dark mode support
 
 The `light-dark()` function automatically adapts the glass:
+
 - **Light mode:** White-tinted glass, shadows use `color-mix` with 85-90% transparency
 - **Dark mode:** Black-tinted glass, shadows use `color-mix` with 65-85% transparency
 
@@ -974,8 +916,12 @@ The `light-dark()` function automatically adapts the glass:
 :root {
   color-scheme: light dark;
 }
-[data-theme="light"] { color-scheme: light only; }
-[data-theme="dark"]  { color-scheme: dark only; }
+[data-theme="light"] {
+  color-scheme: light only;
+}
+[data-theme="dark"] {
+  color-scheme: dark only;
+}
 ```
 
 ---
@@ -991,18 +937,12 @@ select {
   width: 460px;
   padding: 15px 0;
   border-radius: 30px;
-  background:
-    linear-gradient(0deg,
-      #FFF9 0px,
-      #FFF3 10px,
-      #FFF0,
-      #FFF0,
-      #FFF3 calc(100% - 10px),
-      #FFF9 100%),
-    #9991;
-  border: solid 2px #FFF9;
-  box-shadow: 2px 2px 4px 0 #0006, -1px -1px 1px 0 #0002;
-  color: #FFF;
+  background: linear-gradient(0deg, #fff9 0px, #fff3 10px, #fff0, #fff0, #fff3 calc(100% - 10px), #fff9 100%), #9991;
+  border: solid 2px #fff9;
+  box-shadow:
+    2px 2px 4px 0 #0006,
+    -1px -1px 1px 0 #0002;
+  color: #fff;
   font-size: 20px;
   text-shadow: 0px 0px 6px #000;
   cursor: pointer;
@@ -1011,6 +951,7 @@ select {
 ```
 
 **Background stack:**
+
 1. Vertical gradient with bright edges (#FFF9) fading to transparent center — simulates glass edge catch
 2. Base tint (#9991) — semi-transparent gray
 
@@ -1018,15 +959,7 @@ select {
 
 ```css
 select:hover {
-  background:
-    linear-gradient(0deg,
-      #FFF9 0px,
-      #FFF3 10px,
-      #FFF0,
-      #FFF0,
-      #FFF3 calc(100% - 10px),
-      #FFF9 100%),
-    #FFF4;  /* Brighter base — glass catches more light */
+  background: linear-gradient(0deg, #fff9 0px, #fff3 10px, #fff0, #fff0, #fff3 calc(100% - 10px), #fff9 100%), #fff4; /* Brighter base — glass catches more light */
 }
 ```
 
@@ -1034,15 +967,7 @@ select:hover {
 
 ```css
 select:open {
-  background:
-    linear-gradient(0deg,
-      #FFF 0px,
-      #FFF3 25px,
-      #FFF0,
-      #FFF0,
-      #FFF3 calc(100% - 25px),
-      #FFF 100%),
-    #FFF4;
+  background: linear-gradient(0deg, #fff 0px, #fff3 25px, #fff0, #fff0, #fff3 calc(100% - 25px), #fff 100%), #fff4;
   max-height: 75vh;
   backdrop-filter: url(#glass);
 }
@@ -1086,7 +1011,7 @@ select option {
   border-radius: 18px;
   border: solid 1px #0002;
   background-color: #0001;
-  color: #FFFFFF;
+  color: #ffffff;
   text-shadow: 0px 0px 4px #0008;
   box-shadow: 0px 0px 1px #0004;
   cursor: pointer;
@@ -1094,7 +1019,8 @@ select option {
   outline: none;
 }
 
-option:hover, option:focus {
+option:hover,
+option:focus {
   border: solid 1px #0004;
   background-color: #0003;
 }
@@ -1105,12 +1031,14 @@ option:hover, option:focus {
 ## 23.10 Glass Recipes Quick Reference
 
 ### Recipe 1: Simple frosted card (Tailwind)
+
 ```
 backdrop-blur-xl bg-white/10 border border-white/20
 shadow-[0_0.3px_0.7px_rgba(0,0,0,0.13),0_0.9px_1.7px_rgba(0,0,0,0.18),0_1.8px_3.5px_rgba(0,0,0,0.22),0_3.7px_7.3px_rgba(0,0,0,0.28),0_10px_20px_rgba(0,0,0,0.4)]
 ```
 
 ### Recipe 2: Dark glass panel (Tailwind)
+
 ```
 backdrop-blur-md bg-[hsl(220_25%_5%/0.66)]
 border border-[hsl(222_12%_20%)]
@@ -1118,6 +1046,7 @@ shadow-[hsl(222_50%_2%)_0px_10px_16px_-8px,hsl(222_50%_4%)_0px_20px_36px_-14px]
 ```
 
 ### Recipe 3: Glass sphere base (inline style needed)
+
 ```css
 style="
   border-radius: 50%;
@@ -1131,6 +1060,7 @@ style="
 ```
 
 ### Recipe 4: Glass icon with caustic (inline style needed)
+
 ```css
 style="
   border-radius: 3.25em;
@@ -1149,15 +1079,15 @@ style="
 
 ### Decision matrix
 
-| Need | Technique | Section |
-|------|-----------|---------|
-| Simple frosted panel | Backdrop-filter blur | 23.3 |
-| No backdrop-filter support | Clip-path + duplicate background | 23.2 |
-| Dark UI menu/modal | Dark glassmorphism + glow | 23.4 |
-| App icon / tile | Box-shadow stack + backdrop-filter | 23.5 |
-| Decorative sphere/orb | Multi-gradient radial | 23.6 |
-| Animated marble/bead | Layered div construction | 23.7 |
-| Physical refraction/warp | SVG displacement filter | 23.8 |
-| Chromatic aberration | SVG RGB split filter | 23.8 |
-| Glass form controls | Glass select/dropdown | 23.9 |
-| Light + dark mode glass | `light-dark()` + `color-scheme` | 23.8 |
+| Need                       | Technique                          | Section |
+| -------------------------- | ---------------------------------- | ------- |
+| Simple frosted panel       | Backdrop-filter blur               | 23.3    |
+| No backdrop-filter support | Clip-path + duplicate background   | 23.2    |
+| Dark UI menu/modal         | Dark glassmorphism + glow          | 23.4    |
+| App icon / tile            | Box-shadow stack + backdrop-filter | 23.5    |
+| Decorative sphere/orb      | Multi-gradient radial              | 23.6    |
+| Animated marble/bead       | Layered div construction           | 23.7    |
+| Physical refraction/warp   | SVG displacement filter            | 23.8    |
+| Chromatic aberration       | SVG RGB split filter               | 23.8    |
+| Glass form controls        | Glass select/dropdown              | 23.9    |
+| Light + dark mode glass    | `light-dark()` + `color-scheme`    | 23.8    |
