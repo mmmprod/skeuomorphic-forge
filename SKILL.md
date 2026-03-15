@@ -1,6 +1,6 @@
 ---
 name: skeuomorphic-forge
-description: "Build physically-realistic skeuomorphic UI with Tailwind CSS. Covers buttons, panels, gauges, knobs, CRT/LED displays, glass/metal effects, particle systems, and industrial hardware. Provides shadow stacks, material textures, lighting rules, and construction blueprints. Triggers on: skeuomorphic, realistic depth, industrial UI, 3D button, gauge, meter, analog, tactile, material texture, retro-industrial, aerospace panel, DSP cockpit. Do NOT trigger for flat/minimal UI or standard Material/Shadcn components."
+description: "Build physically-realistic skeuomorphic UI with Tailwind CSS. Covers buttons, panels, gauges, knobs, CRT/LED displays, glass/metal effects, particle systems, loaders, progress indicators, and industrial hardware. Provides shadow stacks, material textures, lighting rules, and construction blueprints. Triggers on: skeuomorphic, realistic depth, industrial UI, 3D button, gauge, meter, analog, tactile, material texture, retro-industrial, aerospace panel, DSP cockpit, neumorphic, loading screen. Do NOT trigger for flat/minimal UI or standard Material/Shadcn components."
 ---
 
 # Skeuomorphic Forge
@@ -824,141 +824,26 @@ This checklist is aligned with **CLAUDE.md §C Design Gate U1-U8**. A component 
 
 ### Display Well Depth — Inset Shadows Only (NO borders)
 
-For display wells (CRT screens, input recesses), depth comes ONLY from inset box-shadows. Do NOT use borders on display wells — borders make the glass look like it's sticking OUT instead of being recessed IN. See `references/16-benchmark-lessons.md` §16.13 for the full history.
+Display wells use inset box-shadows for depth, NOT borders. Borders make glass look like it sticks OUT instead of being recessed IN. Sharp corners (`borderRadius: 0`) + `overflow: hidden` for CRT look. Code examples in `references/14-metal-recess-wells.md` §14.5 and `references/16-benchmark-lessons.md` §16.12-§16.13.
 
-```javascript
-const DISPLAY_WELL = {
-  background: "linear-gradient(180deg, #050505 0%, #0a0a0a 100%)",
-  borderRadius: 0,  // sharp CRT corners
-  overflow: "hidden",
-  border: "none",   // NO border on display wells
-  boxShadow: `
-    inset 0 3px 8px rgba(0,0,0,0.7),
-    inset 0 -2px 4px rgba(0,0,0,0.4),
-    inset 3px 0 6px rgba(0,0,0,0.5),
-    inset -3px 0 6px rgba(0,0,0,0.5),
-    inset 0 1px 2px rgba(0,0,0,0.8),
-    inset 0 6px 12px rgba(0,0,0,0.3),
-    inset 0 -1px 0 rgba(255,250,240,0.15)
-  `,
-};
-```
+### Rim Light vs Color Bleed — TWO SEPARATE THINGS
 
-The bottom `inset 0 -1px 0` creates a subtle bottom catch light (light entering the recess from above), which is physically correct for a recessed well.
+These are physically different phenomena, often confused. Must be implemented separately:
 
-### IMPORTANT: Rim Light vs Color Bleed — TWO SEPARATE THINGS
+1. **RIM LIGHT** (border) = ambient light catching machined metal edge. Color: **NEUTRAL WARM** `rgba(255,250,240,...)`. Same on every recess regardless of content. Top/left brighter (135deg light).
+2. **COLOR BLEED** (inset box-shadow) = screen content reflecting off recess walls. Color **MATCHES CONTENT** (green, amber, red). Position follows content location inside the display.
 
-These are often confused. They are physically different phenomena and must be implemented separately:
+**NEVER use colored borders for color bleed.** Borders = rim light = neutral warm. Color bleed = inset box-shadow = content color.
 
-1. **RIM LIGHT** (border) = ambient light catching the machined metal edge of the recess. Color is **NEUTRAL WARM** (`rgba(255,250,240,...)`) matching the chassis palette. Direction follows the 135deg light source (top/left brighter). This looks identical on EVERY recess regardless of content.
-
-2. **COLOR BLEED** (inset box-shadow) = light emitted by the screen content reflecting off the recess walls. Color **MATCHES THE CONTENT** (green, amber, red). Position follows WHERE THE CONTENT IS inside the screen — if "2.1ms" is on the right side of the display, the color bleed is strongest on the RIGHT wall.
-
-```javascript
-// CORRECT — two separate systems
-const RECESS = {
-  // 1. RIM LIGHT: neutral warm, follows 135deg ambient light (same on every recess)
-  borderTop: "1px solid rgba(255,250,240,0.20)",
-  borderLeft: "1px solid rgba(255,250,240,0.14)",
-  borderBottom: "1px solid rgba(255,250,240,0.06)",
-  borderRight: "1px solid rgba(255,250,240,0.06)",
-
-  // 2. COLOR BLEED: content color, follows content position (separate inset shadow)
-  // "2.1ms" readout is on the right side → right wall gets green bleed
-  boxShadow: `
-    ${DEPTH_SHADOWS},
-    inset -4px 0 8px rgba(60,220,120,0.04)  /* green bleed on RIGHT wall from readout */
-  `,
-};
-
-// WRONG — colored border as "rim light"
-borderLeft: "1px solid rgba(60,220,120,0.22)"  // NO — green border = not a rim light, it's wrong
-```
-
-### Color Bleed from Display Content (CRITICAL for realism)
-
-When a screen/display shows colored content (amber text, green readout, red warning), the walls of the recess pick up that color as a subtle glow. This is NOT done with border (that's the rim light above) — it's done with **inset box-shadow** to simulate light bouncing off the recess walls.
-
-**CRITICAL**: Identify the glowing content that is INSIDE the screen recess (not labels outside it). For a status card, "CONNECTED" might be outside the screen as a title — the actual screen content is "2.1ms" or "NO SIGNAL". The color bleed comes from what's INSIDE the display well.
-
-```javascript
-// Color bleed is implemented as INSET BOX-SHADOW, not border
-// The border stays neutral warm (rim light from ambient)
-
-// "2.1ms" readout on the RIGHT side of the display → green bleed on RIGHT wall
-boxShadow: `
-  ${DEPTH_INSET_SHADOWS},
-  inset -4px 0 10px rgba(60,220,120,0.04)  /* green bleed on right wall */
-`
-
-// "NO SIGNAL" centered in display → red bleed diffuse from center
-boxShadow: `
-  ${DEPTH_INSET_SHADOWS},
-  inset 0 0 16px rgba(220,60,60,0.03)  /* red bleed ambient from center */
-`
-
-// "3000" amber digits left-aligned in input well → amber on LEFT wall
-boxShadow: `
-  ${DEPTH_INSET_SHADOWS},
-  inset 4px 0 10px rgba(255,180,60,0.04)  /* amber bleed on left wall from digits */
-`
-```
-
-**NEVER use colored borders for color bleed.** Borders = rim light = neutral warm = matches chassis. Color bleed = inset box-shadow = matches content color = positioned where content projects.
-
-The color bleed is subtle (0.06-0.10 opacity) but it dramatically increases realism. Without it, the recess looks disconnected from its content — like a picture frame instead of a real CRT cavity.
-
-### Color Bleed Follows Content Position (via inset box-shadow, NOT border)
-
-Screen content projects colored light onto the recess walls. This is implemented as **inset box-shadow** (never border — borders are for raised elements, not recessed wells). The color matches the screen content, and the shadow is positioned on the wall closest to the glowing content.
-
-```javascript
-// "2.1 ms" green readout on right side → green bleed on RIGHT wall
-boxShadow: `${DEPTH_SHADOWS}, inset -4px 0 10px rgba(60,220,120,0.05)`
-
-// "3000" amber digits left-aligned → amber bleed on LEFT wall
-boxShadow: `${DEPTH_SHADOWS}, inset 4px 0 10px rgba(255,180,60,0.05)`
-
-// "NO SIGNAL" centered → red diffuse bleed
-boxShadow: `${DEPTH_SHADOWS}, inset 0 0 16px rgba(220,60,60,0.03)`
-```
-
-See `references/16-benchmark-lessons.md` §16.1 for the full distinction between rim light and color bleed.
+For code examples and detailed implementation: `references/16-benchmark-lessons.md` §16.1 and `references/09-rim-light-effects.md`.
 
 ### Screen Depth Gradient (Content Color, Opposite to Glass Reflection)
 
-CRT/display screens need TWO overlapping gradients to create depth:
+CRT screens need TWO overlapping gradients in OPPOSITE directions:
+1. **Glass reflection** (top-left → bottom-right): warm `rgba(255,245,235,0.08)` — ambient light on glass
+2. **Content depth gradient** (right → left): TEXT COLOR at low opacity — phosphor/LED emission from within
 
-1. **Glass reflection** (top-left → bottom-right): warm white tint `rgba(255,245,235,0.08)` — simulates ambient light on the glass surface
-2. **Content depth gradient** (bottom-right → top-left, or right → left): uses the TEXT COLOR at very low opacity — simulates the screen content illuminating the display cavity from within
-
-These two gradients go in OPPOSITE directions. The glass reflection comes from outside (ambient light hitting the surface), while the content gradient comes from inside (the phosphor/LED emitting light into the cavity).
-
-```javascript
-// Display shows GREEN text → add green depth gradient from right-to-left
-const SCREEN_OVERLAYS = {
-  // Glass reflection (from outside, top-left)
-  glassReflection: {
-    background: "linear-gradient(125deg, rgba(255,245,235,0.08) 0%, transparent 50%)",
-    pointerEvents: "none",
-  },
-  // Content depth gradient (from inside, opposite direction: right-to-left)
-  contentDepth: {
-    background: "linear-gradient(270deg, rgba(60,220,120,0.06) 0%, transparent 60%)",
-    pointerEvents: "none",
-  },
-};
-
-// AMBER text → amber depth gradient right-to-left
-contentDepth: { background: "linear-gradient(270deg, rgba(255,180,60,0.05) 0%, transparent 60%)" }
-
-// RED text → red depth gradient right-to-left
-contentDepth: { background: "linear-gradient(270deg, rgba(220,60,60,0.05) 0%, transparent 60%)" }
-```
-
-Stack both as `::before`/`::after` or as absolute-positioned overlay divs. The content depth gradient adds the feeling that the text is physically INSIDE the screen emitting light, not printed on a flat surface.
-
-**This applies to**: CRT screens, display wells, input recesses, gauge pits, LED holes — ANY sunken surface.
+For code examples: `references/16-benchmark-lessons.md` §16.17.
 
 ### Rim Light Effects
 
@@ -991,7 +876,7 @@ Stack both as `::before`/`::after` or as absolute-positioned overlay divs. The c
 
 ---
 
-## Reference Files (16 references + 13 HTML assets)
+## Reference Files (17 references + 21 HTML assets)
 
 **ALWAYS start with `00-golden-examples.md`** — it has the Lookup Table to find component patterns.
 
@@ -1013,6 +898,7 @@ Stack both as `::before`/`::after` or as absolute-positioned overlay divs. The c
 | `13-3d-depth-techniques.md`                        | **3D glossary**, shadow depth, perspective/transforms, button press, flip card, isometric, emboss, glass dome, parallax, @property animations | ~880     | Read or search  |
 | `14-metal-recess-wells.md`                         | **Metal recesses/wells** — 4-zone anatomy, 6/9/12-layer inset stacks, gorges, punched holes, LCD wells, color bleed                           | ~360     | Read or search  |
 | `15-detailed-chassis.md`                           | **Detailed chassis** — 6-zone anatomy, bezel frame, brushed texture, hex perf, panel joints, torx screws, stamped labels                      | ~570     | Read or search  |
+| `16-benchmark-lessons.md`                          | **Benchmark failures** — 17 lessons from testing: display wells, color bleed, rim light, device sizing, emboss opacity                        | ~460     | Read or search  |
 
 ### HTML Assets — Quick Lookup
 
@@ -1031,6 +917,14 @@ Stack both as `::before`/`::after` or as absolute-positioned overlay divs. The c
 | Horizontal bar meter    | `horizontal-thermometer.html`       | `thermometer`  | Glass bulb, recessed tube, color-reactive fill      |
 | Deep CRT (31 layers)    | `codepen-deep-screen.html`          | `deep-screen`  | Ultra shadow stack gold standard                    |
 | Full page (15+ buttons) | `agile-tech-skeuomorphic-site.html` | `site`         | Multiple button tiers, full layout                  |
+| Rimlight toggle switch  | `rimlight-toggle-switch.html`       | `rimlight`     | Halo glow behind handle, grip dots, cubic-bezier    |
+| Color-mix buttons       | `color-mix-buttons.html`            | `color-mix`    | CSS color-mix(), 3-layer pseudo, LED, slider        |
+| Rocker 3D switch        | `rocker-3d-switch.html`             | `rocker`       | perspective + rotateY, dual shadow, dark theme      |
+| Tile up/down/button     | `tile-buttons-divs.html`            | `tiles`        | Neumorphic dual-shadow, up/down/pressed patterns    |
+| Neumorphic loader       | `neumorphic-loading-circle.html`    | `loading`      | Conic-gradient progress, counter-spin text          |
+| Progress loader (light) | `neumorphic-progress-loader.html`   | `progress`     | Triple-ring fill+glow+well, --progress CSS var      |
+| Pressed buttons (light) | `neumorphic-pressed-buttons.html`   | `pressed`      | Light neumorphism, 4-dir shadows, focus pulse       |
+| Fingerprint SVG button  | `fingerprint-button.html`           | `fingerprint`  | SVG stroke-dashoffset draw-on, dual layer, dome     |
 
 All files in `assets/`. Detailed breakdowns: `references/12-production-components.md`
 

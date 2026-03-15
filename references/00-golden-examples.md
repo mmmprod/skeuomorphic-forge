@@ -447,6 +447,12 @@ Find the component type below. Read the listed reference files BEFORE writing co
 | Rocker switch              | —         | `02` + `01`                                          |
 | Engraved glow button       | 14.38     | `04` (search "14.38")                                |
 | Circuit relay button       | 14.53     | `04` (search "14.53")                                |
+| Rimlight toggle switch     | —         | `assets/rimlight-toggle-switch.html`                 |
+| Color-mix buttons (multi)  | —         | `assets/color-mix-buttons.html`                      |
+| Rocker 3D switch           | —         | `assets/rocker-3d-switch.html`                       |
+| Tile up/down/button        | —         | `assets/tile-buttons-divs.html`                      |
+| Neumorphic pressed (light) | —         | `assets/neumorphic-pressed-buttons.html`             |
+| Fingerprint SVG button     | —         | `assets/fingerprint-button.html`                     |
 
 ### Cards & Panels
 
@@ -474,6 +480,8 @@ Find the component type below. Read the listed reference files BEFORE writing co
 | Nixie tube         | 14.14     | `04` (search "14.14")                                     |
 | VFD readout        | —         | `11` (search "CRT") + `01`                                |
 | LED indicator      | 29        | `11-retro-industrial-patterns.md`                         |
+| Neumorphic loader  | —         | `assets/neumorphic-loading-circle.html`                   |
+| Progress loader    | —         | `assets/neumorphic-progress-loader.html`                  |
 | Bargraph meter     | —         | `03` + `01`                                               |
 | Mechanical counter | 33        | `11-retro-industrial-patterns.md`                         |
 

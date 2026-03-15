@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skeuomorphic Forge Search — Find patterns across 13 reference files + 13 HTML assets.
+Skeuomorphic Forge Search — Find patterns across 17 reference files + 21 HTML assets.
 
 Usage:
   python3 search.py "button"                    # Search all references
@@ -39,6 +39,7 @@ FILE_MAP = {
     "13": "13-3d-depth-techniques.md",
     "14": "14-metal-recess-wells.md",
     "15": "15-detailed-chassis.md",
+    "16": "16-benchmark-lessons.md",
 }
 
 # HTML assets indexed separately — resolved from ASSETS_DIR
@@ -56,6 +57,14 @@ HTML_MAP = {
     "phosphor": "deep-screen-phosphor.html",
     "folding": "folding-header.html",
     "thermometer": "horizontal-thermometer.html",
+    "rimlight": "rimlight-toggle-switch.html",
+    "color-mix": "color-mix-buttons.html",
+    "rocker": "rocker-3d-switch.html",
+    "tiles": "tile-buttons-divs.html",
+    "loading": "neumorphic-loading-circle.html",
+    "progress": "neumorphic-progress-loader.html",
+    "pressed": "neumorphic-pressed-buttons.html",
+    "fingerprint": "fingerprint-button.html",
 }
 
 
