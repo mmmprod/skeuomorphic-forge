@@ -447,12 +447,6 @@ Find the component type below. Read the listed reference files BEFORE writing co
 | Rocker switch              | —         | `02` + `01`                                          |
 | Engraved glow button       | 14.38     | `04` (search "14.38")                                |
 | Circuit relay button       | 14.53     | `04` (search "14.53")                                |
-| Rimlight toggle switch     | —         | `assets/rimlight-toggle-switch.html`                 |
-| Color-mix buttons (multi)  | —         | `assets/color-mix-buttons.html`                      |
-| Rocker 3D switch           | —         | `assets/rocker-3d-switch.html`                       |
-| Tile up/down/button        | —         | `assets/tile-buttons-divs.html`                      |
-| Neumorphic pressed (light) | —         | `assets/neumorphic-pressed-buttons.html`             |
-| Fingerprint SVG button     | —         | `assets/fingerprint-button.html`                     |
 
 ### Cards & Panels
 
@@ -480,8 +474,6 @@ Find the component type below. Read the listed reference files BEFORE writing co
 | Nixie tube         | 14.14     | `04` (search "14.14")                                     |
 | VFD readout        | —         | `11` (search "CRT") + `01`                                |
 | LED indicator      | 29        | `11-retro-industrial-patterns.md`                         |
-| Neumorphic loader  | —         | `assets/neumorphic-loading-circle.html`                   |
-| Progress loader    | —         | `assets/neumorphic-progress-loader.html`                  |
 | Bargraph meter     | —         | `03` + `01`                                               |
 | Mechanical counter | 33        | `11-retro-industrial-patterns.md`                         |
 
@@ -560,3 +552,38 @@ Find the component type below. Read the listed reference files BEFORE writing co
 ```bash
 grep -ri "keyword" references/
 ```
+
+---
+
+## 10. Anti-Patterns (Do / Don't)
+
+| BAD                                             | WHY                                                                | GOOD                                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| 2-3 layer box-shadow                            | = flat design, no physical depth                                   | 5-15 layers, graduated blur                                              |
+| Screws on a flat surface                        | Screws without depth = decorative contradiction                    | Build depth FIRST, add screws on top                                     |
+| Screws on glass/screen                          | Physically impossible — screws fasten metal, not glass             | Screws on METAL chassis/bezel only, never on display surface             |
+| Low-quality flat-circle screws                  | Single inset shadow ≠ machined screw, looks fake                   | Radial gradient sphere + 5-layer shadow + torx slot (see section 4)      |
+| Cards resizing with content                     | Physical device (CRT/gauge) has fixed dimensions                   | Explicit width+height on device cards, content fills fixed frame         |
+| Recess without inner rim light                  | Flat dark rectangle instead of machined cavity                     | 1px warm border at recess edge, top brighter than bottom                 |
+| Shallow screen depth (1-3 inset layers)         | Screen looks like a dark div, no sense of physical cavity          | CRT/display recess needs 12+ inset layers + inner rim light             |
+| Rim light with glow/blur                        | A reflection is sharp, not diffuse — glow = neon, not machined lip | Clean 1px border only, NO box-shadow bloom around it                     |
+| No color bleed from screen content              | Recess looks disconnected from its display content                 | Inner rim picks up display color (amber text -> amber rim at 0.06-0.10)  |
+| Embossed text too faint (opacity < 0.25)        | Invisible silkscreen/stamped labels, defeats the purpose           | Embossed text min 0.35 opacity (tertiary), 0.5 (secondary)              |
+| Button/disabled state different size than active | Physical device doesn't shrink when turned off                     | Same explicit width+height for all states of same component              |
+| Decorative rim light without physical reason     | Random glowing line on a button top — why is it there?             | Every light effect needs a physical source (LED slot, edge catch, etc.)  |
+| Pure white `rgba(255,255,255,X)` at X>0.10      | Looks blafard/clinical, wrong light temperature on industrial metal | `rgba(255,240,220,X)` or `rgba(255,245,235,X)` — always warm above 0.10 |
+| Same box-shadow for rest/hover/active           | No physical feedback, button feels dead                            | Different stacks per state (Step 6)                                      |
+| `filter: blur()` in animation                   | Performance killer, causes repaint                                 | `opacity` + `transform` only                                             |
+| Multiple light directions                       | Physically impossible, breaks realism                              | Single source 135deg everywhere                                          |
+| Inventing a shadow stack                        | Inconsistent, likely too shallow                                   | Copy-adapt from golden-examples                                          |
+| Hardware BEFORE depth                           | Cosmetic, not structural                                           | Assembly order: depth layers first                                       |
+| Light mixed with shadow in one confused stack   | Muddy, unrealistic surfaces                                        | Dark for depth, warm for specular — separate                             |
+| `rgba(255,255,255,0.5)` edge catch              | Glowing white line, not realistic                                  | `rgba(255,255,255,0.08)` max for edges                                   |
+| Colored drop shadows `rgba(140,80,255,0.2)`     | Shadows are absence of light — always black in reality             | `rgba(0,0,0,...)` for ALL drop shadows. Color only in `inset` highlights |
+| Body text < 13px / titles < 14px                | Unreadable on most screens, looks like fine print                  | Body >= 13px, titles >= 14px, labels >= 11px (see Step 6b)               |
+| Container and card same brightness (#18 vs #1c) | Everything melts together, no visual hierarchy                     | Container #08-#10, card #1c-#28, minimum #12 hex delta                   |
+| Always amber-on-dark industrial                 | Monotonous, every page looks identical                             | Propose 2-3 themes from the 6 palettes (see Step 6c)                     |
+| Styling without reading the page first          | Random choices that clash with existing patterns                   | STEP 0.5: scan page, extract palette, match hierarchy                    |
+| Choosing button style without asking            | Wrong tier: CTA where secondary needed, ghost where primary needed | Use Button Decision Matrix, ask if ambiguous                             |
+| Adding a 3rd accent color silently              | Visual chaos, page loses coherence                                 | Max 2 accents per page. Ask before introducing a new one                 |
+| Ignoring existing sibling components            | New card looks nothing like the 5 existing cards                   | Same role = same style. Match siblings first                             |

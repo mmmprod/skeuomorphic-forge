@@ -1,52 +1,11 @@
 ---
 name: skeuomorphic-forge
-description: "Build physically-realistic skeuomorphic UI with Tailwind CSS. Covers buttons, panels, gauges, knobs, CRT/LED displays, glass/metal effects, particle systems, loaders, progress indicators, and industrial hardware. Provides shadow stacks, material textures, lighting rules, and construction blueprints. Triggers on: skeuomorphic, realistic depth, industrial UI, 3D button, gauge, meter, analog, tactile, material texture, retro-industrial, aerospace panel, DSP cockpit, neumorphic, loading screen. Do NOT trigger for flat/minimal UI or standard Material/Shadcn components."
+description: "Build physically-realistic skeuomorphic UI with Tailwind CSS. Covers buttons, panels, gauges, knobs, CRT/LED displays, glass/metal effects, particle systems, and industrial hardware. Provides shadow stacks, material textures, lighting rules, and construction blueprints. Triggers on: skeuomorphic, realistic depth, industrial UI, 3D button, gauge, meter, analog, tactile, material texture, retro-industrial, aerospace panel, DSP cockpit. Do NOT trigger for flat/minimal UI or standard Material/Shadcn components."
 ---
 
 # Skeuomorphic Forge
 
 Build physically-realistic UI components using Tailwind CSS + inline styles. Every component MUST look like a real physical object — machined metal, CRT glass, brushed aluminum — not a flat div with a drop shadow.
-
----
-
-## PROJECT INTEGRATION — Living References in the Codebase
-
-**Before building any new component, consult the Phase 0 industrial library** at `components/industrial/`. These 9 extracted components are the gold standard for this project — production-proven, style-consistent, and battle-tested.
-
-| Component               | Physical Object                                           | Key Techniques                                                                       |
-| ----------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| **SteelMountPlate**     | Machined aluminum mounting bracket with 4 torx screws     | 5-layer boxShadow, radial gradient screws, repeating-linear-gradient brushed texture |
-| **PlasmaProgressBar**   | Gas discharge fill indicator with glass knob              | SVG feTurbulence animation, 4-stop dynamic color, backdrop-filter glass knob         |
-| **SkeuomorphicSwitch**  | Aluminum toggle with amber trail glow + brushed knob      | 8-layer conic gradient housing, 8 trail bloom layers, 6+ inset gorge shadows        |
-| **SkeuomorphicStatCard**| 3-ring bezel CRT-like readout with color-coded digits     | 8+ inset shadows per ring, 2 specular sweeps, scanline overlay                      |
-| **DiagnosticCard**      | Severity-variant alert card (info/warning/critical)       | CSS class contract in `electrical-soviet.css`                                        |
-| **SkeuomorphicCounter** | Mechanical rolling counter with 3-ring bezel + 4 screws   | 10-layer boxShadow, 3-ring assembly, torx screws, glass overlay, scanlines          |
-| **IndustrialInput**     | Number input field with glitch/hologram FX                | CSS class contract (`.holo-input`, `.glitch-input-wrapper`)                          |
-| **StatusDisplay**       | CRT-style status readout with bezel + scanlines + glass   | Scanline repeating-linear-gradient, 2-layer glass reflection, edge specular          |
-| **IndustrialSelect**    | Dropdown select with glitch styling                       | CSS class contract (`.holo-input.holo-select`)                                       |
-
-**Usage rule**: When building a component similar to one above, READ the existing component first and match its patterns. Import from `@/components/industrial/` (barrel `index.ts`) when possible.
-
-### CSS INLINE RULE (PROJECT-SPECIFIC — CRITICAL)
-
-In this project, **Prettier/format-on-save reformats CSS files** (including `neo-components.css`). Any visual override written in CSS classes gets reverted on save or build.
-
-**Solution**: Apply ALL visual overrides via **inline `style={{}}`** in TSX components. CSS classes serve as structural base only (layout, display, transitions). This is documented in `.cursor/rules/10-linter-reverts-design-changes.mdc`.
-
-```tsx
-// CORRECT — visual overrides inline, Prettier cannot touch them
-<div
-  className="neo-card" // structural only
-  style={{
-    background: "linear-gradient(145deg, #1e1e1e 0%, #121212 100%)",
-    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.3)`,
-    borderTop: "1px solid rgba(255,255,255,0.09)",
-  }}
->
-
-// WRONG — visual overrides in CSS class (Prettier will reformat/lose them)
-.my-custom-card { box-shadow: ...; background: ...; }
-```
 
 ---
 
@@ -126,85 +85,15 @@ Example scan output:
 
 ### Phase 2 — CLASSIFY the requested component
 
-Determine WHAT the component is and its ROLE on the page:
-
-#### Button Decision Matrix
-
-| Role                 | Visual weight                        | Shadow tier         | Gradient                              | Size                                  | When to use                               |
-| -------------------- | ------------------------------------ | ------------------- | ------------------------------------- | ------------------------------------- | ----------------------------------------- |
-| **CTA / Hero**       | Maximum — eye-catching, unique color | Advanced (8+)       | Bold themed gradient + shimmer/LED    | Large (48-56px height, 16px+ padding) | 1 per page max. Primary conversion action |
-| **Primary action**   | High — solid, visible                | Standard (5+)       | Surface gradient matching page accent | Medium (40-44px height)               | Main actions: Save, Submit, Confirm       |
-| **Secondary action** | Medium — understated solid           | Standard (5)        | Subtle surface gradient               | Medium (36-40px)                      | Alternative actions: Cancel, Back, Edit   |
-| **Tertiary / Ghost** | Low — border only, no fill           | Minimal (2-3 inset) | None — transparent with border        | Small-Medium (32-40px)                | Minor actions: filters, toggles, options  |
-| **Destructive**      | High — danger color                  | Standard (5+)       | Red gradient `#4a1010 → #2a0808`      | Medium (40-44px)                      | Delete, Remove, Reset                     |
-| **Navigation**       | Low — text-like                      | None or minimal     | None                                  | Inline                                | Links, breadcrumbs, pagination            |
-
-#### Container Decision Matrix
-
-| Role                  | Background                        | Shadow type              | Borders                                    | When to use                         |
-| --------------------- | --------------------------------- | ------------------------ | ------------------------------------------ | ----------------------------------- |
-| **Page section well** | `#08-#0e` (darkest)               | Inset 4-6 layers         | Subtle top border `rgba(255,255,255,0.04)` | Grouping related content            |
-| **Card (floating)**   | `#1c-#28` (lighter than well)     | Drop shadow Standard 5+  | Top/left bevel, bottom/right dark          | Individual items inside wells       |
-| **Nested card**       | `#14-#1c` (between well and card) | Drop shadow 3-5 layers   | Subtle border                              | Sub-items inside cards              |
-| **Modal / overlay**   | `#1a-#22`                         | Hero 11+ (max drama)     | Strong bevel all sides                     | Overlays, dialogs, important panels |
-| **Header / toolbar**  | Match page bg or slightly lighter | Standard 5 bottom shadow | Bottom border only                         | Navigation, controls                |
-
-#### PHYSICAL SIZE RULE — Cards as Hardware Panels
-
-A skeuomorphic card represents a physical device (screen, gauge, instrument panel). Physical devices have FIXED dimensions — a CRT screen doesn't shrink when it shows less text.
-
-**When rendering multiple instances of the same component** (e.g., 3 status cards with different states), ALL instances MUST have identical dimensions. Use explicit `width` + `height` (or `minWidth` + `minHeight`) in the container style.
-
-```tsx
-// CORRECT — fixed dimensions, content fills the space
-<div style={{ width: 320, height: 280, overflow: "hidden" }}>
-  {/* content adapts inside fixed frame */}
-</div>
-
-// WRONG — card shrinks/grows with content
-<div style={{ padding: 16 }}>
-  {/* variable height = not a physical device */}
-</div>
-```
-
-**When rendering multiple variants** (e.g., 3 status cards: connected/disconnected/connecting), determine the dimensions from the variant with the MOST content. All other variants use the same dimensions — empty space stays empty, the chassis doesn't shrink.
-
-**Disabled/inactive states** must also have the SAME dimensions as active states. A physical button doesn't get smaller when it's off.
-
-**Content centering rule**: The main content (input, readout, display) must be visually CENTERED in the chassis. Labels and silkscreen marks are secondary — they don't push the primary content to the bottom or side. Use `display: flex; align-items: center; justify-content: center` on the chassis, with labels positioned absolutely or in thin header/footer zones. A frequency input with "3000 Hz" shoved to the bottom of a tall panel looks wrong — center it.
-
-**When to apply**: any card/panel that represents a physical device, any button with active/disabled states. Not applicable to layout containers or flowing content.
-
-#### Special Elements
-
-| Type            | Shadow tier          | Reference file          | Notes                            |
-| --------------- | -------------------- | ----------------------- | -------------------------------- |
-| Gauge / meter   | Advanced 8+          | `01-shadows-materials`  | Circular gradient, rim light     |
-| CRT display     | Hero 11+ or Ultra 31 | `11-retro-industrial`   | Phosphor glow, scanlines         |
-| Toggle / switch | Standard 5           | `02-hardware-animation` | Track recess + thumb raised      |
-| Knob / dial     | Advanced 8+          | `08-metal-effects`      | Conic gradient, pointer          |
-| LED indicator   | Standard 5           | `11-retro-industrial`   | Radial gradient, pulse animation |
+**Read `references/17-context-scan-matrices.md`** for the full decision matrices:
+- **Button Decision Matrix** — 6 tiers from CTA/Hero to Navigation
+- **Container Decision Matrix** — 5 roles from Page well to Header
+- **Physical Size Rule** — device cards have FIXED dimensions
+- **Special Elements** — gauge, CRT, toggle, knob, LED shadow tiers
 
 ### Phase 3 — ASK before choosing (MANDATORY)
 
-**If the style choice is not obvious from context, ASK the user.** Present options based on the scan.
-
-**When to ask:**
-
-| Situation                                 | Question format                                                                                                                                                           |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| New button, no clear role                 | "This button could be: (A) Primary action [amber gradient], (B) CTA hero [themed, with effects], (C) Ghost/subtle. Which fits?"                                           |
-| New section, ambiguous hierarchy          | "This section should be: (A) A well/recess [dark, cards float inside], (B) A card panel [raised, lighter]. Which one?"                                                    |
-| Page has no established theme             | "No theme detected. I propose: (A) Warm industrial [amber], (B) Cool steel [blue-grey], (C) [other based on context]. Which direction?"                                   |
-| Multiple button styles already exist      | "The page already has [X] and [Y] button styles. This new button should: (A) Match the primary style, (B) Be a different tier [explain why], (C) Something new [propose]" |
-| Building something that will be prominent | "This [component] will be visually prominent. I suggest [specific style + reasoning]. OK, or do you prefer something else?"                                               |
-
-**When NOT to ask (just adapt):**
-
-- Page has a clear established theme → match it
-- Component role is unambiguous (e.g., "add a save button" → primary action, match existing accent)
-- User explicitly stated the style they want
-- It's a standard card inside an existing well → match sibling cards
+If the style choice is not obvious from context, ASK the user. See `references/17-context-scan-matrices.md` for the "When to ask" vs "When NOT to ask" decision table.
 
 ### Phase 3b — CONSISTENCY CHECK
 
@@ -367,42 +256,25 @@ box-shadow:
 /* LIGHT — surface curvature */
 background: linear-gradient(145deg, #1e1e1e 0%, #121212 100%);
 
-/* LIGHT — bevel edges (warm tint, not pure white) */
-border-top: 1px solid rgba(255, 250, 240, 0.08);
-border-left: 1px solid rgba(255, 250, 240, 0.04);
+/* LIGHT — bevel edges */
+border-top: 1px solid rgba(255, 255, 255, 0.08);
+border-left: 1px solid rgba(255, 255, 255, 0.04);
 border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 border-right: 1px solid rgba(0, 0, 0, 0.2);
 ```
 
 ### WARM light, not blafard white
 
-Real light sources are warm (tungsten, halogen, ambient workshop lighting). Pure white `rgba(255,255,255)` at any visible opacity looks clinical and wrong on industrial surfaces. This is the #1 systematic failure in benchmarks — agents default to pure white for glass overlays, specular hotspots, and rim lights even when told not to. The fix is simple: **swap the 255,255,255 for 255,240,220** (warm) or **255,245,235** (neutral-warm) whenever opacity > 0.10.
+**NEVER** use pure `rgba(255,255,255,...)` for specular highlights at opacity > 0.1.
 
-| Purpose             | Color                      | Max opacity | When                            |
-| ------------------- | -------------------------- | ----------- | ------------------------------- |
-| Edge catch (subtle) | `rgba(255,255,255,...)`    | **0.08**    | box-shadow inset, every surface |
-| Top bevel highlight | `rgba(255,250,240,...)`    | **0.12**    | border-top/left facing light    |
-| Specular hotspot    | `rgba(255,240,220,...)`    | 0.25        | `::before` on curved surfaces   |
-| Glass reflection    | `rgba(255,245,235,...)`    | 0.20        | `::before/::after` overlays     |
-| Rim light (pseudo)  | `rgba(255,240,220,0.20)`  | 0.20        | radial-gradient, top edge       |
-| Active glow         | `rgba(255,180,60,...)`     | 0.40        | Active/on states, LEDs          |
-| CRT/LED emission    | `hsl(35 100% 60%)`        | Full color  | Display elements                |
-
-**The rule**: if the opacity is above 0.10, the color MUST be warm (`r=255, g<=245, b<=235`), never pure `255,255,255`. Pure white is only acceptable at extremely low opacity (0.03-0.08) where the warmth is imperceptible.
-
-```javascript
-// WRONG — pure white glass overlay at visible opacity
-"::before": { background: "radial-gradient(..., rgba(255,255,255,0.25), ...)" }
-
-// CORRECT — warm-tinted glass overlay
-"::before": { background: "radial-gradient(..., rgba(255,240,220,0.20), ...)" }
-
-// WRONG — pure white rim light
-background: "radial-gradient(ellipse, rgba(255,255,255,0.25) 0%, transparent 70%)"
-
-// CORRECT — warm rim light
-background: "radial-gradient(ellipse, rgba(255,240,220,0.20) 0%, transparent 70%)"
-```
+| Purpose             | Color                                         | Opacity         | When                            |
+| ------------------- | --------------------------------------------- | --------------- | ------------------------------- |
+| Edge catch (subtle) | `rgba(255,255,255,...)`                       | 0.03-0.08       | Always, on every raised surface |
+| Top bevel highlight | `rgba(255,255,255,...)`                       | 0.08-0.15       | Top/left edges facing light     |
+| Specular hotspot    | `rgba(255,240,220,...)`                       | 0.15-0.30       | `::before` on curved surfaces   |
+| Active glow         | `rgba(255,180,60,...)`                        | 0.10-0.40       | Active/on states, LEDs          |
+| CRT/LED emission    | `hsl(35 100% 60%)`                            | Full color      | Display elements                |
+| Rim light (pseudo)  | `rgba(255,255,255,0.25)` center → transparent | radial-gradient | Top edge of raised panels       |
 
 ---
 
@@ -432,36 +304,6 @@ Backplate (deepest, largest shadow stack)
 ```
 
 **CRITICAL**: Hardware (screws, vents) goes AFTER the depth layers exist. Screws on a flat surface = contradiction. Build depth FIRST, then add hardware.
-
-### 3d. SCREWS — Placement rules and quality (BENCHMARK FAILURE — READ CAREFULLY)
-
-**Screws go on METAL only. Never on glass, screens, or display surfaces.** In real hardware, screws fasten metal panels together. A screw on a glass CRT face or screen bezel is physically impossible and looks absurd. If the component has both a metal chassis and a glass display, the screws go on the chassis/bezel frame — never on or over the glass.
-
-**Screw quality matters.** The existing Phase 0 components (`SteelMountPlate`, `SkeuomorphicCounter`) set the quality bar. Copy from them, not from memory. Each screw needs:
-
-```javascript
-// CORRECT — High-quality torx screw (from SteelMountPlate)
-// 1. Sphere body: radial gradient with specular hotspot at 32% 26% (consistent 135deg light)
-background: "radial-gradient(circle at 32% 26%, rgba(255,240,220,0.25) 0%, #3a3a3a 25%, #252525 60%, #1a1a1a 100%)"
-// 2. 7-layer shadow for REAL depth (screws sit ON the surface, they need pronounced shadows):
-boxShadow: `
-  inset 0 1px 0 rgba(255,240,220,0.08),
-  inset 0 -1px 2px rgba(0,0,0,0.7),
-  0 1px 1px rgba(0,0,0,0.6),
-  0 1px 3px rgba(0,0,0,0.5),
-  0 2px 4px rgba(0,0,0,0.4),
-  0 3px 6px rgba(0,0,0,0.25),
-  0 4px 8px rgba(0,0,0,0.15)
-`
-// 3. Torx/Phillips slot: inner div with cross shape or rotated lines, NOT just a border
-// 4. Size PROPORTIONAL to chassis: 10-12px on small panels, 12-16px on large panels
-```
-
-**Screw size rule**: screws must be proportional to the chassis they sit on. A 16px screw on a 200px-wide panel looks like a bolt on a watch. Rule of thumb: screw diameter = ~3-4% of the panel's shortest dimension. A 320px panel → 10-12px screws. A 500px panel → 14-16px screws.
-
-**FORBIDDEN**: Flat circle with a single inset shadow as "screw". Single-color dot. Screw on glass/screen area. Screw without shadow depth. Oversized screws (>20px or >5% of panel width).
-
-**Placement**: 4 corners of rectangular metal panels. All screws must have the SAME quality. Vary torx slot rotation angle per screw (45, 135, 225, 315deg) for realism.
 
 ---
 
@@ -501,9 +343,9 @@ boxShadow: `
 
 ```javascript
 boxShadow: `
-  inset 0 1px 0 rgba(255,240,220,0.25),
+  inset 0 1px 0 rgba(255,255,255,0.25),
   inset 0 -1px 0 rgba(0,0,0,0.8),
-  inset 1px 0 1px rgba(255,240,220,0.1),
+  inset 1px 0 1px rgba(255,255,255,0.1),
   inset -1px 0 1px rgba(0,0,0,0.5),
   0 2px 4px rgba(0,0,0,0.4),
   0 4px 8px rgba(0,0,0,0.3),
@@ -537,77 +379,35 @@ After shadows are in place, add light on TOP:
 
 ## STEP 6 — ADD INTERACTION STATES (Priority 5)
 
-EVERY interactive element needs ALL of these. Use React state + Tailwind classes + inline style overrides:
-
-```tsx
-// Define shadow stacks as constants (keeps JSX clean)
-const REST_SHADOW = `
-  inset 0 1px 0 rgba(255,255,255,0.05),
-  inset 0 -1px 0 rgba(0,0,0,0.3),
-  0 2px 4px rgba(0,0,0,0.4),
-  0 8px 16px rgba(0,0,0,0.3),
-  0 16px 32px rgba(0,0,0,0.2)
-`;
-const HOVER_SHADOW = `
-  inset 0 1px 0 rgba(255,255,255,0.10),
-  inset 0 -1px 0 rgba(0,0,0,0.3),
-  0 4px 6px rgba(0,0,0,0.45),
-  0 10px 20px rgba(0,0,0,0.35),
-  0 20px 40px rgba(0,0,0,0.25)
-`;
-const ACTIVE_SHADOW = `
-  inset 0 2px 4px rgba(0,0,0,0.5),
-  inset 0 1px 1px rgba(0,0,0,0.3),
-  0 1px 2px rgba(0,0,0,0.3)
-`;
-
-// In JSX — use Tailwind for base states, inline style for shadow stacks
-<button
-  className={cn(
-    "transition-all duration-150",
-    "hover:-translate-y-px",               // Hover — lift
-    "active:translate-y-px",               // Active — depress
-    "disabled:opacity-50 disabled:saturate-[0.3] disabled:pointer-events-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500",
-  )}
-  style={{
-    boxShadow: isActive ? ACTIVE_SHADOW : isHovered ? HOVER_SHADOW : REST_SHADOW,
-    background: "linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%)",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
-  }}
-  onMouseEnter={() => setIsHovered(true)}
-  onMouseLeave={() => { setIsHovered(false); setIsActive(false); }}
-  onMouseDown={() => setIsActive(true)}
-  onMouseUp={() => setIsActive(false)}
->
-```
-
-**Why React state for shadows?** Tailwind `hover:` cannot express multi-layer boxShadow changes. Use `onMouseEnter/Leave/Down/Up` to swap the full shadow stack via inline style. Tailwind handles `translate`, `opacity`, `outline`.
-
-### Input Focus Animations (BENCHMARK FAILURE — not just a cursor)
-
-When an input field gets focus, a plain blinking cursor is not enough for skeuomorphic design. The input recess should come ALIVE — like powering on a VFD/CRT display. Add light animation effects on focus:
+EVERY interactive element needs ALL of these:
 
 ```javascript
-// On focus, the recess well intensifies:
-const WELL_FOCUSED = {
-  // 1. Color bleed intensifies (inset shadow, NOT border — borders stay neutral warm or none)
+// Hover — lift + expand shadow
+':hover': {
+  transform: 'translateY(-1px)',
+  boxShadow: '/* same stack but blur +2px per layer, opacity +0.05 on highlights */'
+}
+// Active — depress into surface
+':active': {
+  transform: 'translateY(1px)',
   boxShadow: `
-    ${REST_INSET_SHADOWS},
-    inset 4px 0 10px rgba(255,180,60,0.08),  // amber bleed DOUBLED from 0.04 at rest
-    inset 0 0 12px rgba(255,180,60,0.04),     // NEW — warm ambient from display powering up
-    inset 0 0 24px rgba(255,180,60,0.02)      // NEW — wider ambient bloom
-  `,
-
-  // 2. Text glow intensifies
-  textShadow: "0 0 8px rgba(255,180,60,0.6), 0 0 16px rgba(255,180,60,0.3)",
-
-  // 3. Transition for smooth power-on feel
-  transition: "all 0.3s ease",
-};
+    inset 0 2px 4px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(0,0,0,0.3),
+    0 1px 2px rgba(0,0,0,0.3)
+  `
+}
+// Disabled — desaturate + reduce opacity
+':disabled': {
+  opacity: 0.5,
+  filter: 'saturate(0.3)',
+  pointerEvents: 'none'
+}
+// Focus — visible ring
+':focus-visible': {
+  outline: '2px solid hsl(35 100% 60%)',
+  outlineOffset: '2px'
+}
 ```
-
-This simulates the physical behavior of a VFD display brightening when activated. The entire recess responds to input, not just the text cursor. Apply similar logic to any interactive display element (not just inputs).
 
 ---
 
@@ -676,131 +476,19 @@ Example proposals:
 
 ## STEP 7 — VERIFY (Pre-Delivery Gate)
 
-This checklist is aligned with **CLAUDE.md §C Design Gate U1-U8**. A component that fails this gate MUST NOT be delivered.
+**Read and apply `references/18-verification-checklist.md`** — the full U0-U9 checklist aligned with CLAUDE.md Section C Design Gate.
 
-### U0 — Context Scan (BLOCKING — must be done FIRST)
+Key gates: U0 Context Scan (BLOCKING), U1 Shadow Depth (CRITICAL), U2 Light Source (CRITICAL), U3-U4 Construction + Hardware (HIGH), U5 Interaction States (HIGH), U6 Physical Purpose (HIGH), U7 Typography (HIGH), U8 Accessibility (MEDIUM), U9 Benchmark Lessons.
 
-- [ ] Page was READ before any styling began (Step 0.5 Phase 1)
-- [ ] Existing palette, button styles, and container hierarchy were identified
-- [ ] Component role was classified using Decision Matrix (Step 0.5 Phase 2)
-- [ ] User was ASKED before choosing style (if ambiguous) or choice was justified by existing siblings
-- [ ] Max 2 accent colors on the page — no 3rd accent introduced without approval
-- [ ] New component matches sibling components of same role
-- [ ] Phase 0 components in `components/industrial/` were consulted as reference
-- [ ] Visual overrides applied via inline `style={{}}`, NOT CSS classes (Prettier rule)
-
-### U1 — Shadow Depth (CRITICAL)
-
-- [ ] Shadow layer count: Standard >= 5, Advanced >= 8, Hero >= 11. COUNT them.
-- [ ] Shadow uses ONLY dark `rgba(0,0,0,...)` for ALL drop shadows (non-inset)
-- [ ] NO colored drop shadows: no purple, amber, blue `0 Xpx Ypx rgba(color)` underneath elements
-- [ ] Graduated blur progression: near shadows tight (2-4px), far shadows wide (16-32px)
-- [ ] Started from golden-example, reference pattern, or Phase 0 component — NOT invented
-
-### U2 — Light Source Consistency (CRITICAL)
-
-- [ ] Single light direction (135deg) consistent across ALL components on the page
-- [ ] Light and shadow are SEPARATE systems (not mixed in one confused stack)
-- [ ] No pure white above 0.10: every `rgba(255,255,255,X)` with X>0.10 must be swapped to `rgba(255,240,220,X)` or warmer
-- [ ] Edge catches at opacity 0.03-0.08 only. Glass/specular overlays max 0.20 with warm tint
-- [ ] Surface gradient present for curvature (`linear-gradient(145deg, ...)`)
-
-### U3 — 4-Layer Construction (HIGH)
-
-- [ ] Physical object named explicitly ("machined aluminum", "Bakelite switch")
-- [ ] 4-layer construction present: Chassis + Depth + Lighting + Detail
-- [ ] Assembly order respected: depth BEFORE hardware
-- [ ] Screws/rivets sit ON a surface with depth, not on flat div
-
-### U4 — Hardware Placement (HIGH)
-
-- [ ] Hardware placement realistic (screws at 4 corners if rectangle)
-- [ ] Hardware uses radial gradients for beveled sphere effect (see SteelMountPlate)
-- [ ] Torx/Phillips slots oriented consistently
-
-### U5 — Interaction States (HIGH)
-
-- [ ] hover, active, disabled, focus-visible all implemented
-- [ ] Hover lifts (`hover:-translate-y-px`) with expanded shadow via React state
-- [ ] Active depresses (`active:translate-y-px`) with compressed shadow
-- [ ] Shadow stack CHANGES between states (not same for all)
-
-### U6 — Physical Purpose (HIGH)
-
-- [ ] Every CSS effect maps to a physical phenomenon (shadow=depth, gradient=curvature, highlight=reflection)
-- [ ] No decorative-only effects — each layer represents a real physical property
-
-### U7 — Typography as Surface (HIGH)
-
-- [ ] Body text >= 13px, titles >= 14px, labels >= 12px, NOTHING below 10px
-- [ ] Primary text opacity >= 0.85, secondary >= 0.5
-- [ ] Labels use silkscreen (`text-shadow`) or engraved (clip + gradient) — NOT plain text
-- [ ] Typography is a SURFACE treatment, not floating text
-- [ ] Embossed/engraved text has enough contrast to be readable (min opacity 0.35 for tertiary, 0.5 for secondary)
-
-### U8 — Accessibility (MEDIUM)
-
-- [ ] WCAG contrast ratio OK for all text
-- [ ] `focus-visible` present on all interactive elements
-- [ ] Touch targets >= 44px
-- [ ] `prefers-reduced-motion` respected
-- [ ] `will-change` on animated elements
-- [ ] `pointer-events-none` on texture overlays
-- [ ] No `filter: blur()` in animations (use `opacity` + `transform` only)
-
-### U9 — Benchmark Lessons (see `references/16-benchmark-lessons.md`)
-
-- [ ] Display wells use inset shadows for depth, NOT borders (§16.13)
-- [ ] Display wells have borderRadius: 0 (sharp CRT corners) + overflow: hidden (§16.12)
-- [ ] All 5 display well overlays present: glass reflection, left-edge specular, content depth gradient, scanlines, color bleed (§16.17)
-- [ ] Device cards have fixed dimensions (same across all variants) (§16.6)
-- [ ] Component size proportional to content density (§16.11)
-- [ ] Screw spacing >= 8px from any content element (§16.14)
-- [ ] No unexplained light bars or glowing lines on chassis (§16.15)
-- [ ] Glass reflection overlay present and visible on all display wells (§16.16)
-- [ ] Color bleed = inset box-shadow in content color, NOT colored border (§16.1)
-- [ ] Emboss labels >= 0.50 primary, >= 0.45 secondary, >= 0.35 tertiary (§16.3)
-
-### Contrast Separation (CRITICAL — cross-cutting)
-
-- [ ] Container/well backgrounds are DARKER than card backgrounds (>= #12 hex delta)
-- [ ] Cards inside dark wells have reinforced top/left borders (opacity >= 0.09)
-- [ ] No two nested elements share the same brightness level
+A component that fails this gate MUST NOT be delivered.
 
 ---
 
 ## Anti-Patterns (Do / Don't)
 
-| BAD                                             | WHY                                                                | GOOD                                                                     |
-| ----------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| 2-3 layer box-shadow                            | = flat design, no physical depth                                   | 5-15 layers, graduated blur                                              |
-| Screws on a flat surface                        | Screws without depth = decorative contradiction                    | Build depth FIRST, add screws on top                                     |
-| Screws on glass/screen                          | Physically impossible — screws fasten metal, not glass             | Screws on METAL chassis/bezel only, never on display surface             |
-| Low-quality flat-circle screws                  | Single inset shadow ≠ machined screw, looks fake                   | Radial gradient sphere + 5-layer shadow + torx slot (see §3d)            |
-| Cards resizing with content                     | Physical device (CRT/gauge) has fixed dimensions                   | Explicit width+height on device cards, content fills fixed frame         |
-| Recess without inner rim light                  | Flat dark rectangle instead of machined cavity                     | 1px warm border at recess edge, top brighter than bottom (see §14 addendum) |
-| Shallow screen depth (1-3 inset layers)         | Screen looks like a dark div, no sense of physical cavity          | CRT/display recess needs 12+ inset layers + inner rim light             |
-| Rim light with glow/blur                        | A reflection is sharp, not diffuse — glow = neon, not machined lip | Clean 1px border only, NO box-shadow bloom around it                     |
-| No color bleed from screen content              | Recess looks disconnected from its display content                 | Inner rim picks up display color (amber text → amber rim at 0.06-0.10)   |
-| Embossed text too faint (opacity < 0.25)        | Invisible silkscreen/stamped labels, defeats the purpose           | Embossed text min 0.35 opacity (tertiary), 0.5 (secondary)              |
-| Button/disabled state different size than active | Physical device doesn't shrink when turned off                     | Same explicit width+height for all states of same component              |
-| Decorative rim light without physical reason     | Random glowing line on a button top — why is it there?             | Every light effect needs a physical source (LED slot, edge catch, etc.)  |
-| Pure white `rgba(255,255,255,X)` at X>0.10      | Looks blafard/clinical, wrong light temperature on industrial metal | `rgba(255,240,220,X)` or `rgba(255,245,235,X)` — always warm above 0.10 |
-| Same box-shadow for rest/hover/active           | No physical feedback, button feels dead                            | Different stacks per state (Step 6)                                      |
-| `filter: blur()` in animation                   | Performance killer, causes repaint                                 | `opacity` + `transform` only                                             |
-| Multiple light directions                       | Physically impossible, breaks realism                              | Single source 135deg everywhere                                          |
-| Inventing a shadow stack                        | Inconsistent, likely too shallow                                   | Copy-adapt from golden-examples                                          |
-| Hardware BEFORE depth                           | Cosmetic, not structural                                           | Assembly order: depth layers first                                       |
-| Light mixed with shadow in one confused stack   | Muddy, unrealistic surfaces                                        | Dark for depth, warm for specular — separate                             |
-| `rgba(255,255,255,0.5)` edge catch              | Glowing white line, not realistic                                  | `rgba(255,255,255,0.08)` max for edges                                   |
-| Colored drop shadows `rgba(140,80,255,0.2)`     | Shadows are absence of light — always black in reality             | `rgba(0,0,0,...)` for ALL drop shadows. Color only in `inset` highlights |
-| Body text < 13px / titles < 14px                | Unreadable on most screens, looks like fine print                  | Body >= 13px, titles >= 14px, labels >= 11px (see Step 6b)               |
-| Container and card same brightness (#18 vs #1c) | Everything melts together, no visual hierarchy                     | Container #08-#10, card #1c-#28, minimum #12 hex delta                   |
-| Always amber-on-dark industrial                 | Monotonous, every page looks identical                             | Propose 2-3 themes from the 6 palettes (see Step 6c)                     |
-| Styling without reading the page first          | Random choices that clash with existing patterns                   | STEP 0.5: scan page, extract palette, match hierarchy                    |
-| Choosing button style without asking            | Wrong tier: CTA where secondary needed, ghost where primary needed | Use Button Decision Matrix, ask if ambiguous                             |
-| Adding a 3rd accent color silently              | Visual chaos, page loses coherence                                 | Max 2 accents per page. Ask before introducing a new one                 |
-| Ignoring existing sibling components            | New card looks nothing like the 5 existing cards                   | Same role = same style. Match siblings first                             |
+**Full table in `references/00-golden-examples.md`** (section 10 — Anti-Patterns).
+
+Key rules: shadows BLACK only, min 5 layers, hardware AFTER depth, warm light (not pure white above 0.10), same dimensions for all states, copy shadow stacks from golden examples (never invent), max 2 accent colors per page.
 
 ---
 
@@ -821,29 +509,6 @@ This checklist is aligned with **CLAUDE.md §C Design Gate U1-U8**. A component 
 | LED hole                   | 4                    | radial `#1a1a1a → #000`      | §14.7     |
 
 **FORBIDDEN**: `inset 0 2px 4px rgba(0,0,0,0.3)` alone (1-3 layers). This is a CSS input field, not a metal recess. Every recess needs ALL 4 zones: top attack, lateral walls, bottom catch, outer lip.
-
-### Display Well Depth — Inset Shadows Only (NO borders)
-
-Display wells use inset box-shadows for depth, NOT borders. Borders make glass look like it sticks OUT instead of being recessed IN. Sharp corners (`borderRadius: 0`) + `overflow: hidden` for CRT look. Code examples in `references/14-metal-recess-wells.md` §14.5 and `references/16-benchmark-lessons.md` §16.12-§16.13.
-
-### Rim Light vs Color Bleed — TWO SEPARATE THINGS
-
-These are physically different phenomena, often confused. Must be implemented separately:
-
-1. **RIM LIGHT** (border) = ambient light catching machined metal edge. Color: **NEUTRAL WARM** `rgba(255,250,240,...)`. Same on every recess regardless of content. Top/left brighter (135deg light).
-2. **COLOR BLEED** (inset box-shadow) = screen content reflecting off recess walls. Color **MATCHES CONTENT** (green, amber, red). Position follows content location inside the display.
-
-**NEVER use colored borders for color bleed.** Borders = rim light = neutral warm. Color bleed = inset box-shadow = content color.
-
-For code examples and detailed implementation: `references/16-benchmark-lessons.md` §16.1 and `references/09-rim-light-effects.md`.
-
-### Screen Depth Gradient (Content Color, Opposite to Glass Reflection)
-
-CRT screens need TWO overlapping gradients in OPPOSITE directions:
-1. **Glass reflection** (top-left → bottom-right): warm `rgba(255,245,235,0.08)` — ambient light on glass
-2. **Content depth gradient** (right → left): TEXT COLOR at low opacity — phosphor/LED emission from within
-
-For code examples: `references/16-benchmark-lessons.md` §16.17.
 
 ### Rim Light Effects
 
@@ -876,7 +541,7 @@ For code examples: `references/16-benchmark-lessons.md` §16.17.
 
 ---
 
-## Reference Files (17 references + 21 HTML assets)
+## Reference Files (18 references + 13 HTML assets)
 
 **ALWAYS start with `00-golden-examples.md`** — it has the Lookup Table to find component patterns.
 
@@ -899,32 +564,26 @@ For code examples: `references/16-benchmark-lessons.md` §16.17.
 | `14-metal-recess-wells.md`                         | **Metal recesses/wells** — 4-zone anatomy, 6/9/12-layer inset stacks, gorges, punched holes, LCD wells, color bleed                           | ~360     | Read or search  |
 | `15-detailed-chassis.md`                           | **Detailed chassis** — 6-zone anatomy, bezel frame, brushed texture, hex perf, panel joints, torx screws, stamped labels                      | ~570     | Read or search  |
 | `16-benchmark-lessons.md`                          | **Benchmark failures** — 17 lessons from testing: display wells, color bleed, rim light, device sizing, emboss opacity                        | ~460     | Read or search  |
+| `17-context-scan-matrices.md`                      | **Decision matrices** — Button/container tiers, physical size rule, special elements, when-to-ask tables                                      | ~100     | Read full       |
+| `18-verification-checklist.md`                     | **Pre-delivery gate** — U0-U9 verification checklist aligned with CLAUDE.md Section C Design Gate                                             | ~100     | Read full       |
 
 ### HTML Assets — Quick Lookup
 
-| Need                    | File                                | Search key     | Key patterns                                        |
-| ----------------------- | ----------------------------------- | -------------- | --------------------------------------------------- |
-| Push button with LED    | `power-button.html`                 | `power-button` | 17-layer button, glow slot, Phillips screws         |
-| Dashboard / analytics   | `synthscore-analytics.html`         | `synthscore`   | Gradient bar, metallic border, tech brackets        |
-| VU meter / gauge        | `tube-compressor-vu.html`           | `vu-meter`     | 16-layer well, 5-layer glass, animated needle       |
-| Toggle switch           | `skeuomorphic-switch.html`          | `switch`       | Recessed track, grip handle, LED indicators         |
-| LCD numeric display     | `lcd-db-display.html`               | `lcd`          | Olive screen, scanlines, Digital-7 font             |
-| Rotary lever / knob     | `industrial-lever.html`             | `lever`        | 11-layer knob, SVG screws, CSS-only checkbox        |
-| Score gauge / radial    | `credit-score-gauge.html`           | `gauge`        | SVG arc, 16-layer chassis, brushed metal            |
-| Alert / warning panel   | `autochord-alert-panel.html`        | `alert`        | Dome icon, red glow, perforated backplate           |
-| CRT danger screen       | `deep-screen-phosphor.html`         | `phosphor`     | Red phosphor, 31-layer chassis hole, breathing anim |
-| Folding / accordion     | `folding-header.html`               | `folding`      | Collapsible, glowing icon, neomorphic well          |
-| Horizontal bar meter    | `horizontal-thermometer.html`       | `thermometer`  | Glass bulb, recessed tube, color-reactive fill      |
-| Deep CRT (31 layers)    | `codepen-deep-screen.html`          | `deep-screen`  | Ultra shadow stack gold standard                    |
-| Full page (15+ buttons) | `agile-tech-skeuomorphic-site.html` | `site`         | Multiple button tiers, full layout                  |
-| Rimlight toggle switch  | `rimlight-toggle-switch.html`       | `rimlight`     | Halo glow behind handle, grip dots, cubic-bezier    |
-| Color-mix buttons       | `color-mix-buttons.html`            | `color-mix`    | CSS color-mix(), 3-layer pseudo, LED, slider        |
-| Rocker 3D switch        | `rocker-3d-switch.html`             | `rocker`       | perspective + rotateY, dual shadow, dark theme      |
-| Tile up/down/button     | `tile-buttons-divs.html`            | `tiles`        | Neumorphic dual-shadow, up/down/pressed patterns    |
-| Neumorphic loader       | `neumorphic-loading-circle.html`    | `loading`      | Conic-gradient progress, counter-spin text          |
-| Progress loader (light) | `neumorphic-progress-loader.html`   | `progress`     | Triple-ring fill+glow+well, --progress CSS var      |
-| Pressed buttons (light) | `neumorphic-pressed-buttons.html`   | `pressed`      | Light neumorphism, 4-dir shadows, focus pulse       |
-| Fingerprint SVG button  | `fingerprint-button.html`           | `fingerprint`  | SVG stroke-dashoffset draw-on, dual layer, dome     |
+| Need                    | File                                | Search key     |
+| ----------------------- | ----------------------------------- | -------------- |
+| Push button with LED    | `power-button.html`                 | `power-button` |
+| Dashboard / analytics   | `synthscore-analytics.html`         | `synthscore`   |
+| VU meter / gauge        | `tube-compressor-vu.html`           | `vu-meter`     |
+| Toggle switch           | `skeuomorphic-switch.html`          | `switch`       |
+| LCD numeric display     | `lcd-db-display.html`               | `lcd`          |
+| Rotary lever / knob     | `industrial-lever.html`             | `lever`        |
+| Score gauge / radial    | `credit-score-gauge.html`           | `gauge`        |
+| Alert / warning panel   | `autochord-alert-panel.html`        | `alert`        |
+| CRT danger screen       | `deep-screen-phosphor.html`         | `phosphor`     |
+| Folding / accordion     | `folding-header.html`               | `folding`      |
+| Horizontal bar meter    | `horizontal-thermometer.html`       | `thermometer`  |
+| Deep CRT (31 layers)    | `codepen-deep-screen.html`          | `deep-screen`  |
+| Full page (15+ buttons) | `agile-tech-skeuomorphic-site.html` | `site`         |
 
 All files in `assets/`. Detailed breakdowns: `references/12-production-components.md`
 

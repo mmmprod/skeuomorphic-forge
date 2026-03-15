@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skeuomorphic Forge Search — Find patterns across 17 reference files + 21 HTML assets.
+Skeuomorphic Forge Search — Find patterns across 19 reference files + 21 HTML assets.
 
 Usage:
   python3 search.py "button"                    # Search all references
@@ -40,6 +40,8 @@ FILE_MAP = {
     "14": "14-metal-recess-wells.md",
     "15": "15-detailed-chassis.md",
     "16": "16-benchmark-lessons.md",
+    "17": "17-context-scan-matrices.md",
+    "18": "18-verification-checklist.md",
 }
 
 # HTML assets indexed separately — resolved from ASSETS_DIR
