@@ -41,14 +41,13 @@ Not flat divs with drop shadows. Real objects — machined metal, CRT glass, bru
 ## Install
 
 ```bash
-# As a Claude Code plugin
-claude /install-plugin github:mmmprod/skeuomorphic-forge
+# One-liner (recommended)
+claude skill add --from https://github.com/mmmprod/skeuomorphic-forge
 ```
 
 ```bash
-# Or clone into your project skills
-mkdir -p .claude/skills && cd .claude/skills
-git clone https://github.com/mmmprod/skeuomorphic-forge.git
+# Or clone manually into your project
+git clone https://github.com/mmmprod/skeuomorphic-forge.git .claude/skills/skeuomorphic-forge
 ```
 
 Auto-triggers on: `skeuomorphic`, `industrial UI`, `3D button`, `gauge`, `meter`, `realistic depth`, `retro-industrial`, `DSP cockpit`, `CRT display`, `glass effect`, `metal texture`.
@@ -72,31 +71,40 @@ Auto-triggers on: `skeuomorphic`, `industrial UI`, `3D button`, `gauge`, `meter`
 ```
 skeuomorphic-forge/
 |
-|-- SKILL.md                    <- The brain (386 lines of battle-tested rules)
+|-- SKILL.md                    <- The brain (600 lines of battle-tested rules)
 |
-|-- references/                 <- The knowledge (12 files, 18,830 lines)
-|   |-- 00-golden-examples.md       Production shadow stacks, complete components
-|   |-- 01-shadows-materials.md      16 material gradients (chrome, leather, wood...)
-|   |-- 02-hardware-animation.md     Screws, vents, rivets, 8 animations
-|   |-- 03-blueprints-palettes.md    14 component blueprints, 6 color palettes
-|   |-- 04-community-techniques.md   102 community patterns [8,671 lines!]
-|   |-- 05-physics-interaction.md    Light physics, sphere/cylinder/flat lighting
-|   |-- 06-aging-tokens.md           Patina, safety colors, design tokens
+|-- references/                 <- The knowledge (19 files)
+|   |-- 00-golden-examples.md       Shadow stacks, components, anti-patterns
+|   |-- 01..06                       Materials, hardware, blueprints, physics, tokens
 |   |-- 07-glass-effects.md          10 glass techniques (frosted, sphere, SVG warp)
 |   |-- 08-metal-effects.md          8 metal techniques (brushed, chrome, gold)
 |   |-- 09-rim-light-effects.md      5 rim light techniques, 4-layer system
 |   |-- 10-particle-effects.md       10 particle systems (CSS, Canvas, WebGL)
 |   |-- 11-retro-industrial.md       Bezel, CRT, LED, screw, counter [5,392 lines!]
+|   |-- 12-production-components.md  11 production patterns with breakdowns
+|   |-- 13-3d-depth-techniques.md    Perspective, transforms, emboss, parallax
+|   |-- 14-metal-recess-wells.md     Inset stacks, gorges, LCD wells
+|   |-- 15-detailed-chassis.md       6-zone chassis anatomy, hex perf, torx
+|   |-- 16-benchmark-lessons.md      17 lessons from 10 visual iterations
+|   |-- 17-context-scan-matrices.md  Button/container decision matrices
+|   |-- 18-verification-checklist.md U0-U9 delivery gate checklist
 |
-|-- assets/                     <- The gold standards (2 production HTML files)
-|   |-- agile-tech-site.html         8,000-line production skeuomorphic site
-|   |-- codepen-deep-screen.html     31-layer ultra shadow stack
+|-- assets/                     <- 21 HTML design examples (open in browser)
+|   |-- power-button.html            17-layer button, glow slot, screws
+|   |-- skeuomorphic-switch.html     Recessed track, grip handle, LEDs
+|   |-- industrial-lever.html        11-layer knob, SVG screws, CSS-only
+|   |-- rimlight-toggle-switch.html  Halo glow, grip dots, cubic-bezier
+|   |-- color-mix-buttons.html       CSS color-mix(), LED, slider variants
+|   |-- tile-buttons-divs.html       Neumorphic up/down/pressed patterns
+|   |-- fingerprint-button.html      SVG stroke animation, dome button
+|   |-- neumorphic-loading-circle.html  Conic-gradient progress ring
+|   |-- ... and 13 more (gauges, CRT, VU meter, dashboard, etc.)
 |
-|-- scripts/                    <- The tools
-    |-- search.py                    BM25 search engine across all 14 sources
+|-- scripts/
+    |-- search.py                    BM25 search across all 40 sources
 ```
 
-**Total: 27,583 lines** of copy-paste-ready patterns, shadow stacks, and production code.
+**19 reference files + 21 HTML examples + BM25 search engine.**
 
 ---
 
@@ -158,14 +166,14 @@ buttons, cards             knobs, meters               panels, chassis          
 Don't read 8,671 lines manually. Use BM25-powered search:
 
 ```bash
-python3 scripts/search.py "button shadow"              # Search all 14 sources
+python3 scripts/search.py "button shadow"              # Search all 40 sources
 python3 scripts/search.py "CRT display" -n 5           # Top 5 results
 python3 scripts/search.py "box-shadow" --file 04        # Search specific file
 python3 scripts/search.py "knob gradient" --code-only   # Only code blocks
 python3 scripts/search.py "rim light" --context 5       # Limited preview
 ```
 
-Indexes 2,400+ sections. Returns ranked results with file, line numbers, and matching content.
+Indexes 2,600+ sections across 19 references + 21 HTML assets. BM25-ranked results with file, line numbers, and matching content.
 
 ---
 
@@ -213,9 +221,9 @@ Indexes 2,400+ sections. Returns ranked results with file, line numbers, and mat
 ## Stats
 
 ```
-   References      12 files       18,830 lines
-   HTML Assets      2 files        8,495 lines
-   Search Engine    1 script       2,400+ indexed sections
+   References      19 files       decision matrices, checklists, patterns
+   HTML Assets     21 files       buttons, switches, loaders, gauges, CRT...
+   Search Engine    1 script       2,600+ indexed sections across 40 sources
    Shadow Tiers     4 levels       5 / 8 / 11 / 31 layers
    Materials       16 gradients    chrome, leather, wood, rubber...
    Glass Effects   10 techniques   frosted, dark, sphere, SVG warp
