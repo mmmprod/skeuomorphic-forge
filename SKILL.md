@@ -584,6 +584,14 @@ Key rules: shadows BLACK only, min 5 layers, hardware AFTER depth, warm light (n
 | Horizontal bar meter    | `horizontal-thermometer.html`       | `thermometer`  |
 | Deep CRT (31 layers)    | `codepen-deep-screen.html`          | `deep-screen`  |
 | Full page (15+ buttons) | `agile-tech-skeuomorphic-site.html` | `site`         |
+| Rimlight toggle switch  | `rimlight-toggle-switch.html`       | `rimlight`     |
+| Color-mix buttons       | `color-mix-buttons.html`            | `color-mix`    |
+| Rocker 3D switch        | `rocker-3d-switch.html`             | `rocker`       |
+| Tile up/down/button     | `tile-buttons-divs.html`            | `tiles`        |
+| Neumorphic loader       | `neumorphic-loading-circle.html`    | `loading`      |
+| Progress loader (light) | `neumorphic-progress-loader.html`   | `progress`     |
+| Pressed buttons (light) | `neumorphic-pressed-buttons.html`   | `pressed`      |
+| Fingerprint SVG button  | `fingerprint-button.html`           | `fingerprint`  |
 
 All files in `assets/`. Detailed breakdowns: `references/12-production-components.md`
 
