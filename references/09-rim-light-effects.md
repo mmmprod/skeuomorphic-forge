@@ -394,6 +394,8 @@ Both `::before` and `::after` use the same `radial-gradient` positioned at the l
 }
 ```
 
+**Note:** The 0.85 center intensity in Layer 1 is inside a `mask-composite` border — only a 1px ring is visible. The effective perceived brightness of the rim stays within the 0.20–0.25 range from §25.0. This is NOT an exception to the opacity rule.
+
 **Key differences from Layer 1:**
 
 - `inset: -1px` — overflows parent bounds, creating glow bleed

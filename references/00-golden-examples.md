@@ -10,7 +10,7 @@ All examples below are extracted from production code that works. COPY and ADAPT
 
 ### Standard (5+ layers) — Buttons, cards, toggles
 
-From `components/industrial/SteelMountPlate.tsx`:
+From production code (not shipped with this skill):
 
 ```javascript
 boxShadow: `
@@ -25,7 +25,7 @@ boxShadow: `
 
 ### Advanced (8-9 layers) — Knobs, dials, meters, switch rails
 
-From `components/industrial/SkeuomorphicSwitch.tsx` (gorge/channel effect):
+From production code (not shipped with this skill) (gorge/channel effect):
 
 ```javascript
 boxShadow: `
@@ -39,7 +39,7 @@ boxShadow: `
 /* Light goes on the KNOB that sits inside, not on the rail. */
 ```
 
-From `components/industrial/SkeuomorphicCounter.tsx` (display well — 9 layers):
+From production code (not shipped with this skill) (display well — 9 layers):
 
 ```javascript
 boxShadow: `
@@ -261,7 +261,7 @@ const bottomRimStyle: React.CSSProperties = {
 
 ## 4. SCREW HEAD (5 layers + radial gradient)
 
-From `components/industrial/SkeuomorphicCounter.tsx`:
+From production code (not shipped with this skill):
 
 ```javascript
 const screwStyle: React.CSSProperties = {

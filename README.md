@@ -80,7 +80,7 @@ skeuomorphic-forge/
 |   |-- 08-metal-effects.md          8 metal techniques (brushed, chrome, gold)
 |   |-- 09-rim-light-effects.md      5 rim light techniques, 4-layer system
 |   |-- 10-particle-effects.md       10 particle systems (CSS, Canvas, WebGL)
-|   |-- 11-retro-industrial.md       Bezel, CRT, LED, screw, counter [5,392 lines!]
+|   |-- 11-retro-industrial-patterns.md  Bezel, CRT, LED, screw, counter [5,489 lines!]
 |   |-- 12-production-components.md  11 production patterns with breakdowns
 |   |-- 13-3d-depth-techniques.md    Perspective, transforms, emboss, parallax
 |   |-- 14-metal-recess-wells.md     Inset stacks, gorges, LCD wells
@@ -132,7 +132,7 @@ buttons, cards             knobs, meters               panels, chassis          
 ```
  1. READ                    2. FIND                     3. BUILD                    4. VERIFY
  golden-examples.md         search.py "knob"            assembly order              pre-delivery gate
- (always first)             (BM25 across 14 files)      back -> front               6 checklists
+ (always first)             (BM25 across 40 files)      back -> front               6 checklists
                                                                                     by priority
    [00-golden]                $ python3 search.py        Backplate                    CRITICAL
        |                        "rim light" -n 5           +-- Panels                  |
@@ -163,7 +163,7 @@ buttons, cards             knobs, meters               panels, chassis          
 
 ## Search Engine
 
-Don't read 8,671 lines manually. Use BM25-powered search:
+Don't read 10,046 lines manually. Use BM25-powered search:
 
 ```bash
 python3 scripts/search.py "button shadow"              # Search all 40 sources

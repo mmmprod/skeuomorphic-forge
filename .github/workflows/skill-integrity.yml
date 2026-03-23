@@ -83,13 +83,16 @@ jobs:
               sys.exit(1)
           "
 
+      - name: Run unit tests
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
+
       - name: Run search engine smoke test
         run: |
           output=$(python3 scripts/search.py "button shadow" -n 2)
           echo "$output"
           section_count=$(echo "$output" | grep -o 'sections scanned:.* [0-9]*' | grep -o '[0-9]\+' | head -1)
-          if [ -z "$section_count" ] || [ "$section_count" -lt 2000 ]; then
-            echo "::error::Expected 2000+ sections, got '${section_count:-EMPTY}'"
+          if [ -z "$section_count" ] || [ "$section_count" -lt 1350 ]; then
+            echo "::error::Expected 1350+ sections, got '${section_count:-EMPTY}'"
             exit 1
           fi
           echo "Search engine OK: $section_count sections indexed"

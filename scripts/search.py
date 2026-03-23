@@ -82,10 +82,15 @@ def load_file_sections(filepath: Path) -> list[dict]:
     current_lines = []
     current_start = 1
 
+    in_fence = False
     for i, line in enumerate(lines, 1):
+        # Track fenced code blocks — never treat lines inside as headings
+        if line.startswith("```"):
+            in_fence = not in_fence
+
         # Detect headings (markdown ## or HTML comments <!-- SECTION -->)
         is_heading = False
-        if (
+        if not in_fence and (
             line.startswith("#")
             or re.match(r"^/\*\s*=+", line)
             or re.match(r"^\.\w+.*\{", line)
@@ -200,9 +205,16 @@ def search(
     # Determine which files to search
     all_keys = {**FILE_MAP, **HTML_MAP}
     if file_filter:
-        keys = [k for k in all_keys if file_filter.lower() in k.lower()]
+        filt = file_filter.lower()
+        # 1. Exact match first
+        keys = [k for k in all_keys if k.lower() == filt]
         if not keys:
-            return f"Error: No file matching '{file_filter}'. Available: {', '.join(all_keys.keys())}"
+            # 2. Prefix match
+            keys = [k for k in all_keys if k.lower().startswith(filt)]
+        if not keys:
+            return f"Error: No file matching '{file_filter}'. Available: {', '.join(sorted(all_keys.keys()))}"
+        if len(keys) > 1:
+            return f"Error: Ambiguous filter '{file_filter}' matches {len(keys)} files: {', '.join(sorted(keys))}. Use a more specific key."
     else:
         keys = list(all_keys.keys())
 

@@ -1,6 +1,6 @@
 # Verification Checklist — Pre-Delivery Gate
 
-Aligned with **CLAUDE.md Section C Design Gate U1-U8**. A component that fails this gate MUST NOT be delivered.
+Pre-delivery verification gate U0-U9. A component that fails this gate MUST NOT be delivered.
 
 ---
 
@@ -12,7 +12,7 @@ Aligned with **CLAUDE.md Section C Design Gate U1-U8**. A component that fails t
 - [ ] User was ASKED before choosing style (if ambiguous) or choice was justified by existing siblings
 - [ ] Max 2 accent colors on the page — no 3rd accent introduced without approval
 - [ ] New component matches sibling components of same role
-- [ ] Phase 0 components in `components/industrial/` were consulted as reference
+- [ ] Phase 0 golden examples in `references/00-golden-examples.md` were consulted as reference
 - [ ] Visual overrides applied via inline `style={{}}`, NOT CSS classes (Prettier rule)
 
 ---

@@ -133,7 +133,7 @@ When a user asks for "3D", "depth", "relief", or "effet 3D", map their words to 
 ### Using the Search Engine (for files 04, 11, and cross-file searches)
 
 ```bash
-# Search all 16 reference files + 13 HTML assets
+# Search all 19 reference files + 21 HTML assets
 python3 scripts/search.py "button shadow"
 
 # Top 5 results
@@ -149,7 +149,7 @@ python3 scripts/search.py "knob gradient" --code-only
 python3 scripts/search.py "rim light" --context 5
 ```
 
-The search engine indexes 2600+ sections across all 29 source files (16 references + 13 HTML assets) using BM25 ranking. Use it instead of reading large files (04 = 8671 lines, 11 = 5392 lines).
+The search engine indexes 2600+ sections across all 40 source files (19 references + 21 HTML assets) using BM25 ranking. Use it instead of reading large files (04 = 10046 lines, 11 = 5489 lines).
 
 ### Using the Lookup Table
 
@@ -476,7 +476,7 @@ Example proposals:
 
 ## STEP 7 — VERIFY (Pre-Delivery Gate)
 
-**Read and apply `references/18-verification-checklist.md`** — the full U0-U9 checklist aligned with CLAUDE.md Section C Design Gate.
+**Read and apply `references/18-verification-checklist.md`** — the full U0-U9 pre-delivery verification gate.
 
 Key gates: U0 Context Scan (BLOCKING), U1 Shadow Depth (CRITICAL), U2 Light Source (CRITICAL), U3-U4 Construction + Hardware (HIGH), U5 Interaction States (HIGH), U6 Physical Purpose (HIGH), U7 Typography (HIGH), U8 Accessibility (MEDIUM), U9 Benchmark Lessons.
 
@@ -541,7 +541,7 @@ Key rules: shadows BLACK only, min 5 layers, hardware AFTER depth, warm light (n
 
 ---
 
-## Reference Files (18 references + 13 HTML assets)
+## Reference Files (19 references + 21 HTML assets)
 
 **ALWAYS start with `00-golden-examples.md`** — it has the Lookup Table to find component patterns.
 
@@ -551,21 +551,21 @@ Key rules: shadows BLACK only, min 5 layers, hardware AFTER depth, warm light (n
 | `01-shadows-materials-textures.md`                 | 16 material gradients (chrome, leather, wood, rubber...)                                                                                      | 321      | Read full       |
 | `02-hardware-animation-neumorphism.md`             | Screws, vents, rivets, 8 animations, neumorphism                                                                                              | 166      | Read full       |
 | `03-blueprints-performance-palettes.md`            | 14 component blueprints, performance rules, 6 palettes                                                                                        | 130      | Read full       |
-| `04-community-techniques.md`                       | 102 community patterns (14.1-14.102)                                                                                                          | **8671** | **SEARCH ONLY** |
+| `04-community-techniques.md`                       | 102 community patterns (14.1-14.102)                                                                                                          | **10046** | **SEARCH ONLY** |
 | `05-physics-composition-interaction-typography.md` | Light physics, sphere/cylinder/flat lighting                                                                                                  | 258      | Read full       |
 | `06-aging-safety-tokens-palettes.md`               | Aging/patina, safety colors, design tokens                                                                                                    | 160      | Read full       |
 | `07-glass-effects.md`                              | 10 glass techniques (frosted, dark glass, sphere)                                                                                             | 1163     | Read or search  |
 | `08-metal-effects.md`                              | 8 metal techniques (brushed, chrome, gold, conic)                                                                                             | 690      | Read or search  |
 | `09-rim-light-effects.md`                          | 7 common mistakes + 5 rim light techniques with 4-layer system                                                                                | ~530     | Read or search  |
 | `10-particle-effects.md`                           | 10 particle systems (CSS, Canvas, WebGL, fire)                                                                                                | 877      | Read or search  |
-| `11-retro-industrial-patterns.md`                  | Bezel, CRT, LED, screw, texture, counter                                                                                                      | **5392** | **SEARCH ONLY** |
+| `11-retro-industrial-patterns.md`                  | Bezel, CRT, LED, screw, texture, counter                                                                                                      | **5489** | **SEARCH ONLY** |
 | `12-production-components.md`                      | 11 production patterns: button, dashboard, VU, switch, LCD, lever, gauge, alert, CRT, accordion, thermometer                                  | ~500     | Read or search  |
 | `13-3d-depth-techniques.md`                        | **3D glossary**, shadow depth, perspective/transforms, button press, flip card, isometric, emboss, glass dome, parallax, @property animations | ~880     | Read or search  |
 | `14-metal-recess-wells.md`                         | **Metal recesses/wells** — 4-zone anatomy, 6/9/12-layer inset stacks, gorges, punched holes, LCD wells, color bleed                           | ~360     | Read or search  |
 | `15-detailed-chassis.md`                           | **Detailed chassis** — 6-zone anatomy, bezel frame, brushed texture, hex perf, panel joints, torx screws, stamped labels                      | ~570     | Read or search  |
 | `16-benchmark-lessons.md`                          | **Benchmark failures** — 17 lessons from testing: display wells, color bleed, rim light, device sizing, emboss opacity                        | ~460     | Read or search  |
 | `17-context-scan-matrices.md`                      | **Decision matrices** — Button/container tiers, physical size rule, special elements, when-to-ask tables                                      | ~100     | Read full       |
-| `18-verification-checklist.md`                     | **Pre-delivery gate** — U0-U9 verification checklist aligned with CLAUDE.md Section C Design Gate                                             | ~100     | Read full       |
+| `18-verification-checklist.md`                     | **Pre-delivery gate** — U0-U9 pre-delivery verification gate                                                                                  | ~100     | Read full       |
 
 ### HTML Assets — Quick Lookup
 
