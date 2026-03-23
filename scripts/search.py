@@ -244,11 +244,23 @@ def search(
         output.append(f"**Filtered to:** {file_filter}")
 
     count = 0
+    iterations = 0
+    max_iterations = max_results * 10  # Safety bound: don't scan entire corpus
     for idx, score in ranked:
-        if score <= 0 or count >= max_results:
+        if score <= 0 or count >= max_results or iterations >= max_iterations:
             break
+        iterations += 1
 
         section = all_sections[idx]
+
+        # When code_only, skip sections that have no code blocks — backfill from next ranked result
+        if code_only:
+            blocks = extract_code_blocks(section["body"])
+            if not blocks:
+                continue
+        else:
+            blocks = []
+
         count += 1
 
         output.append(f"\n### Result {count} (score: {score:.2f})")
@@ -257,12 +269,8 @@ def search(
         )
 
         if code_only:
-            blocks = extract_code_blocks(section["body"])
-            if blocks:
-                for block in blocks[:3]:
-                    output.append(f"```\n{block.strip()}\n```")
-            else:
-                output.append("*(No code blocks in this section)*")
+            for block in blocks[:3]:
+                output.append(f"```\n{block.strip()}\n```")
         elif context_lines > 0:
             # Show limited preview
             body_lines = section["body"].split("\n")

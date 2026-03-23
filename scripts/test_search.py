@@ -60,19 +60,42 @@ class TestFileFilterExact(unittest.TestCase):
 
 
 class TestCodeOnlyReturnsCode(unittest.TestCase):
-    """--code-only must return actual code blocks, not 'No code blocks'."""
+    """--code-only must return actual code blocks, never 'No code blocks'."""
 
     def test_code_only_returns_code(self):
         """Searching 'rim light' with --code-only must find CSS with box-shadow."""
         result = search("rim light", code_only=True, max_results=5)
-        # After the fence fix, at least one result should contain actual code
         has_code = "box-shadow" in result or "background" in result or "rgba" in result
-        has_no_code_msg = "No code blocks" in result
-        # At least some results must have code, not all "No code blocks"
         self.assertTrue(
-            has_code or not has_no_code_msg,
+            has_code,
             f"Expected code blocks in results but got:\n{result[:500]}",
         )
+
+    def test_code_only_never_shows_no_code_message(self):
+        """Regression guard: --code-only must never output 'No code blocks'."""
+        result = search("rim light", code_only=True, max_results=5)
+        self.assertNotIn(
+            "No code blocks",
+            result,
+            f"code_only should skip sections without code, not display them:\n{result[:500]}",
+        )
+
+    def test_code_only_backfills_to_max_results(self):
+        """--code-only with max_results=5 must return 5 results if enough code sections exist."""
+        result = search("rim light", code_only=True, max_results=5)
+        result_count = result.count("### Result")
+        self.assertEqual(
+            result_count,
+            5,
+            f"Expected 5 backfilled results, got {result_count}:\n{result[:500]}",
+        )
+
+    def test_code_only_different_query(self):
+        """--code-only must work for queries beyond 'rim light'."""
+        result = search("button shadow", code_only=True, max_results=3)
+        self.assertNotIn("No code blocks", result)
+        has_code = "box-shadow" in result or "background" in result or "rgba" in result
+        self.assertTrue(has_code, f"Expected code in results:\n{result[:500]}")
 
 
 if __name__ == "__main__":
