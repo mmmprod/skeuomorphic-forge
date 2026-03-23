@@ -149,7 +149,7 @@ python3 scripts/search.py "knob gradient" --code-only
 python3 scripts/search.py "rim light" --context 5
 ```
 
-The search engine indexes 2600+ sections across all 40 source files (19 references + 21 HTML assets) using BM25 ranking. Use it instead of reading large files (04 = 10046 lines, 11 = 5489 lines).
+The search engine indexes all sections across 40 source files (19 references + 21 HTML assets) using BM25 ranking. Use it instead of reading large files (04 = 10046 lines, 11 = 5489 lines).
 
 ### Using the Lookup Table
 
@@ -600,7 +600,7 @@ All files in `assets/`. Detailed breakdowns: `references/12-production-component
 Use the BM25 search engine for efficient pattern discovery:
 
 ```bash
-# Cross-file search (all 29 sources)
+# Cross-file search (all 40 sources)
 python3 scripts/search.py "button shadow"
 
 # Targeted file search (for 04 or 11)
