@@ -2,7 +2,9 @@
 
 import unittest
 from pathlib import Path
-from search import load_file_sections, extract_code_blocks, search
+
+from search import load_file_sections
+from search import search
 
 
 class TestFenceProtection(unittest.TestCase):
@@ -28,7 +30,11 @@ class TestFenceProtection(unittest.TestCase):
         try:
             sections = load_file_sections(tmp)
             # Should be 1 section (the heading), not 2
-            self.assertEqual(len(sections), 1, f"Expected 1 section, got {len(sections)}: {[s['heading'] for s in sections]}")
+            self.assertEqual(
+                len(sections),
+                1,
+                f"Expected 1 section, got {len(sections)}: {[s['heading'] for s in sections]}",
+            )
             self.assertIn("box-shadow", sections[0]["body"])
         finally:
             tmp.unlink(missing_ok=True)
