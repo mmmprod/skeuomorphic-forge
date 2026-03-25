@@ -15,7 +15,7 @@ Tu generes du code React/JSX avec Tailwind CSS + inline styles (`style={{}}`). P
 
 Violer une seule de ces regles produit un composant visuellement casse.
 
-**C1 Ombres portees = NOIR UNIQUEMENT.** Tous les `box-shadow` non-inset utilisent exclusivement `rgba(0,0,0,...)`. Une ombre est l'absence de lumiere. Jamais d'ombre portee violette, ambree, bleue. Exception : les `inset` highlights avec rgba clair/colore sont OK (lumiere frappant les bords internes).
+**C1 Ombres portees = NOIR UNIQUEMENT.** Tous les `box-shadow` non-inset utilisent exclusivement `rgba(0,0,0,...)`. Une ombre est l'absence de lumiere. Jamais d'ombre portee violette, ambree, bleue. Exceptions : (a) les `inset` highlights avec rgba clair/colore sont OK (lumiere frappant les bords internes), (b) les glows d'emission/backlight a tres faible opacite (< 0.08) sont OK pour simuler la lumiere emise par un ecran/LED (ex: `0 0 60px rgba(255,176,0,0.06)`).
 
 **C2 Source lumineuse unique a 135deg**, coherente sur TOUS les composants de la page. Plusieurs directions = physiquement impossible.
 
@@ -125,7 +125,7 @@ boxShadow: `
 
 ### Ultra (31 couches) — deep CRT recess
 
-Structure : 7 micro-borders (crisp edge) + 5 vertical depth + 5 horizontal walls + 5 bottom depth + 4 corner occlusion + 5 external rim/base.
+Structure : 7 micro-borders (crisp edge) + 5 vertical depth + 3 horizontal left + 3 horizontal right + 5 bottom depth + 4 corner occlusion + 4 external rim/base = 31 total.
 
 ```javascript
 boxShadow: `
@@ -160,7 +160,7 @@ boxShadow: `
 | CTA/Hero | Advanced 8+ | Bold thematique + shimmer/LED | 48-56px height, 1 par page max |
 | Primary | Standard 5+ | Surface gradient accent | 40-44px |
 | Secondary | Standard 5 | Subtle surface gradient | 36-40px |
-| Tertiary/Ghost | Minimal 2-3 inset | Aucun, transparent + border | 32-40px |
+| Tertiary/Ghost | Minimal 2-3 inset (exception C6 — ghost = pas de relief physique) | Aucun, transparent + border | 32-40px |
 | Destructive | Standard 5+ | Red `#4a1010->#2a0808` | 40-44px |
 
 ### Conteneurs
@@ -252,9 +252,11 @@ Chaque recess necessite les 4 zones : top attack, murs lateraux, bottom catch, l
 
 ### Rim Light
 
-Shadow stack construit D'ABORD (5+ couches), PUIS rim light par-dessus. Bord superieur 2-4x plus lumineux que le bas. Au moins UN `::before` ou `::after` avec `radial-gradient` pour hotspot concentre. Pas d'opacite highlight > 0.25. `pointerEvents: "none"` sur les overlays.
+Shadow stack construit D'ABORD (5+ couches), PUIS rim light par-dessus. Bord superieur 2-4x plus lumineux que le bas. Au moins UN pseudo-element overlay (`<span>` absolu ou Tailwind `before:` / `after:`) avec `radial-gradient` pour hotspot concentre. Rim light opacity max 0.25 (specular hotspots et active glows peuvent aller plus haut — voir tableau Eclairage). `pointerEvents: "none"` sur les overlays.
 
 **INTERDIT** : `border: 1px solid rgba(255,255,255,0.1)` comme "rim light" (border uniforme = cadre photo). `box-shadow: 0 0 20px rgba(255,255,255,0.1)` seul (glow uniforme = neon).
+
+**Note pseudo-elements** : En JSX inline, `::before`/`::after` ne sont pas disponibles. Utiliser soit des classes Tailwind (`before:content-[''] before:absolute before:...`), soit un `<span aria-hidden="true" className="pointer-events-none absolute ..." />` comme overlay dedié.
 
 ### Chassis Metal / Panneaux
 
