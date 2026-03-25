@@ -461,3 +461,33 @@ Si modification d'une page existante : coherence, matcher le theme existant. Ne 
 Si creation d'un composant net-new sans theme etabli : proposer 2 options maximum depuis les 6 themes ci-dessus. L'utilisateur choisit.
 
 Ne jamais proposer de variete quand la page environnante etablit deja le role, la palette et la hierarchie.
+
+---
+
+## HTML ASSETS — Lookup rapide
+
+| Besoin | Fichier | Cle recherche |
+|---|---|---|
+| Push button avec LED | `power-button.html` | `power-button` |
+| Dashboard / analytics | `synthscore-analytics.html` | `synthscore` |
+| VU meter / gauge | `tube-compressor-vu.html` | `vu-meter` |
+| Toggle switch | `skeuomorphic-switch.html` | `switch` |
+| LCD numeric display | `lcd-db-display.html` | `lcd` |
+| Rotary lever / knob | `industrial-lever.html` | `lever` |
+| Score gauge / radial | `credit-score-gauge.html` | `gauge` |
+| Alert / warning panel | `autochord-alert-panel.html` | `alert` |
+| CRT danger screen | `deep-screen-phosphor.html` | `phosphor` |
+| Folding / accordion | `folding-header.html` | `folding` |
+| Horizontal bar meter | `horizontal-thermometer.html` | `thermometer` |
+| Deep CRT (31 layers) | `codepen-deep-screen.html` | `deep-screen` |
+| Full page (15+ buttons) | `agile-tech-skeuomorphic-site.html` | `site` |
+| Rimlight toggle switch | `rimlight-toggle-switch.html` | `rimlight` |
+| Color-mix buttons | `color-mix-buttons.html` | `color-mix` |
+| Rocker 3D switch | `rocker-3d-switch.html` | `rocker` |
+| Tile up/down/button | `tile-buttons-divs.html` | `tiles` |
+| Neumorphic loader | `neumorphic-loading-circle.html` | `loading` |
+| Progress loader (light) | `neumorphic-progress-loader.html` | `progress` |
+| Pressed buttons (light) | `neumorphic-pressed-buttons.html` | `pressed` |
+| Fingerprint SVG button | `fingerprint-button.html` | `fingerprint` |
+
+Tous les fichiers dans `assets/`.
