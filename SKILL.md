@@ -53,7 +53,7 @@ Un composant qui echoue un gate CRITICAL ne doit PAS etre livre.
 
 **U5 Interaction States (HIGH):** hover (lift + expand shadow), active (depress + compress), disabled (opacity 0.5 + desaturate), focus-visible (outline 2px). Le shadow stack CHANGE entre les etats.
 
-**U6 Typography (HIGH):** Body >= 13px, titres >= 14px, labels >= 12px, rien sous 10px. Texte primaire opacity >= 0.85, secondaire >= 0.5, tertiaire >= 0.35. Labels en silkscreen (text-shadow) ou grave (clip + gradient), pas en texte brut.
+**U6 Typography (HIGH):** Body >= 13px, titres >= 14px, labels >= 11px, rien sous 10px. Texte primaire opacity >= 0.85, secondaire >= 0.5, tertiaire >= 0.35. Labels en silkscreen (text-shadow) ou grave (clip + gradient), pas en texte brut.
 
 **U7 Accessibility (MEDIUM):** Contraste WCAG OK. `focus-visible` sur tous les interactifs. Touch targets >= 44px. `prefers-reduced-motion`. `pointer-events: none` sur les overlays de texture. Pas de `filter: blur()` dans les animations.
 
@@ -103,11 +103,11 @@ boxShadow: `
 `
 ```
 
-### Hero (13+ couches) — panneaux, chassis, faceplates
+### Hero (11+ couches) — panneaux, chassis, faceplates
 
 ```javascript
 boxShadow: `
-  inset 0 1px 0 rgba(255,255,255,0.25),    /* L: top bevel */
+  inset 0 1px 0 rgba(255,240,220,0.25),    /* L: top bevel (warm per C3) */
   inset 0 -1px 0 rgba(0,0,0,0.8),          /* S: bottom bevel */
   inset 1px 0 1px rgba(255,255,255,0.1),    /* L: left bevel */
   inset -1px 0 1px rgba(0,0,0,0.5),         /* S: right bevel */
