@@ -2,5 +2,10 @@
   "name": "skeuomorphic-forge",
   "version": "1.0.0",
   "description": "Create production-grade skeuomorphic UI with Tailwind CSS — industrial panels, gauges, meters, LED/nixie indicators, toggle switches, metal/glass/leather textures, neumorphic components, CRT displays, particle effects",
-  "skills": ["SKILL.md"]
+  "author": {
+    "name": "MMMProd",
+    "url": "https://github.com/mmmprod"
+  },
+  "repository": "https://github.com/mmmprod/skeuomorphic-forge",
+  "license": "MIT"
 }

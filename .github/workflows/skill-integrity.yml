@@ -158,13 +158,13 @@ jobs:
           fi
           echo "SKILL.md size OK: ${size}B (limit: 40960B)"
 
-      - name: No nested skill directories
+      - name: Skill directory structure
         run: |
-          if [ -d "skills/" ]; then
-            echo "::error::Nested skills/ directory detected — likely a packaging artifact. Remove it."
+          if [ ! -f "skills/skeuomorphic-forge/SKILL.md" ]; then
+            echo "::error::skills/skeuomorphic-forge/SKILL.md not found — required for plugin auto-discovery"
             exit 1
           fi
-          echo "No nested directories"
+          echo "Skill directory structure OK"
 
       - name: No files over 500KB
         run: |
