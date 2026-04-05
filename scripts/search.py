@@ -130,13 +130,7 @@ def load_file_sections(filepath: Path) -> list[dict]:
 
 def extract_code_blocks(text: str) -> list[str]:
     """Extract fenced code blocks from markdown."""
-    blocks = re.findall(r"```[\w]*\n(.*?)```", text, re.DOTALL)
-    # Also match inline CSS blocks (property: value patterns)
-    css_blocks = re.findall(
-        r"((?:box-shadow|background|text-shadow|filter|animation):\s*\n(?:.*\n)*?;)",
-        text,
-    )
-    return blocks + css_blocks
+    return re.findall(r"```[\w]*\n(.*?)```", text, re.DOTALL)
 
 
 class BM25:
@@ -186,7 +180,7 @@ class BM25:
                     idf_val = self.idf[token]
                     num = tf * (self.k1 + 1)
                     den = tf + self.k1 * (
-                        1 - self.b + self.b * self.doc_lengths[idx] / self.avgdl
+                        1 - self.b + self.b * self.doc_lengths[idx] / (self.avgdl or 1)
                     )
                     score += idf_val * num / den
             scores.append((idx, score))

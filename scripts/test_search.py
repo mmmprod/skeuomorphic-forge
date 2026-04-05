@@ -98,5 +98,17 @@ class TestCodeOnlyReturnsCode(unittest.TestCase):
         self.assertTrue(has_code, f"Expected code in results:\n{result[:500]}")
 
 
+class TestBM25EdgeCases(unittest.TestCase):
+    def test_avgdl_zero_no_crash(self):
+        from search import BM25
+
+        bm = BM25()
+        bm.fit(["test test test"])
+        bm.avgdl = 0
+        # Must not raise ZeroDivisionError
+        result = bm.score("test")
+        self.assertIsInstance(result, list)
+
+
 if __name__ == "__main__":
     unittest.main()
