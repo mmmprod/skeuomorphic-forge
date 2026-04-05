@@ -173,7 +173,7 @@ python3 scripts/search.py "knob gradient" --code-only   # Only code blocks
 python3 scripts/search.py "rim light" --context 5       # Limited preview
 ```
 
-Indexes 2,600+ sections across 19 references + 21 HTML assets. BM25-ranked results with file, line numbers, and matching content.
+Indexes 1,699 sections across 19 references + 21 HTML assets. BM25-ranked results with file, line numbers, and matching content.
 
 ---
 
@@ -223,7 +223,7 @@ Indexes 2,600+ sections across 19 references + 21 HTML assets. BM25-ranked resul
 ```
    References      19 files       decision matrices, checklists, patterns
    HTML Assets     21 files       buttons, switches, loaders, gauges, CRT...
-   Search Engine    1 script       2,600+ indexed sections across 40 sources
+   Search Engine    1 script       1,699 indexed sections across 40 sources
    Shadow Tiers     4 levels       5 / 8 / 11 / 31 layers
    Materials       16 gradients    chrome, leather, wood, rubber...
    Glass Effects   10 techniques   frosted, dark, sphere, SVG warp
