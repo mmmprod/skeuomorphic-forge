@@ -35,6 +35,47 @@ jobs:
           fi
           echo "All asset files referenced in SKILL.md"
 
+      - name: Validate golden-examples references
+        run: |
+          # SKILL.md compresses duplicate content by pointing to canonical sections
+          # in references/00-golden-examples.md. This step verifies that every
+          # referenced heading still exists VERBATIM (exact line match) in the
+          # golden file. Substring matching (grep -qF without -x) was insufficient
+          # because partial headings like "## 2. COMPLETE BUTTON" would falsely
+          # match the longer real heading "## 2. COMPLETE BUTTON — Rest / Hover /
+          # Active". We use grep -Fxq for exact-line match so renames are caught
+          # immediately. Update SKILL.md table AND this list together when a
+          # golden heading is intentionally renamed.
+          golden="references/00-golden-examples.md"
+          if [ ! -f "$golden" ]; then
+            echo "::error::$golden not found"
+            exit 1
+          fi
+          errors=0
+          headings=(
+            "## 1. SHADOW STACKS BY TIER"
+            "## 2. COMPLETE BUTTON — Rest / Hover / Active"
+            "### Industrial Circuit Relay Button"
+            "## 3. COMPLETE CARD WITH RIM LIGHT"
+            "## 4. SCREW HEAD (5 layers + radial gradient)"
+            "## 5. PHOSPHOR / CRT TEXT GLOW"
+            "## 6. SILKSCREEN LABEL"
+            "## 7. MATERIAL SURFACE GRADIENTS"
+            "## 8. WARM INDUSTRIAL PALETTE"
+            "## 9. TYPOGRAPHY"
+          )
+          for h in "${headings[@]}"; do
+            if ! grep -Fxq "$h" "$golden"; then
+              echo "::error::Heading not found (exact-line match) in $golden: $h"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors golden-examples heading reference(s) broken — update SKILL.md table or restore the headings."
+            exit 1
+          fi
+          echo "All ${#headings[@]} golden-examples heading references resolve."
+
   search-engine:
     name: Search Engine Tests
     runs-on: ubuntu-latest
