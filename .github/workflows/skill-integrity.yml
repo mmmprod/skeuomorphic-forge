@@ -35,6 +35,42 @@ jobs:
           fi
           echo "All asset files referenced in SKILL.md"
 
+      - name: Validate golden-examples references
+        run: |
+          # SKILL.md compresses duplicate content by pointing to canonical sections
+          # in references/00-golden-examples.md. This step verifies that every
+          # referenced section heading still exists in the golden file. If a heading
+          # is renamed or removed, this fails so the SKILL.md pointer table can be
+          # updated in the same PR.
+          golden="references/00-golden-examples.md"
+          if [ ! -f "$golden" ]; then
+            echo "::error::$golden not found"
+            exit 1
+          fi
+          errors=0
+          headings=(
+            "## 1. SHADOW STACKS BY TIER"
+            "## 2. COMPLETE BUTTON"
+            "## 3. COMPLETE CARD WITH RIM LIGHT"
+            "## 4. SCREW HEAD"
+            "## 5. PHOSPHOR / CRT TEXT GLOW"
+            "## 6. SILKSCREEN LABEL"
+            "## 7. MATERIAL SURFACE GRADIENTS"
+            "## 8. WARM INDUSTRIAL PALETTE"
+            "## 9. TYPOGRAPHY"
+          )
+          for h in "${headings[@]}"; do
+            if ! grep -qF "$h" "$golden"; then
+              echo "::error::Heading not found in $golden: $h"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors golden-examples heading reference(s) broken — update SKILL.md table or restore the headings."
+            exit 1
+          fi
+          echo "All ${#headings[@]} golden-examples heading references resolve."
+
   search-engine:
     name: Search Engine Tests
     runs-on: ubuntu-latest

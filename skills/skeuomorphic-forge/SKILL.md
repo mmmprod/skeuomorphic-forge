@@ -61,12 +61,12 @@ Un composant qui echoue un gate CRITICAL ne doit PAS etre livre.
 
 ## SHADOW STACKS CANONIQUES (copier-adapter, ne jamais inventer)
 
-Les quatre tiers de shadow stacks — **Standard** (5+ couches), **Advanced** (8-9), **Hero** (11+), **Ultra** (31) — sont documentes avec code verbatim dans `references/00-golden-examples.md` §1 SHADOW STACKS BY TIER. **Charger ce fichier AVANT de construire tout composant avec relief.** Ne jamais reconstruire un stack de memoire : copier-adapter depuis le golden file.
+Les quatre tiers de shadow stacks — **Standard** (5+ couches), **Advanced** (8-9), **Hero** (11+ minimum, golden example en utilise 13+), **Ultra** (31) — sont documentes avec code verbatim dans `references/00-golden-examples.md` section `## 1. SHADOW STACKS BY TIER`. **Charger ce fichier AVANT de construire tout composant avec relief.** Ne jamais reconstruire un stack de memoire : copier-adapter depuis le golden file.
 
 Rappel des tiers (pour classifier rapidement, voir tableau CLASSIFICATION DU COMPOSANT ci-dessous) :
 - **Standard 5+** : boutons, cartes, toggles
 - **Advanced 8-9** : knobs, dials, meters, rails de switch, display wells
-- **Hero 11+** : panneaux, chassis, faceplates
+- **Hero 11+ minimum (golden = 13+)** : panneaux, chassis, faceplates
 - **Ultra 31** : deep CRT recess
 
 ---
@@ -188,19 +188,21 @@ Shadow stack construit D'ABORD (5+ couches), PUIS rim light par-dessus. Bord sup
 
 ## PATTERNS DE PRODUCTION CANONIQUES
 
-Tous les patterns prets-a-l'emploi (bouton rest/hover/active, card avec rim light, tete de vis, phosphor/CRT glow, silkscreen label, gradients de materiaux metal/chrome/cuir/bois) sont documentes avec code verbatim dans `references/00-golden-examples.md` :
+Tous les patterns prets-a-l'emploi (bouton rest/hover/active, card avec rim light, tete de vis, phosphor/CRT glow, silkscreen label, gradients de materiaux metal/chrome/cuir/bois) sont documentes avec code verbatim dans `references/00-golden-examples.md`. Les references utilisent les titres exacts (`## N. NAME`) du golden file pour resister aux renumerotations :
 
 | Pattern | Section dans `references/00-golden-examples.md` |
 |---|---|
-| Bouton complet Rest/Hover/Active | §2 COMPLETE BUTTON |
-| Industrial Circuit Relay Button | §2 (variant) |
-| Card avec Rim Light | §3 COMPLETE CARD WITH RIM LIGHT |
-| Tete de vis (5 couches + slot torx) | §4 SCREW HEAD |
-| Phosphor / CRT Text Glow (amber, rouge) | §5 PHOSPHOR / CRT TEXT GLOW |
-| Silkscreen Label | §6 SILKSCREEN LABEL |
-| Metal brosse / Sphere knob / Chrome / Cuir / Bois | §7 MATERIAL SURFACE GRADIENTS |
+| Bouton complet Rest/Hover/Active | `## 2. COMPLETE BUTTON — Rest / Hover / Active` |
+| Industrial Circuit Relay Button | `## 2.` (variant) |
+| Card avec Rim Light | `## 3. COMPLETE CARD WITH RIM LIGHT` |
+| Tete de vis (5 couches + slot torx) | `## 4. SCREW HEAD (5 layers + radial gradient)` |
+| Phosphor / CRT Text Glow (amber, rouge) | `## 5. PHOSPHOR / CRT TEXT GLOW` |
+| Silkscreen Label | `## 6. SILKSCREEN LABEL` |
+| Metal brosse / Sphere knob / Chrome / Cuir / Bois | `## 7. MATERIAL SURFACE GRADIENTS` |
 
-**Workflow** : charger `references/00-golden-examples.md`, trouver le pattern, copier le bloc, adapter les couleurs/tailles au theme cible. Pour des materiaux avances (aluminium brosse detaille, acier, cuivre) consulter `references/08-metal-effects.md`. Pour le verre consulter `references/07-glass-effects.md`.
+**Workflow** : charger `references/00-golden-examples.md`, trouver le pattern par son titre exact, copier le bloc, adapter les couleurs/tailles au theme cible. **IMPORTANT** : les blocs golden sont ecrits en CSS pur (`.button { box-shadow: ... }`). Conformement a la regle de generation (React/JSX + Tailwind + inline styles), **traduire chaque bloc CSS en `style={{ boxShadow: '...' }}` ou en classes Tailwind avant utilisation** — ne jamais coller le CSS verbatim dans une feuille de style globale ni creer de classes custom. Pour des materiaux avances (aluminium brosse detaille, acier, cuivre) consulter `references/08-metal-effects.md`. Pour le verre consulter `references/07-glass-effects.md`.
+
+Une etape CI (`Validate golden-examples references` dans `skill-integrity.yml`) verifie qu'a chaque release, tous les titres de section listes ci-dessus existent encore dans `references/00-golden-examples.md`. Si la verification echoue, soit le golden file a ete renomme, soit ce tableau doit etre mis a jour.
 
 ---
 
@@ -336,7 +338,7 @@ Charger a la demande selon le sujet de travail :
 
 ### Scripts (`scripts/`)
 
-- **`search.py`** — Recherche semantique sur `assets/` et `references/`. Utile pour trouver le bon exemple ou la bonne reference sans charger 108k mots dans le contexte. Executer via `python scripts/search.py "query"`.
+- **`search.py`** — Recherche semantique sur `assets/` et `references/`. Utile pour trouver le bon exemple ou la bonne reference sans charger 108k mots dans le contexte. Executer via `python3 scripts/search.py "query"` (le script utilise des features Python 3 — typing `list[dict]`, etc.).
 
 ### Assets (`assets/`)
 
