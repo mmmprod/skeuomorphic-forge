@@ -1,13 +1,13 @@
 ---
 name: skeuomorphic-forge
-description: "Build physically-realistic skeuomorphic UI with Tailwind CSS. Covers buttons, panels, gauges, knobs, CRT/LED displays, glass/metal effects, particle systems, and industrial hardware. Provides shadow stacks, material textures, lighting rules, and construction blueprints. Triggers on: skeuomorphic, realistic depth, industrial UI, 3D button, gauge, meter, analog, tactile, material texture, retro-industrial, aerospace panel, DSP cockpit. Do NOT trigger for flat/minimal UI or standard Material/Shadcn components."
+description: "This skill should be used when the user asks to build physically-realistic skeuomorphic UI with Tailwind CSS — buttons, panels, gauges, knobs, CRT/LED displays, glass/metal effects, particle systems, industrial hardware. Triggers on requests mentioning: skeuomorphic, realistic depth, industrial UI, 3D button, gauge, meter, analog, tactile, material texture, retro-industrial, aerospace panel, DSP cockpit, VU meter, rotary knob, CRT display, rim light, metal recess, faceplate. Provides shadow stacks, material textures, lighting rules, and construction blueprints. Do NOT trigger for flat/minimal UI or standard Material/Shadcn components."
 ---
 
 # SKEUOMORPHIC FORGE — Instructions de generation UI
 
-Tu es un expert en UI skeuomorphique physiquement realiste. Chaque composant que tu produis DOIT ressembler a un objet physique reel (metal usine, verre CRT, aluminium brosse, Bakelite), pas un div plat avec une ombre CSS.
+Ce skill produit de l'UI skeuomorphique physiquement realiste. Chaque composant genere DOIT ressembler a un objet physique reel (metal usine, verre CRT, aluminium brosse, Bakelite), pas un div plat avec une ombre CSS.
 
-Tu generes du code React/JSX avec Tailwind CSS + inline styles (`style={{}}`). Pas de classes CSS custom sauf indication contraire.
+Generer du code React/JSX avec Tailwind CSS + inline styles (`style={{}}`). Pas de classes CSS custom sauf indication contraire.
 
 ---
 
@@ -61,93 +61,13 @@ Un composant qui echoue un gate CRITICAL ne doit PAS etre livre.
 
 ## SHADOW STACKS CANONIQUES (copier-adapter, ne jamais inventer)
 
-### Standard (5+ couches) — boutons, cartes, toggles
+Les quatre tiers de shadow stacks — **Standard** (5+ couches), **Advanced** (8-9), **Hero** (11+), **Ultra** (31) — sont documentes avec code verbatim dans `references/00-golden-examples.md` §1 SHADOW STACKS BY TIER. **Charger ce fichier AVANT de construire tout composant avec relief.** Ne jamais reconstruire un stack de memoire : copier-adapter depuis le golden file.
 
-```javascript
-boxShadow: `
-  inset 0 1px 0 rgba(255,255,255,0.05),   /* L: top edge catch */
-  inset 0 -1px 0 rgba(0,0,0,0.3),          /* S: bottom edge */
-  0 2px 4px rgba(0,0,0,0.4),               /* S: close cast */
-  0 8px 16px rgba(0,0,0,0.3),              /* S: mid depth */
-  0 16px 32px rgba(0,0,0,0.2)              /* S: ambient floor */
-`
-```
-
-### Advanced (8-9 couches) — knobs, dials, meters, rails de switch
-
-Gorge/channel :
-
-```javascript
-boxShadow: `
-  inset 0 6px 14px rgba(0,0,0,0.98),       /* S: top gorge */
-  inset 0 3px 5px rgba(0,0,0,0.85),        /* S: mid gorge */
-  inset 0 -3px 5px rgba(0,0,0,0.5),        /* S: bottom step */
-  inset 3px 0 6px rgba(0,0,0,0.55),        /* S: left wall */
-  inset -3px 0 6px rgba(0,0,0,0.55)        /* S: right wall */
-`
-```
-
-Display well (9 couches) :
-
-```javascript
-boxShadow: `
-  inset 0 12px 30px rgba(0,0,0,0.95),
-  inset 0 6px 14px rgba(0,0,0,0.85),
-  inset 0 -12px 30px rgba(0,0,0,0.8),
-  inset 4px 0 12px rgba(0,0,0,0.6),
-  inset -4px 0 12px rgba(0,0,0,0.6),
-  inset 0 0 40px rgba(0,5,15,0.3),
-  inset 0 0 30px rgba(255,180,60,0.02),    /* L: warm glow in well */
-  0 0 0 1px rgba(0,0,0,0.95),
-  0 1px 0 rgba(255,255,255,0.03)
-`
-```
-
-### Hero (11+ couches) — panneaux, chassis, faceplates
-
-```javascript
-boxShadow: `
-  inset 0 1px 0 rgba(255,240,220,0.25),    /* L: top bevel (warm per C3) */
-  inset 0 -1px 0 rgba(0,0,0,0.8),          /* S: bottom bevel */
-  inset 1px 0 1px rgba(255,255,255,0.1),    /* L: left bevel */
-  inset -1px 0 1px rgba(0,0,0,0.5),         /* S: right bevel */
-  0 2px 4px rgba(0,0,0,0.4),
-  0 4px 8px rgba(0,0,0,0.3),
-  0 6px 12px rgba(0,0,0,0.25),
-  0 8px 16px rgba(0,0,0,0.2),
-  0 12px 24px rgba(0,0,0,0.15),
-  0 16px 32px rgba(0,0,0,0.1),
-  0 20px 40px rgba(0,0,0,0.08),
-  0 0 60px rgba(255,176,0,0.06),            /* L: amber backlight */
-  0 40px 60px -20px rgba(0,0,0,0.5)
-`
-```
-
-### Ultra (31 couches) — deep CRT recess
-
-Structure : 7 micro-borders (crisp edge) + 5 vertical depth + 3 horizontal left + 3 horizontal right + 5 bottom depth + 4 corner occlusion + 4 external rim/base = 31 total.
-
-```javascript
-boxShadow: `
-  inset 0 1px 0 #000, inset 0 2px 0 #000, inset 0 3px 1px #000,
-  inset 1px 0 0 #000, inset 2px 0 0 #000, inset -1px 0 0 #000, inset -2px 0 0 #000,
-  inset 0 4px 4px rgba(0,0,0,1), inset 0 8px 10px rgba(0,0,0,1),
-  inset 0 14px 18px rgba(0,0,0,0.95), inset 0 22px 30px rgba(0,0,0,0.85),
-  inset 0 32px 50px rgba(0,0,0,0.6),
-  inset 6px 0 8px rgba(0,0,0,1), inset 12px 0 16px rgba(0,0,0,0.9),
-  inset 20px 0 24px rgba(0,0,0,0.6),
-  inset -6px 0 8px rgba(0,0,0,1), inset -12px 0 16px rgba(0,0,0,0.9),
-  inset -20px 0 24px rgba(0,0,0,0.6),
-  inset 0 -4px 4px rgba(0,0,0,1), inset 0 -8px 10px rgba(0,0,0,1),
-  inset 0 -14px 18px rgba(0,0,0,0.95), inset 0 -22px 30px rgba(0,0,0,0.85),
-  inset 0 -32px 50px rgba(0,0,0,0.6),
-  inset 10px 10px 18px rgba(0,0,0,0.9), inset -10px 10px 18px rgba(0,0,0,0.9),
-  inset 10px -10px 18px rgba(0,0,0,0.9), inset -10px -10px 18px rgba(0,0,0,0.9),
-  0 1px 0 rgba(255,255,255,0.05), 0 2px 0 rgba(255,255,255,0.02),
-  0 -1px 0 rgba(0,0,0,0.9), 0 -2px 4px rgba(0,0,0,0.6),
-  0 6px 24px rgba(0,0,0,0.6), 0 12px 48px rgba(0,0,0,0.4)
-`
-```
+Rappel des tiers (pour classifier rapidement, voir tableau CLASSIFICATION DU COMPOSANT ci-dessous) :
+- **Standard 5+** : boutons, cartes, toggles
+- **Advanced 8-9** : knobs, dials, meters, rails de switch, display wells
+- **Hero 11+** : panneaux, chassis, faceplates
+- **Ultra 31** : deep CRT recess
 
 ---
 
@@ -268,139 +188,27 @@ Shadow stack construit D'ABORD (5+ couches), PUIS rim light par-dessus. Bord sup
 
 ## PATTERNS DE PRODUCTION CANONIQUES
 
-### Bouton complet — Rest / Hover / Active
+Tous les patterns prets-a-l'emploi (bouton rest/hover/active, card avec rim light, tete de vis, phosphor/CRT glow, silkscreen label, gradients de materiaux metal/chrome/cuir/bois) sont documentes avec code verbatim dans `references/00-golden-examples.md` :
 
-```css
-.button {
-  --bg: #080808; border: 0; border-radius: 100px;
-  background-color: var(--bg); cursor: pointer; transition: all 0.2s ease;
-  box-shadow:
-    inset 0 0.3rem 0.9rem rgba(255,255,255,0.3),
-    inset 0 -0.1rem 0.3rem rgba(0,0,0,0.7),
-    inset 0 -0.4rem 0.9rem rgba(255,255,255,0.5),
-    0 3rem 3rem rgba(0,0,0,0.3),
-    0 1rem 1rem -0.6rem rgba(0,0,0,0.8);
-}
-.button:hover {
-  box-shadow:
-    inset 0 0.3rem 0.5rem rgba(255,255,255,0.4),
-    inset 0 -0.1rem 0.3rem rgba(0,0,0,0.7),
-    inset 0 -0.4rem 0.9rem rgba(255,255,255,0.7),
-    0 3rem 3rem rgba(0,0,0,0.3),
-    0 1rem 1rem -0.6rem rgba(0,0,0,0.8);
-}
-.button:active {
-  transform: translateY(4px);
-  box-shadow:
-    inset 0 0.3rem 0.5rem rgba(255,255,255,0.5),
-    inset 0 -0.1rem 0.3rem rgba(0,0,0,0.8),
-    inset 0 -0.4rem 0.9rem rgba(255,255,255,0.4),
-    0 3rem 3rem rgba(0,0,0,0.3),
-    0 1rem 1rem -0.6rem rgba(0,0,0,0.8);
-}
-```
+| Pattern | Section dans `references/00-golden-examples.md` |
+|---|---|
+| Bouton complet Rest/Hover/Active | §2 COMPLETE BUTTON |
+| Industrial Circuit Relay Button | §2 (variant) |
+| Card avec Rim Light | §3 COMPLETE CARD WITH RIM LIGHT |
+| Tete de vis (5 couches + slot torx) | §4 SCREW HEAD |
+| Phosphor / CRT Text Glow (amber, rouge) | §5 PHOSPHOR / CRT TEXT GLOW |
+| Silkscreen Label | §6 SILKSCREEN LABEL |
+| Metal brosse / Sphere knob / Chrome / Cuir / Bois | §7 MATERIAL SURFACE GRADIENTS |
 
-Pattern : Hover AUGMENTE les highlights (opacity +0.1 a +0.2). Active ENFONCE (translateY + redistribution lumiere). Les couches de shadow restent constantes, seules les opacites changent.
-
-### Card avec Rim Light
-
-```javascript
-const cardStyle = {
-  position: 'relative', borderRadius: 12,
-  background: 'linear-gradient(145deg, hsl(30 12% 10%) 0%, hsl(30 14% 6%) 100%)',
-  padding: '24px', overflow: 'hidden',
-  boxShadow: `
-    inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4),
-    0 4px 12px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3),
-    0 0 1px rgba(255,255,255,0.1)
-  `,
-};
-// ::before rim light — top edge
-{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 1,
-  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.25), transparent 70%)',
-  pointerEvents: 'none' }
-// ::after bottom rim
-{ position: 'absolute', bottom: 0, left: '20%', right: '20%', height: 1,
-  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.08), transparent 70%)',
-  pointerEvents: 'none' }
-```
-
-### Tete de vis (5 couches + radial gradient)
-
-```javascript
-{ position: 'absolute', width: 7, height: 7, borderRadius: '50%',
-  background: 'radial-gradient(circle at 32% 26%, hsl(40 15% 50%) 0%, hsl(35 18% 38%) 15%, hsl(30 20% 25%) 40%, hsl(25 22% 15%) 70%, hsl(20 20% 8%) 100%)',
-  boxShadow: `
-    inset 0 2px 4px rgba(0,0,0,0.95), inset 0 -0.5px 0 rgba(255,255,255,0.2),
-    0 1px 1px rgba(0,0,0,0.9), 0 2px 3px rgba(0,0,0,0.6),
-    0 0 0 0.5px rgba(0,0,0,0.8)
-  `,
-  zIndex: 20 }
-// Slot torx : ::before avec linear-gradient(angle, transparent 38%, rgba(0,0,0,0.7) 42%, ... 58%, transparent 62%)
-```
-
-### Phosphor / CRT Text Glow
-
-```javascript
-// Amber (palette par defaut)
-{ fontFamily: "'Orbitron', sans-serif", fontWeight: 700,
-  letterSpacing: '0.05em', textTransform: 'uppercase',
-  color: 'hsl(35 100% 65%)',
-  textShadow: '0 0 4px currentColor, 0 0 10px currentColor, 0 0 20px rgba(255,180,0,0.3)' }
-// Rouge : color #ff6b5a, textShadow: 0 0 1px rgba(255,107,90,1), 0 0 6px rgba(255,80,60,0.7), 0 0 12px rgba(255,40,20,0.3)
-// Animation optionnelle : opacity 0.95->1->0.95 sur 4s
-```
-
-### Silkscreen Label
-
-```javascript
-{ fontFamily: 'ui-monospace, monospace', fontWeight: 600,
-  letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.65rem',
-  color: 'rgba(255,255,255,0.06)',
-  textShadow: '0 1px 0 rgba(0,0,0,0.9), 0 0 6px rgba(255,255,255,0.05)' }
-```
-
-### Gradients de materiaux
-
-```javascript
-// Metal brosse (sombre, chaud)
-background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)' opacity='0.04'/%3E%3C/svg%3E"), linear-gradient(142deg, hsl(40 10% 16%) 0%, hsl(35 12% 11%) 25%, hsl(30 14% 7%) 50%, hsl(35 10% 9%) 75%, hsl(40 8% 13%) 100%)`,
-backgroundBlendMode: 'overlay, normal',
-// Sphere/knob : radial-gradient(circle at 35% 30%, hsl(40 15% 50%) 0%, hsl(35 12% 30%) 45%, hsl(30 14% 10%) 100%)
-// Chrome : linear-gradient(135deg, #e8e8ec 0%, #a0a0a8 30%, #d0d0d4 50%, #909098 70%, #c8c8cc 100%)
-// Cuir : linear-gradient(160deg, #6b4226 0%, #4a2d18 100%) + SVG feTurbulence grain 8-12% opacity
-// Bois : repeating-linear-gradient(95deg, rgba(139,90,43,0.15) 0px, transparent 3px, transparent 8px), linear-gradient(180deg, #8b5a2b 0%, #6b3a1b 100%)
-```
+**Workflow** : charger `references/00-golden-examples.md`, trouver le pattern, copier le bloc, adapter les couleurs/tailles au theme cible. Pour des materiaux avances (aluminium brosse detaille, acier, cuivre) consulter `references/08-metal-effects.md`. Pour le verre consulter `references/07-glass-effects.md`.
 
 ---
 
-## PALETTE WARM INDUSTRIAL (defaut)
+## PALETTE & TYPOGRAPHIE
 
-| Token | Valeur | Usage |
-|---|---|---|
-| chassis-dark | `hsl(30 14% 5%)` | Fond panneau profond |
-| chassis-base | `hsl(30 12% 8%)` | Fond panneau/carte standard |
-| chassis-mid | `hsl(35 10% 12%)` | Surface elevee |
-| chassis-light | `hsl(35 8% 18%)` | Anneau externe bezel |
-| bevel | `hsl(40 8% 26%)` | Chanfreins |
-| highlight | `hsl(40 12% 38%)` | Points speculaires |
-| amber | `hsl(35 100% 60%)` | Texte CRT, etat actif |
-| amber-dim | `hsl(35 60% 40%)` | Accent muted, bordures |
-| amber-glow | `rgba(255,180,0,0.4)` | Halo text-shadow |
-| cream | `hsl(40 60% 72%)` | Digits compteur |
-| green | `hsl(120 80% 55%)` | LED vert |
-| red | `hsl(0 80% 55%)` | LED rouge, critique |
-| silk | `rgba(255,255,255,0.06)` | Texte silkscreen |
+La palette **WARM INDUSTRIAL** (defaut — 13 tokens : chassis-dark/base/mid/light, bevel, highlight, amber/amber-dim/amber-glow, cream, green, red, silk) et la table **Typographie** (CRT/VFD Orbitron, Terminal Share Tech Mono, Counter digits, Silkscreen, Gravure) sont documentees dans `references/00-golden-examples.md` §8 WARM INDUSTRIAL PALETTE et §9 TYPOGRAPHY. La version reference inclut `--ri-silk-active` (label backlit) en bonus.
 
-### Typographie
-
-| Contexte | Font | Weight | Tracking | Case |
-|---|---|---|---|---|
-| CRT/VFD readout | `'Orbitron', sans-serif` | 700 | 0.05em | uppercase |
-| Terminal/status | `'Share Tech Mono', monospace` | 400 | 0.02em | mixed |
-| Counter digits | `'Orbitron', sans-serif` | 700 | 0.1em | numeric |
-| Silkscreen labels | `font-mono` (system) | 600 | 0.08-0.15em | uppercase |
-| Gravure | `font-mono` (system) | 700 | 0.05em | uppercase |
+Pour les autres themes (cool steel, deep purple, military, vintage audio, CRT terminal) voir le tableau "Choisir la famille esthetique" dans PROTOCOLE DE CONSTRUCTION §2 ci-dessus. Pour les palettes etendues et tokens de patina/vieillissement voir `references/06-aging-safety-tokens-palettes.md`.
 
 ---
 
@@ -492,4 +300,44 @@ Ne jamais proposer de variete quand la page environnante etablit deja le role, l
 | Pressed buttons (light) | `neumorphic-pressed-buttons.html` | `pressed` |
 | Fingerprint SVG button | `fingerprint-button.html` | `fingerprint` |
 
-Tous les fichiers dans `assets/`.
+Tous les fichiers dans `assets/` (au niveau root du plugin).
+
+---
+
+## RESSOURCES SUPPLEMENTAIRES
+
+Ce skill expose trois dossiers au niveau root du plugin (`assets/`, `references/`, `scripts/`). Les references contiennent ~108k mots de deep-dive pour sujets qui depassent le scope du SKILL.md principal.
+
+### Reference Files (`references/`)
+
+Charger a la demande selon le sujet de travail :
+
+| Fichier | Contenu | Quand consulter |
+|---|---|---|
+| `00-golden-examples.md` | Exemples canoniques a copier-adapter | Tout nouveau composant — partir d'un golden exemple |
+| `01-shadows-materials-textures.md` | Shadow stacks detailles par materiau + textures SVG | Construire un nouveau tier de shadow stack |
+| `02-hardware-animation-neumorphism.md` | Vis, rivets, hinges + animations + neumorphism variants | Ajouter du hardware ou des etats animes |
+| `03-blueprints-performance-palettes.md` | Blueprints complets + perf tips + palettes etendues | Composant complexe multi-couches |
+| `04-community-techniques.md` | Techniques issues de la communaute (CodePen, Dribbble) | Inspiration pour effets avances |
+| `05-physics-composition-interaction-typography.md` | Regles physiques + composition + states + typo detaillee | Debug d'un composant qui parait "faux" |
+| `06-aging-safety-tokens-palettes.md` | Patina/vieillissement, design tokens, palettes etendues | Theming global ou finition vintage |
+| `07-glass-effects.md` | Verre CRT, domes, lenses, reflets speculaires | Tout ce qui doit ressembler a du verre |
+| `08-metal-effects.md` | Aluminium brosse, acier, chrome, cuivre | Surfaces metal texturees |
+| `09-rim-light-effects.md` | Rim light avance (beyond le pseudo-element basique) | Quand rim light basique insuffisant |
+| `10-particle-effects.md` | Particules, sparks, dust, ambient motion | Fonds animes, feedback visuel |
+| `11-retro-industrial-patterns.md` | Patterns complets aerospace / DSP / military cockpit | Theme retro-industrial full-page |
+| `12-production-components.md` | Composants production-ready pret a l'emploi | Reutilisation de composants eprouves |
+| `13-3d-depth-techniques.md` | Perspective, tilt, parallax, isometric | Effets 3D au-dela des shadow stacks |
+| `14-metal-recess-wells.md` | Construction detaillee de wells metalliques | Recess complexe (gauge/meter/display) |
+| `15-detailed-chassis.md` | Chassis multi-zones (bezel + surface + wells + grille + labels) | Panneau complet faceplate |
+| `16-benchmark-lessons.md` | Lecons des benchmarks (ce qui marche / ce qui casse) | Eviter les pieges connus |
+| `17-context-scan-matrices.md` | Matrices U0 Context Scan approfondies | Styler dans une page existante complexe |
+| `18-verification-checklist.md` | Checklist verification U0-U7 detaillee avec exemples | Gate final avant livraison |
+
+### Scripts (`scripts/`)
+
+- **`search.py`** — Recherche semantique sur `assets/` et `references/`. Utile pour trouver le bon exemple ou la bonne reference sans charger 108k mots dans le contexte. Executer via `python scripts/search.py "query"`.
+
+### Assets (`assets/`)
+
+21 fichiers HTML complets de composants skeuomorphiques production-ready (voir tableau "HTML ASSETS — Lookup rapide" ci-dessus). Copier-adapter plutot que re-inventer.
