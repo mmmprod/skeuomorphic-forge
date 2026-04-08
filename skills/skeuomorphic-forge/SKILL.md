@@ -193,7 +193,7 @@ Tous les patterns prets-a-l'emploi (bouton rest/hover/active, card avec rim ligh
 | Pattern | Section dans `references/00-golden-examples.md` |
 |---|---|
 | Bouton complet Rest/Hover/Active | `## 2. COMPLETE BUTTON — Rest / Hover / Active` |
-| Industrial Circuit Relay Button | `## 2.` (variant) |
+| Industrial Circuit Relay Button | `### Industrial Circuit Relay Button` (sous-section h3 dans `## 2.`) |
 | Card avec Rim Light | `## 3. COMPLETE CARD WITH RIM LIGHT` |
 | Tete de vis (5 couches + slot torx) | `## 4. SCREW HEAD (5 layers + radial gradient)` |
 | Phosphor / CRT Text Glow (amber, rouge) | `## 5. PHOSPHOR / CRT TEXT GLOW` |
@@ -208,7 +208,7 @@ Une etape CI (`Validate golden-examples references` dans `skill-integrity.yml`) 
 
 ## PALETTE & TYPOGRAPHIE
 
-La palette **WARM INDUSTRIAL** (defaut — 13 tokens : chassis-dark/base/mid/light, bevel, highlight, amber/amber-dim/amber-glow, cream, green, red, silk) et la table **Typographie** (CRT/VFD Orbitron, Terminal Share Tech Mono, Counter digits, Silkscreen, Gravure) sont documentees dans `references/00-golden-examples.md` §8 WARM INDUSTRIAL PALETTE et §9 TYPOGRAPHY. La version reference inclut `--ri-silk-active` (label backlit) en bonus.
+La palette **WARM INDUSTRIAL** (defaut — 13 tokens : chassis-dark/base/mid/light, bevel, highlight, amber/amber-dim/amber-glow, cream, green, red, silk) et la table **Typographie** (CRT/VFD Orbitron, Terminal Share Tech Mono, Counter digits, Silkscreen, Gravure) sont documentees dans `references/00-golden-examples.md` sections `## 8. WARM INDUSTRIAL PALETTE` et `## 9. TYPOGRAPHY`. La version reference inclut `--ri-silk-active` (label backlit) en bonus.
 
 Pour les autres themes (cool steel, deep purple, military, vintage audio, CRT terminal) voir le tableau "Choisir la famille esthetique" dans PROTOCOLE DE CONSTRUCTION §2 ci-dessus. Pour les palettes etendues et tokens de patina/vieillissement voir `references/06-aging-safety-tokens-palettes.md`.
 

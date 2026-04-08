@@ -39,9 +39,13 @@ jobs:
         run: |
           # SKILL.md compresses duplicate content by pointing to canonical sections
           # in references/00-golden-examples.md. This step verifies that every
-          # referenced section heading still exists in the golden file. If a heading
-          # is renamed or removed, this fails so the SKILL.md pointer table can be
-          # updated in the same PR.
+          # referenced heading still exists VERBATIM (exact line match) in the
+          # golden file. Substring matching (grep -qF without -x) was insufficient
+          # because partial headings like "## 2. COMPLETE BUTTON" would falsely
+          # match the longer real heading "## 2. COMPLETE BUTTON — Rest / Hover /
+          # Active". We use grep -Fxq for exact-line match so renames are caught
+          # immediately. Update SKILL.md table AND this list together when a
+          # golden heading is intentionally renamed.
           golden="references/00-golden-examples.md"
           if [ ! -f "$golden" ]; then
             echo "::error::$golden not found"
@@ -50,9 +54,10 @@ jobs:
           errors=0
           headings=(
             "## 1. SHADOW STACKS BY TIER"
-            "## 2. COMPLETE BUTTON"
+            "## 2. COMPLETE BUTTON — Rest / Hover / Active"
+            "### Industrial Circuit Relay Button"
             "## 3. COMPLETE CARD WITH RIM LIGHT"
-            "## 4. SCREW HEAD"
+            "## 4. SCREW HEAD (5 layers + radial gradient)"
             "## 5. PHOSPHOR / CRT TEXT GLOW"
             "## 6. SILKSCREEN LABEL"
             "## 7. MATERIAL SURFACE GRADIENTS"
@@ -60,8 +65,8 @@ jobs:
             "## 9. TYPOGRAPHY"
           )
           for h in "${headings[@]}"; do
-            if ! grep -qF "$h" "$golden"; then
-              echo "::error::Heading not found in $golden: $h"
+            if ! grep -Fxq "$h" "$golden"; then
+              echo "::error::Heading not found (exact-line match) in $golden: $h"
               errors=$((errors + 1))
             fi
           done
