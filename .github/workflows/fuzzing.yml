@@ -6,12 +6,17 @@ on:
   schedule:
     - cron: "43 2 * * 1"
 
-permissions: read-all
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   fuzz:
     name: Python Fuzzing
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       security-events: write
@@ -22,6 +27,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Build fuzzers
         id: build
@@ -36,6 +43,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fuzz-seconds: 90
-          mode: code-change
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
           sanitizer: ${{ matrix.sanitizer }}
           output-sarif: true
