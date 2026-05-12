@@ -6,12 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   validate-skill:
     name: Validate SKILL.md
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Check YAML frontmatter
         run: |
@@ -80,9 +83,9 @@ jobs:
     name: Search Engine Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
 
@@ -153,42 +156,47 @@ jobs:
     name: Prettier Format Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"
 
-      - name: Install Prettier
-        run: npm install --no-save prettier
+      - name: Install locked npm dependencies
+        run: npm ci --ignore-scripts
 
       - name: Check formatting
-        run: npx prettier --check --ignore-unknown ".coderabbit.yaml" ".github/**/*.yml"
+        run: npx --no-install prettier --check --ignore-unknown ".coderabbit.yaml" ".github/**/*.yml"
 
   ruff:
     name: Python Lint (Ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
 
-      - name: Install Ruff
-        run: pip install ruff
-
       - name: Lint Python
-        run: ruff check scripts/
+        uses: astral-sh/ruff-action@0ce1b0bf8b818ef400413f810f8a11cdbda0034b # v4.0.0
+        with:
+          version: "0.15.12"
+          checksum: "5e26a7811f7db364864ace00cced53003556a37b63f3c987e340b18207776f1c"
+          args: check scripts/ fuzz/
 
       - name: Check formatting
-        run: ruff format --check scripts/
+        uses: astral-sh/ruff-action@0ce1b0bf8b818ef400413f810f8a11cdbda0034b # v4.0.0
+        with:
+          version: "0.15.12"
+          checksum: "5e26a7811f7db364864ace00cced53003556a37b63f3c987e340b18207776f1c"
+          args: format --check scripts/ fuzz/
 
   guards:
     name: Size & Safety Guards
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: SKILL.md size cap (40KB max)
         run: |
@@ -234,7 +242,7 @@ jobs:
     name: Asset HTML Validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Check HTML assets are not empty
         run: |
@@ -261,3 +269,35 @@ jobs:
             fi
           done
           echo "Shadow stack check done ($warnings warnings)"
+
+  required-ci:
+    name: required-ci
+    runs-on: ubuntu-latest
+    needs:
+      - validate-skill
+      - search-engine
+      - prettier
+      - ruff
+      - guards
+      - asset-validation
+    if: always()
+    steps:
+      - name: Check required jobs
+        run: |
+          failed=0
+          for result in \
+            "${{ needs['validate-skill'].result }}" \
+            "${{ needs['search-engine'].result }}" \
+            "${{ needs.prettier.result }}" \
+            "${{ needs.ruff.result }}" \
+            "${{ needs.guards.result }}" \
+            "${{ needs['asset-validation'].result }}"; do
+            if [ "$result" != "success" ]; then
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more required jobs failed."
+            exit 1
+          fi
+          echo "Required CI jobs passed."
