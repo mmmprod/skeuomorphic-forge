@@ -1,2 +1,4 @@
 __pycache__/
 *.skill
+.release-manager/state/
+.release-manager/*.lock
