@@ -1,3 +1,5 @@
 __pycache__/
 node_modules/
 *.skill
+.release-manager/state/
+.release-manager/*.lock
